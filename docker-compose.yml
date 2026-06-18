@@ -1,4 +1,15 @@
 services:
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   redis:
     image: redis:7-alpine
     restart: unless-stopped
@@ -24,8 +35,11 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      MONGODB: mongodb://mongodb:27017
     depends_on:
       redis:
+        condition: service_healthy
+      mongodb:
         condition: service_healthy
     ports:
       - "${BACKEND_BIND_IP:-127.0.0.1}:${BACKEND_PORT:-8095}:8082"
@@ -65,3 +79,4 @@ services:
 
 volumes:
   redis-data:
+  mongodb-data:

@@ -62,6 +62,14 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-
+  mongo:
+    image: mongo:7
+    container_name: ivts-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
 volumes:
   redis-data:
+  mongo-data:
