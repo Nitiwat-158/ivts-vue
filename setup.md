@@ -49,6 +49,11 @@ APP_ENV=local ./server.sh deploy
 cd backend-node
 npm run start:local
 ```
+#To kill port
+```bash
+netstat -ano | findstr : PORT
+taskkill /F /PID ID
+```
 
 ```bash
 cd frontend-vue
