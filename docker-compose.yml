@@ -2,6 +2,8 @@ services:
   mongodb:
     image: mongo:7
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:27017:27017" # <--- ADD THIS LINE
     volumes:
       - mongodb-data:/data/db
     healthcheck:
@@ -13,6 +15,8 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"   # <--- ADD THIS LINE
     volumes:
       - redis-data:/data
     healthcheck:

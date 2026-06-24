@@ -28,6 +28,7 @@ REDIS_PORT=6379
 ```
 
 ```bash
+docker compose --env-file .env.local up -d --build
 docker run -d -p 27017:27017 --name ivts-local-mongo mongo:6.0
 docker run -d -p 6379:6379 --name ivts-local-redis redis:alpine
 ```
@@ -51,7 +52,7 @@ npm run start:local
 ```
 #To kill port
 ```bash
-netstat -ano | findstr : PORT
+netstat -ano | findstr :PORT
 taskkill /F /PID ID
 ```
 
