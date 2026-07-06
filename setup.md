@@ -58,7 +58,7 @@ taskkill /F /PID ID
 
 ```bash
 cd frontend-vue
-npm install        # Required on first run to register vue-cli-service
+npm install        
 npm run serve:local
 ```
 
