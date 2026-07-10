@@ -12,6 +12,13 @@ export default function buildNav (t) {
         },
         {
           _name: 'CSidebarNavItem',
+          name: t('nav.cctvViewer'),
+          to: '/cctv/viewer',
+          icon: 'cil-camera',
+          public: true
+        },
+        {
+          _name: 'CSidebarNavItem',
           name: t('nav.ivtsRegistry'),
           to: '/ivts/registry',
           icon: 'cil-description',

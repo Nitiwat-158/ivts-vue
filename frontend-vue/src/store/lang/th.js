@@ -104,6 +104,7 @@ const th = {
     },
     nav: {
         dashboard: "แดชบอร์ด",
+        cctvViewer: "กล้อง CCTV",
         ivtsRegistry: "ทะเบียน IVTS",
         businessOperations: "งานปฏิบัติการ IVTS",
         banks: "ธนาคาร",

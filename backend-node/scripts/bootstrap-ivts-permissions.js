@@ -21,6 +21,7 @@ const DEFAULT_MENU_PATHS = (
     : [
   securityConfig.permissionRootPath || '/ivts/security/permission',
   '/dashboard',
+  '/cctv/viewer',
   '/ivts/registry',
   '/ivts/review',
   '/ivts/reports',

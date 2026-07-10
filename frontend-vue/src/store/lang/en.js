@@ -102,6 +102,7 @@ const en = {
     },
     nav: {
         dashboard: "Dashboard",
+        cctvViewer: "CCTV Viewer",
         ivtsRegistry: "IVTS Registry",
         businessOperations: "IVTS Operations",
         banks: "Banks",

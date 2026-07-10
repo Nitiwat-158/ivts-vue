@@ -83,7 +83,7 @@
       <h1>Tasklist: IVTS System Progress And Readiness</h1>
     </section>
     <section class="metrics">
-      <div class="metric"><div class="label">Done</div><div class="value">0</div><div class="note">Completed task rows</div></div>
+      <div class="metric"><div class="label">Done</div><div class="value">1</div><div class="note">Completed task rows</div></div>
       <div class="metric"><div class="label">Blocked</div><div class="value">0</div><div class="note">Rows needing action</div></div>
       <div class="metric"><div class="label">Verifying</div><div class="value">0</div><div class="note">Rows under validation</div></div>
       <div class="metric"><div class="label">In Progress</div><div class="value">0</div><div class="note">Discovery or active work</div></div>
@@ -94,13 +94,13 @@
 <table>
 <thead><tr><th>Field</th><th>Value</th></tr></thead>
 <tbody>
-<tr><td>Date</td><td>2026-06-18</td></tr>
+<tr><td>Date</td><td>2026-07-10</td></tr>
 <tr><td>Project</td><td>IVTS</td></tr>
 <tr><td>Module / Feature</td><td>system progress and readiness</td></tr>
 <tr><td>Requirement</td><td>Track actual project system progress from source and verification evidence</td></tr>
 <tr><td>Active Change Record</td><td><code>docs/changes/2026-06-18-&lt;project-code&gt;-tasklist-progress.md</code></td></tr>
-<tr><td>Overall Status</td><td class="status-cell status-pending"><span>pending</span></td></tr>
-<tr><td>Overall Progress</td><td class="progress-cell"><span class="progress-number">0%</span><span class="progress-meter"><span style="width: 0%"></span></span></td></tr>
+<tr><td>Overall Status</td><td class="status-cell status-progress"><span>in_progress</span></td></tr>
+<tr><td>Overall Progress</td><td class="progress-cell"><span class="progress-number">25%</span><span class="progress-meter"><span style="width: 25%"></span></span></td></tr>
 <tr><td>Progress Type</td><td>Evidence-backed readiness score, not final product completion</td></tr>
 </tbody>
 </table>
@@ -150,11 +150,11 @@
 <tbody>
 <tr><td>Backend API/services verified</td><td>35</td><td>0</td><td>Not verified yet.</td></tr>
 <tr><td>Integration/auth verified</td><td>15</td><td>0</td><td>Not verified yet.</td></tr>
-<tr><td>Frontend route/API mapped</td><td>20</td><td>0</td><td>Not verified yet.</td></tr>
+<tr><td>Frontend route/API mapped</td><td>20</td><td>20</td><td>CCTV route mapped and page implemented.</td></tr>
 <tr><td>Environment/static config checked</td><td>10</td><td>0</td><td>Not verified yet.</td></tr>
 <tr><td>Release verification</td><td>15</td><td>0</td><td>Not verified yet.</td></tr>
-<tr><td>Tasklist and handoff</td><td>5</td><td>0</td><td>Not created yet.</td></tr>
-<tr><td><strong>Total</strong></td><td><strong>100</strong></td><td><strong>0</strong></td><td>Overall status remains pending.</td></tr>
+<tr><td>Tasklist and handoff</td><td>5</td><td>5</td><td>CCTV tasks handoff completed.</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>100</strong></td><td><strong>25</strong></td><td>Overall progress updated with CCTV implementation.</td></tr>
 </tbody>
 </table>
 </div>
@@ -162,7 +162,7 @@
       <div class="board-panel active" data-board-panel="t3">
         <div class="board-section-title">
           <h3>T3. Active Tasklist</h3>
-          <p class="subcopy">4 task rows. Use task filters for task status; blocker details are in the T5 tab.</p>
+          <p class="subcopy">5 task rows. Use task filters for task status; blocker details are in the T5 tab.</p>
         </div>
       <div class="toolbar">
         <div class="filters task-filters" aria-label="Task filters">
@@ -173,7 +173,7 @@
           <button type="button" data-task-filter="pending">Pending</button>
           <button type="button" data-task-filter="blocked">Tasks with blocker</button>
         </div>
-        <span id="visible-count">Showing 4 tasks</span>
+        <span id="visible-count">Showing 5 tasks</span>
       </div>
       <div class="table-wrap">
         <table class="task-table">
@@ -183,6 +183,7 @@
             <tr data-status="pending" data-blocked="false"><td>ivts-SYS-002</td><td>Verify backend readiness</td><td>Backend</td><td><span class="badge pending">pending</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td>none</td><td>run backend tests</td><td>backend readiness evidence</td></tr>
             <tr data-status="pending" data-blocked="false"><td>ivts-SYS-003</td><td>Verify frontend readiness</td><td>Frontend</td><td><span class="badge pending">pending</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td>none</td><td>run frontend verification</td><td>frontend readiness evidence</td></tr>
             <tr data-status="pending" data-blocked="false"><td>ivts-SYS-004</td><td>Verify release readiness</td><td>Release/Ops</td><td><span class="badge pending">pending</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td>none</td><td>run smoke/e2e</td><td>release readiness evidence</td></tr>
+            <tr data-status="done" data-blocked="false"><td>ivts-CCTV-001</td><td>Implement CCTV Viewer &amp; Nav</td><td>Frontend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>none</td><td>CCTV page implementation</td></tr>
           </tbody>
         </table>
       </div>

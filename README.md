@@ -3,7 +3,7 @@
 IVTS is an IAM-integrated agreement management system for MFU. It includes:
 
 - Backend API for IVTS registry records.
-- Vue frontend for dashboard, IVTS registry, account directory, settings, and permission management.
+- Vue frontend for dashboard, IVTS registry, CCTV Viewer, account directory, settings, and permission management.
 - IAM delegated authentication and permission filtering.
 - Local/server Docker Compose files.
 - GitLab CI and GitLab deploy compose templates for Harbor-based delivery.

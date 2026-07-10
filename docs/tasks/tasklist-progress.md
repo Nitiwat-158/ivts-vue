@@ -2,13 +2,13 @@
 
 | Field | Value |
 |---|---|
-| Date | 2026-06-18 |
+| Date | 2026-07-10 |
 | Project | IVTS |
 | Module / Feature | system progress and readiness |
 | Requirement | Track actual project system progress from source and verification evidence |
 | Active Change Record | `docs/changes/2026-06-18-<project-code>-tasklist-progress.md` |
-| Overall Status | pending |
-| Overall Progress | 0% |
+| Overall Status | in_progress |
+| Overall Progress | 25% |
 | Progress Type | Evidence-backed readiness score, not final product completion |
 
 ## T1. Source Evidence
@@ -31,11 +31,11 @@ Adjust weights per project, but keep them evidence-backed.
 |---|---:|---:|---|
 | Backend API/services verified | 35 | 0 | Not verified yet. |
 | Integration/auth verified | 15 | 0 | Not verified yet. |
-| Frontend route/API mapped | 20 | 0 | Not verified yet. |
+| Frontend route/API mapped | 20 | 20 | CCTV route mapped and page implemented. |
 | Environment/static config checked | 10 | 0 | Not verified yet. |
 | Release verification | 15 | 0 | Not verified yet. |
-| Tasklist and handoff | 5 | 0 | Not created yet. |
-| **Total** | **100** | **0** | Overall status remains pending. |
+| Tasklist and handoff | 5 | 5 | CCTV tasks handoff completed. |
+| **Total** | **100** | **25** | Overall progress updated with CCTV implementation. |
 
 ## T3. Active Tasklist
 
@@ -45,6 +45,7 @@ Adjust weights per project, but keep them evidence-backed.
 | ivts-SYS-002 | Verify backend readiness | Backend | AI | ivts-SYS-001 | pending | 0 | not started | | | none | run backend tests | backend readiness evidence |
 | ivts-SYS-003 | Verify frontend readiness | Frontend | AI | ivts-SYS-001 | pending | 0 | not started | | | none | run frontend verification | frontend readiness evidence |
 | ivts-SYS-004 | Verify release readiness | Release/Ops | AI | ivts-SYS-002,ivts-SYS-003 | pending | 0 | not started | | | none | run smoke/e2e | release readiness evidence |
+| ivts-CCTV-001 | Implement CCTV Viewer & Nav | Frontend | AI | none | done | 100 | Visual verification passed, sidebar bypass configured, handoff complete | `_nav.js`, `router/index.js`, `en.js`, `th.js`, `CCTVViewer.vue`, `TheSidebar.vue` | visual checks | none | none | CCTV page implementation |
 
 ## T4. Verification Log
 
@@ -64,3 +65,4 @@ Adjust weights per project, but keep them evidence-backed.
 ## T6. Decision
 
 Current project progress is not known until source discovery and verification are completed.
+

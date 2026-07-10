@@ -115,6 +115,7 @@ export default {
     },
     hasViewPermission(item) {
       if (!item) return true
+      if (item.public === true) return true
       const explicitPaths = this.permissionPaths(item)
       if (!this.permissionLoaded) {
         return !this.$store.state.XAccessToken

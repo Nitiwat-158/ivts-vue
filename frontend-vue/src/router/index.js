@@ -5,6 +5,7 @@ import { resolveFirstAccessiblePath } from '@/projects/utils/permission-landing'
 
 const TheContainer = () => import('@/containers/TheContainer')
 const Dashboard = () => import('@/views/Dashboard')
+const CCTVViewer = () => import('@/projects/views/cctv/CCTVViewer')
 const Page403 = () => import('@/views/pages/Page403')
 const Page404 = () => import('@/views/pages/Page404')
 const Page500 = () => import('@/views/pages/Page500')
@@ -47,6 +48,11 @@ const router = new Router({
           name: 'Dashboard',
           meta: { permission: { path: '/dashboard', action: 'view' } },
           component: Dashboard
+        },
+        {
+          path: 'cctv/viewer',
+          name: 'CCTV Viewer',
+          component: CCTVViewer
         },
         {
           path: 'ivts/registry',
