@@ -46,6 +46,7 @@
     "express-validator": "^5.3.1",
     "google-auth-library": "^10.6.1",
     "ienoopen": "^1.1.0",
+    "leaflet": "^1.9.4",
     "lodash": "^4.17.23",
     "moment": "^2.29.4",
     "mongodb": "^6.12.0",

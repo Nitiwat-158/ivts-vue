@@ -19,6 +19,7 @@ AI ห้ามคาดเดา. ทุก requirement, route, field, permissi
 7. Frontend ต้องเขียนเป็น component-based structure: page ทำหน้าที่ orchestration, UI ย่อยแยกเป็น components.
 8. ทุก task ต้องมี active tasklist ใน `docs/tasks/` และต้องอัปเดต `status`, `progress_percent`, evidence, blocker และ next action ทุกครั้งที่เปลี่ยน gate หรือสถานะ.
 9. System progress ต้องอัปเดตไฟล์เดิม `docs/tasks/tasklist-progress.md` เสมอ ห้ามสร้าง root dated `*-system-progress.md` ไฟล์ใหม่.
+10. เมื่อมีการเขียนหรือแก้ไข code ให้ทำการอัปเดตเอกสารควบคุมที่เกี่ยวข้องตามคำเปลี่ยนแปลงทันที โดยต้องแก้ไข `docs/AI-DOCS-INDEX.md` และ `README.md` ด้วย หากมีการเปลี่ยนแปลงพฤติกรรม คำสั่งรัน พอร์ต ตัวแปรสภาพแวดล้อม สคริปต์ หรือขั้นตอน deploy ต้องอัปเดต README พร้อมกันด้วย.
 
 ## 3. Source Truth Order
 

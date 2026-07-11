@@ -61,3 +61,10 @@ Do not add these unless the project has a real need and source evidence:
 ## Rule
 
 If a doc conflicts with mounted source code, imported source code, tests, or release scripts, source wins and the doc must be updated in the same change.
+
+## Code Change Documentation Rule
+
+Whenever code is written or modified, the change must also keep the documentation contract current:
+
+- Update `docs/AI-DOCS-INDEX.md` when the docs control set, active doc inventory, or doc ownership changes.
+- Update `README.md` whenever behavior, run commands, ports, environment variables, scripts, deployment steps, or operational notes change.

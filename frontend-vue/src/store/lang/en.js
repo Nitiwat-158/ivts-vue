@@ -121,6 +121,8 @@ const en = {
         messageStatus: "Message Status",
         accounts: "Accounts",
         accountDirectory: "Account Directory",
+        userManagement: "User Management",
+        vehicleManagement: "Vehicle Management",
         identityLifecycle: "Identity Lifecycle",
         training: "Training",
         trainingRequests: "Training Requests",
@@ -232,12 +234,30 @@ const en = {
             }
         }
     },
+    vehicleManagement: {
+        title: "Vehicle Management",
+        subtitle: "Manage vehicle-related records and quick access to the external website from one place.",
+        placeholder: "Vehicle management content will be expanded here as the feature is implemented.",
+        actions: {
+            openWebsite: "Open Website"
+        },
+        stats: {
+            total: {
+                label: "Vehicles",
+                hint: "Registered vehicle records"
+            },
+            active: {
+                label: "Active",
+                hint: "Ready for operations"
+            }
+        }
+    },
     accounts: {
         directory: {
-            title: "Account Directory",
-            subtitle: "Review account records and effective access from IAM without storing identity master data in IVTS.",
+            title: "User Management",
+            subtitle: "Review user records and effective access from IAM without storing identity master data in IVTS.",
             table: {
-                subtitle: "Search and inspect account records delegated from IAM.",
+                subtitle: "Search and inspect user records delegated from IAM.",
                 searchPlaceholder: "Search accounts",
                 resultSummary: "Showing {start}-{end} of {total} accounts"
             },

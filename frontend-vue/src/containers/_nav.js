@@ -19,6 +19,20 @@ export default function buildNav (t) {
         },
         {
           _name: 'CSidebarNavItem',
+          name: t('nav.vehicleManagement'),
+          to: '/vehicles/management',
+          icon: 'cil-car-alt',
+          public: true
+        },
+        {
+          _name: 'CSidebarNavItem',
+          name: t('nav.userManagement'),
+          to: '/users/management',
+          icon: 'cil-user',
+          permission: { path: '/accounts/directory', action: 'view' }
+        },
+        {
+          _name: 'CSidebarNavItem',
           name: t('nav.ivtsRegistry'),
           to: '/ivts/registry',
           icon: 'cil-description',
@@ -124,11 +138,12 @@ export default function buildNav (t) {
             }
           ]
         },
+        
         {
           _name: 'CSidebarNavItem',
           name: t('nav.accountDirectory'),
           to: '/accounts/directory',
-          icon: 'cil-user',
+          icon: 'cil-people',
           permission: { path: '/accounts/directory', action: 'view' }
         }
       ]
