@@ -27,12 +27,7 @@ REDIS_HOST=<YOUR_WSL_OR_HOST_IPV4_ADDRESS>
 REDIS_PORT=6379
 ```
 
-```bash
-docker compose --env-file .env.local up -d --build
-docker run -d -p 27017:27017 --name ivts-local-mongo mongo:6.0
-docker run -d -p 6379:6379 --name ivts-local-redis redis:alpine
-```
-
+#FirstregisIAM(only one time)
 ```sh
 cd backend-node
 npm install
@@ -42,29 +37,41 @@ npm run bootstrap:local
 
 # Execute from project root folder
 
+#runDocker
 ```bash
 APP_ENV=local ./server.sh deploy
 ```
 
+#rerunDocker
+```bash
+docker compose --env-file .env.local up -d --build
+docker run -d -p 27017:27017 --name ivts-local-mongo mongo:6.0
+docker run -d -p 6379:6379 --name ivts-local-redis redis:alpine
+```
+
+#runBack-end
 ```bash
 cd backend-node
 npm run start:local
 ```
+
 #To kill port
 ```bash
 netstat -ano | findstr :PORT
 taskkill /F /PID ID
 ```
 
-```bash
-cd frontend-vue
-npm install        
-npm run serve:local
-```
+#runFront-end
 
 ```bash
 cd frontend-vue       
 npm run serve:local
+```
+
+#update Docker
+```bash
+docker compose down
+docker compose up -d
 ```
 
 ---
