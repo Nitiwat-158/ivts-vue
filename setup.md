@@ -62,4 +62,9 @@ npm install
 npm run serve:local
 ```
 
+```bash
+cd frontend-vue       
+npm run serve:local
+```
+
 ---
