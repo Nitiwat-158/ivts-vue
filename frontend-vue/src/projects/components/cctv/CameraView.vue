@@ -33,26 +33,41 @@
 
         <!-- Main Stream display -->
         <div v-else class="stream-container w-100 h-100 d-flex align-items-center justify-content-center">
+          <video
+            v-if="showVideoPlayer"
+            :key="timestamp"
+            :src="buildStreamUrl(camera.streamUrl)"
+            class="w-100 h-100 stream-video"
+            controls
+            autoplay
+            muted
+            playsinline
+            @loadeddata="onLoaded"
+            @error="onError"
+          />
+
           <img
-            v-if="camera.streamUrl"
-            :src="camera.streamUrl + '?t=' + timestamp"
+            v-else-if="showImagePlayer"
+            :key="timestamp"
+            :src="buildStreamUrl(camera.streamUrl)"
             class="img-fluid stream-image"
             alt="CCTV Stream"
             @load="onLoaded"
             @error="onError"
           />
-          <div v-else class="placeholder-fallback text-center text-white p-4">
-            <CIcon name="cil-video" size="xl" class="mb-3 text-muted" />
-            <h5>Mock CCTV Stream</h5>
-            <p class="text-muted small">Live preview is active. Updates every 3 seconds.</p>
-            <div class="mock-canvas rounded border border-secondary p-5 bg-black-50 position-relative">
-              <span class="rec-dot"></span>
-              <span class="time-overlay">{{ currentTime }}</span>
-              <div class="mock-grid">
-                <div>CH1 - {{ camera.id }}</div>
-                <div>MFU SECURITY</div>
-              </div>
-            </div>
+
+          <div v-else class="overlay d-flex flex-column align-items-center justify-content-center text-white px-4 text-center">
+            <CIcon name="cil-ban" size="xl" class="text-warning mb-2" />
+            <h5 class="mb-1">ไม่สามารถแสดงผลสตรีมได้</h5>
+            <small class="text-muted">
+              {{ unsupportedMessage }}
+            </small>
+          </div>
+
+          <div v-if="streamError && !loading" class="overlay d-flex flex-column align-items-center justify-content-center text-white px-4 text-center">
+            <CIcon name="cil-warning" size="xl" class="text-danger mb-2" />
+            <h5 class="mb-1">เกิดข้อผิดพลาดในการเชื่อมต่อ</h5>
+            <small class="text-muted">ตรวจสอบ URL และการเข้าถึงกล้องอีกครั้ง</small>
           </div>
         </div>
       </div>
@@ -86,6 +101,7 @@ export default {
   data() {
     return {
       loading: false,
+      streamError: false,
       timestamp: Date.now(),
       currentTime: '',
       clockInterval: null
@@ -99,16 +115,42 @@ export default {
         offline: 'danger',
         maintenance: 'warning'
       }[this.camera.status] || 'secondary'
+    },
+    streamSourceType() {
+      if (!this.camera || !this.camera.streamUrl) {
+        return 'none'
+      }
+      const url = this.camera.streamUrl.trim().toLowerCase()
+      if (url.startsWith('rtsp://')) {
+        return 'rtsp'
+      }
+      if (url.includes('.m3u8') || url.match(/\.(mp4|webm|ogg)(\?|$)/i)) {
+        return 'video'
+      }
+      return 'image'
+    },
+    showVideoPlayer() {
+      return this.streamSourceType === 'video'
+    },
+    showImagePlayer() {
+      return this.streamSourceType === 'image'
+    },
+    unsupportedMessage() {
+      if (this.streamSourceType === 'rtsp') {
+        return 'RTSP ไม่สามารถเล่นได้โดยตรงในเว็บเบราว์เซอร์ โปรดใช้ URL ที่เป็น HTTP/HTTPS snapshot หรือ proxy service ที่แปลงสตรีมให้เข้ากับเบราว์เซอร์'
+      }
+      return 'กรุณาตรวจสอบ URL ของกล้อง หรือใช้ URL สำหรับรูปภาพ/สตรีมที่เบราว์เซอร์รองรับ'
     }
   },
   watch: {
     camera: {
       handler(newCam) {
+        this.streamError = false
         if (newCam && newCam.status === 'online') {
-          this.loading = true;
+          this.loading = true
           setTimeout(() => {
-            this.loading = false;
-          }, 600);
+            this.loading = false
+          }, 600)
         }
       },
       immediate: true
@@ -125,17 +167,24 @@ export default {
   },
   methods: {
     refreshStream() {
-      this.loading = true;
-      this.timestamp = Date.now();
+      this.loading = true
+      this.streamError = false
+      this.timestamp = Date.now()
       setTimeout(() => {
-        this.loading = false;
-      }, 500);
+        this.loading = false
+      }, 500)
     },
     onLoaded() {
-      this.loading = false;
+      this.loading = false
+      this.streamError = false
     },
     onError() {
-      this.loading = false;
+      this.loading = false
+      this.streamError = true
+    },
+    buildStreamUrl(url) {
+      if (!url) return ''
+      return `${url}${url.includes('?') ? '&' : '?'}t=${this.timestamp}`
     },
     updateClock() {
       const now = new Date();

@@ -40,8 +40,8 @@ export default {
   computed: {
     heroStats () {
       return [
-        { label: this.$t('vehicleManagement.stats.total.label'), value: '0', hint: this.$t('vehicleManagement.stats.total.hint'), icon: 'cil-car-alt', iconClass: 'app-section-stat__icon--total' },
-        { label: this.$t('vehicleManagement.stats.active.label'), value: '0', hint: this.$t('vehicleManagement.stats.active.hint'), icon: 'cil-check-circle', iconClass: 'app-section-stat__icon--active' }
+        { label: this.$t('Total Accounts'), value: '0', hint: this.$t('Profiles returned from IAM'), icon: 'cil-car-alt', iconClass: 'app-section-stat__icon--total' },
+        { label: this.$t('Active'), value: '0', hint: this.$t('Ready for sign-in and access'), icon: 'cil-check-circle', iconClass: 'app-section-stat__icon--active' }
       ]
     }
   },
