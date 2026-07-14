@@ -31,6 +31,8 @@ const gauthOption = {
 }
 Vue.use(GAuth, gauthOption)
 
+Vue.prototype.$icons = icons
+
 new Vue({
   el: '#app',
   router,

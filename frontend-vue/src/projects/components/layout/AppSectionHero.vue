@@ -219,6 +219,12 @@ export default {
   color: #9a5d00;
 }
 
+.app-section-stat__icon--danger,
+.security-stat__icon--danger {
+  background: linear-gradient(135deg, rgba(229, 83, 83, 0.12), rgba(229, 83, 83, 0.2));
+  color: #e55353;
+}
+
 @media (max-width: 767.98px) {
   .app-section-hero__body {
     align-items: flex-start;

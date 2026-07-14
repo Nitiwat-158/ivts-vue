@@ -236,7 +236,7 @@ const en = {
     },
     vehicleManagement: {
         title: "Vehicle Management",
-        subtitle: "Manage vehicle-related records and quick access to the external website from one place.",
+        subtitle: "Verify documents, manage status, and search vehicle records.",
         placeholder: "Vehicle management content will be expanded here as the feature is implemented.",
         actions: {
             openWebsite: "Open Website"
