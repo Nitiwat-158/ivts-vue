@@ -1,24 +1,36 @@
 <template>
-  <div class="vehicle-filter-bar d-flex flex-wrap align-items-end gap-3">
-    <div class="vehicle-filter-bar__field flex-grow-1 min-width-220">
+  <div class="vehicle-filter-bar d-flex align-items-center" style="gap: 1rem;">
+    <div class="vehicle-filter-bar__field" style="min-width: 250px;">
       <CInput
         v-model="searchTerm"
         placeholder="ค้นหาด้วยทะเบียนรถหรือชื่อผู้ใช้"
         size="sm"
+        class="mb-0"
       />
     </div>
 
-    <div class="vehicle-filter-bar__field min-width-220">
+    <div class="vehicle-filter-bar__field" style="min-width: 180px;">
       <CSelect
         v-model="status"
         :options="statusOptions"
         size="sm"
+        class="mb-0"
+      />
+    </div>
+
+    <!-- Optional Page Size Selector (to match Image 2) -->
+    <div class="vehicle-filter-bar__field" style="width: 70px;">
+      <CSelect
+        value="25"
+        :options="['25', '50', '100']"
+        size="sm"
+        class="mb-0"
       />
     </div>
 
     <div class="vehicle-filter-bar__action">
-      <CButton size="sm" color="primary" @click="onExport">
-        <CIcon name="cil-cloud-download" class="mr-2" />
+      <CButton size="sm" color="success" variant="outline" class="font-weight-bold" @click="onExport">
+        <CIcon name="cil-cloud-download" class="mr-1" />
         Export
       </CButton>
     </div>

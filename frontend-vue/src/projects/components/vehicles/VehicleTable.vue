@@ -1,7 +1,9 @@
 <template>
   <div class="vehicle-table-wrapper">
-    <div v-if="vehicles.length === 0" class="vehicle-table-empty">
-      ไม่พบข้อมูลรถ
+    <div v-if="vehicles.length === 0" class="vehicle-table-empty text-center py-5" style="background-color: #f1f3f5; min-height: 200px; display: flex; align-items: center; justify-content: center;">
+      <h4 class="text-secondary font-weight-normal mb-0" style="color: #4f5d73;">
+        No items <CIcon name="cil-ban" class="text-danger ml-2" size="xl" />
+      </h4>
     </div>
 
     <div v-else class="vehicle-table-scroll">
@@ -206,12 +208,23 @@ export default {
   min-width: 780px;
   border-collapse: separate;
   border-spacing: 0;
+  width: 100%;
 }
 
-.vehicle-table th,
-.vehicle-table td {
-  padding: 10px 12px;
+.vehicle-table th {
+  padding: 12px 16px;
   vertical-align: middle;
+  font-weight: 700;
+  color: #3c4b64;
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #d8dbe0;
+  text-transform: capitalize;
+}
+
+.vehicle-table td {
+  padding: 12px 16px;
+  vertical-align: middle;
+  border-bottom: 1px solid #d8dbe0;
 }
 
 .vehicle-table tbody tr {

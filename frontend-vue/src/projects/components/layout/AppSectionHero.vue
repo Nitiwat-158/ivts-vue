@@ -21,21 +21,22 @@
       </CCardBody>
     </CCard>
 
-    <CRow v-if="statItems.length" class="mb-4">
-      <CCol v-for="stat in statItems" :key="stat.label" md="4" sm="6" col="12">
-        <CCard class="app-section-stat bg-style2">
-          <CCardBody>
-            <div class="app-section-stat__header">
-              <div>
-                <div class="app-section-stat__label">{{ stat.label }}</div>
-                <div class="app-section-stat__value">{{ stat.value }}</div>
-                <div v-if="stat.hint" class="app-section-stat__hint">{{ stat.hint }}</div>
-              </div>
-              <div class="app-section-stat__icon" :class="stat.iconClass">
-                <CIcon :name="stat.icon" />
-              </div>
-            </div>
-          </CCardBody>
+  <CRow v-if="statItems.length" class="mb-4">
+    <CCol v-for="stat in statItems" :key="stat.label" lg="3" md="6" sm="6" col="12" class="mb-3">
+    <!-- เพิ่ม class h-100 เข้าไปที่ CCard -->
+    <CCard class="app-section-stat bg-style2 h-100">
+      <CCardBody>
+        <div class="app-section-stat__header">
+          <div>
+            <div class="app-section-stat__label">{{ stat.label }}</div>
+            <div class="app-section-stat__value">{{ stat.value }}</div>
+            <div v-if="stat.hint" class="app-section-stat__hint">{{ stat.hint }}</div>
+          </div>
+          <div class="app-section-stat__icon" :class="stat.iconClass">
+            <CIcon :name="stat.icon" />
+          </div>
+          </div>
+        </CCardBody>
         </CCard>
       </CCol>
     </CRow>

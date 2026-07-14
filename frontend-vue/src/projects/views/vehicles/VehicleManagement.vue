@@ -9,21 +9,45 @@
       @refresh="loadVehicles"
     />
 
-    <VehicleFilterBar
-      @search="onSearch"
-      @filter-status="onFilterStatus"
-      @export="onExport"
-    />
+    <CCard class="border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+      <CCardHeader class="bg-white d-flex flex-wrap justify-content-between align-items-center py-3 border-bottom">
+        <div class="d-flex align-items-center mr-3 mb-2 mb-md-0">
+          <CIcon name="cil-car-alt" class="mr-2 text-danger" size="xl" />
+          <div>
+            <h5 class="mb-0 font-weight-bold" style="color: #3c4b64;">Vehicle Management</h5>
+            <small class="text-muted">Showing 1-{{ vehicles.length || 0 }} of {{ vehicles.length || 0 }} vehicles</small>
+          </div>
+        </div>
+        
+        <VehicleFilterBar
+          @search="onSearch"
+          @filter-status="onFilterStatus"
+          @export="onExport"
+        />
+      </CCardHeader>
 
-    <VehicleTable
-      :vehicles="vehicles"
-      :selectedIds="Array.from(selectedIds)"
-      @approve="handleApprove"
-      @reject="handleReject"
-      @delete="handleDelete"
-      @view="handleView"
-      @toggle-select="handleToggleSelect"
-    />
+      <CCardBody class="p-0">
+        <VehicleTable
+          :vehicles="vehicles"
+          :selectedIds="Array.from(selectedIds)"
+          @approve="handleApprove"
+          @reject="handleReject"
+          @delete="handleDelete"
+          @view="handleView"
+          @toggle-select="handleToggleSelect"
+        />
+      </CCardBody>
+      
+      <CCardFooter class="bg-white border-top py-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="text-muted small font-weight-bold">
+            {{ vehicles.length ? `1-${vehicles.length} / ${vehicles.length}` : '0-0 / 0' }}
+          </span>
+          <!-- A placeholder loading spinner or pagination can go here -->
+          <CIcon v-if="loading" name="cil-loop-circular" class="text-muted" style="animation: spin 1s linear infinite;" />
+        </div>
+      </CCardFooter>
+    </CCard>
 
     <ConfirmDeleteModal
       :visible="showDeleteModal"
