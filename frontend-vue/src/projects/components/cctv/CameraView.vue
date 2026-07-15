@@ -35,8 +35,8 @@
         <div v-else class="stream-container w-100 h-100 d-flex align-items-center justify-content-center">
           <video
             v-if="showVideoPlayer"
+            ref="videoPlayer"
             :key="timestamp"
-            :src="buildStreamUrl(camera.streamUrl)"
             class="w-100 h-100 stream-video"
             controls
             autoplay
@@ -48,7 +48,7 @@
 
           <img
             v-else-if="showImagePlayer"
-            :key="timestamp"
+            :key="timestam"
             :src="buildStreamUrl(camera.streamUrl)"
             class="img-fluid stream-image"
             alt="CCTV Stream"
@@ -90,6 +90,8 @@
 </template>
 
 <script>
+import Hls from 'hls.js'
+
 export default {
   name: 'CameraView',
   props: {
@@ -104,7 +106,8 @@ export default {
       streamError: false,
       timestamp: Date.now(),
       currentTime: '',
-      clockInterval: null
+      clockInterval: null,
+      hlsInstance: null
     }
   },
   computed: {
@@ -148,9 +151,7 @@ export default {
         this.streamError = false
         if (newCam && newCam.status === 'online') {
           this.loading = true
-          setTimeout(() => {
-            this.loading = false
-          }, 600)
+          this.initHls()
         }
       },
       immediate: true
@@ -164,15 +165,93 @@ export default {
     if (this.clockInterval) {
       clearInterval(this.clockInterval);
     }
+    this.destroyHls()
   },
   methods: {
+    destroyHls() {
+      if (this.hlsInstance) {
+        this.hlsInstance.destroy()
+        this.hlsInstance = null
+      }
+    },
+    initHls() {
+      this.destroyHls()
+      if (!this.showVideoPlayer || !this.camera || !this.camera.streamUrl) {
+        setTimeout(() => { this.loading = false }, 600)
+        return
+      }
+      
+      this.$nextTick(() => {
+        const video = this.$refs.videoPlayer
+        const streamUrl = this.buildStreamUrl(this.camera.streamUrl)
+        
+        // Fallback manual timeout just in case hls.js hangs without firing events
+        const manualTimeout = setTimeout(() => {
+          if (this.loading) {
+            this.destroyHls()
+            this.onError()
+            console.error('Manual connection timeout triggered (10 seconds)')
+          }
+        }, 10000)
+
+        if (!video) return
+        
+        if (Hls.isSupported()) {
+          this.hlsInstance = new Hls({
+            debug: true,
+            enableWorker: true,
+            lowLatencyMode: true,
+            manifestLoadingTimeOut: 10000,
+            manifestLoadingMaxRetry: 1,
+            levelLoadingTimeOut: 10000,
+            levelLoadingMaxRetry: 1
+          })
+          
+          this.hlsInstance.loadSource(streamUrl)
+          this.hlsInstance.attachMedia(video)
+          
+          this.hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+            video.play().catch(e => console.warn('Auto-play blocked:', e))
+            this.loading = false
+          })
+          
+          this.hlsInstance.on(Hls.Events.ERROR, (event, data) => {
+            if (data.fatal) {
+              switch(data.type) {
+                case Hls.ErrorTypes.NETWORK_ERROR:
+                  console.error('Fatal network error encountered:', data)
+                  this.destroyHls()
+                  this.onError()
+                  break
+                case Hls.ErrorTypes.MEDIA_ERROR:
+                  console.error('Fatal media error encountered:', data)
+                  this.hlsInstance.recoverMediaError()
+                  break
+                default:
+                  this.destroyHls()
+                  this.onError()
+                  break
+              }
+            }
+          })
+        }
+        else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          video.src = streamUrl
+          video.addEventListener('loadedmetadata', () => {
+            video.play().catch(e => console.warn('Auto-play blocked:', e))
+            this.loading = false
+          })
+          video.addEventListener('error', this.onError)
+        } else {
+          this.onError()
+        }
+      })
+    },
     refreshStream() {
       this.loading = true
       this.streamError = false
       this.timestamp = Date.now()
-      setTimeout(() => {
-        this.loading = false
-      }, 500)
+      this.initHls()
     },
     onLoaded() {
       this.loading = false

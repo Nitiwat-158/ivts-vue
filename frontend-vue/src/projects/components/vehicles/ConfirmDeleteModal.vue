@@ -15,14 +15,14 @@
       </p>
     </CModalBody>
 
-    <CModalFooter class="justify-content-end">
+    <template #footer>
       <CButton color="secondary" size="sm" variant="outline" @click="onCancel">
         Cancel
       </CButton>
       <CButton color="danger" size="sm" class="ms-2" @click="onConfirm">
         Delete
       </CButton>
-    </CModalFooter>
+    </template>
   </CModal>
 </template>
 
