@@ -2,7 +2,8 @@
   <div class="vehicle-filter-bar d-flex align-items-center" style="gap: 1rem;">
     <div class="vehicle-filter-bar__field" style="min-width: 250px;">
       <CInput
-        v-model="searchTerm"
+        :value="searchTerm"
+        @update:value="searchTerm = $event"
         placeholder="ค้นหาด้วยทะเบียนรถหรือชื่อผู้ใช้"
         size="sm"
         class="mb-0"
@@ -11,7 +12,8 @@
 
     <div class="vehicle-filter-bar__field" style="min-width: 180px;">
       <CSelect
-        v-model="status"
+        :value="status"
+        @update:value="status = $event"
         :options="statusOptions"
         size="sm"
         class="mb-0"

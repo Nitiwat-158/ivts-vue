@@ -60,6 +60,7 @@
     <VerifyDocumentModal
       :visible="showVerifyModal"
       :vehicle="currentVehicle"
+      :mode="verifyModalMode"
       @approve="confirmVerify"
       @reject="confirmReject"
       @update:visible="val => (showVerifyModal = val)"
@@ -99,6 +100,7 @@ export default {
       selectedIds: new Set(),
       showDeleteModal: false,
       showVerifyModal: false,
+      verifyModalMode: 'verify',
       currentVehicle: null,
       loading: false,
       searchTimeout: null
@@ -148,6 +150,7 @@ export default {
   methods: {
     async loadVehicles () {
       try {
+        console.log('Fetching vehicles with status filter:', this.statusFilter)
         this.loading = true
         const response = await fetchVehicles(this.searchQuery, this.statusFilter)
         this.vehicles = response
@@ -194,6 +197,7 @@ export default {
       const vehicle = this.vehicles.find(item => item.id === id)
       if (vehicle) {
         this.currentVehicle = vehicle
+        this.verifyModalMode = 'verify'
         this.showVerifyModal = true
       }
     },
@@ -208,6 +212,7 @@ export default {
       const vehicle = this.vehicles.find(item => item.id === id)
       if (vehicle) {
         this.currentVehicle = vehicle
+        this.verifyModalMode = 'view'
         this.showVerifyModal = true
       }
     },

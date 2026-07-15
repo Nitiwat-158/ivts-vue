@@ -63,53 +63,55 @@
                 {{ vehicle.accountStatus }}
               </CBadge>
             </td>
-            <td class="text-end vehicle-table-actions">
-              <CButton
-                v-if="vehicle.docStatus === 'Pending'"
-                size="sm"
-                color="success"
-                variant="outline"
-                shape="pill"
-                class="vehicle-action-btn"
-                v-c-tooltip="{ content: 'Approve', placement: 'top' }"
-                @click="emitEvent('approve', vehicle.id)"
-              >
-                <CIcon name="cil-check" />
-              </CButton>
-              <CButton
-                v-if="vehicle.docStatus === 'Pending'"
-                size="sm"
-                color="danger"
-                variant="outline"
-                shape="pill"
-                class="vehicle-action-btn"
-                v-c-tooltip="{ content: 'Reject', placement: 'top' }"
-                @click="emitEvent('reject', vehicle.id)"
-              >
-                <CIcon name="cil-x" />
-              </CButton>
-              <CButton
-                size="sm"
-                color="info"
-                variant="outline"
-                shape="pill"
-                class="vehicle-action-btn"
-                v-c-tooltip="{ content: 'View', placement: 'top' }"
-                @click="emitEvent('view', vehicle.id)"
-              >
-                <CIcon name="cil-magnifying-glass" />
-              </CButton>
-              <CButton
-                size="sm"
-                color="danger"
-                variant="outline"
-                shape="pill"
-                class="vehicle-action-btn"
-                v-c-tooltip="{ content: 'Delete', placement: 'top' }"
-                @click="emitEvent('delete', vehicle.id)"
-              >
-                <CIcon name="cil-trash" />
-              </CButton>
+            <td class="text-end">
+              <div class="vehicle-table-actions">
+                <CButton
+                  v-if="vehicle.docStatus === 'Pending'"
+                  size="sm"
+                  color="success"
+                  variant="outline"
+                  shape="pill"
+                  class="vehicle-action-btn"
+                  v-c-tooltip="{ content: 'Approve', placement: 'top' }"
+                  @click="emitEvent('approve', vehicle.id)"
+                >
+                  <CIcon name="cil-check" />
+                </CButton>
+                <CButton
+                  v-if="vehicle.docStatus === 'Pending'"
+                  size="sm"
+                  color="danger"
+                  variant="outline"
+                  shape="pill"
+                  class="vehicle-action-btn"
+                  v-c-tooltip="{ content: 'Reject', placement: 'top' }"
+                  @click="emitEvent('reject', vehicle.id)"
+                >
+                  <CIcon name="cil-x" />
+                </CButton>
+                <CButton
+                  size="sm"
+                  color="info"
+                  variant="outline"
+                  shape="pill"
+                  class="vehicle-action-btn"
+                  v-c-tooltip="{ content: 'View', placement: 'top' }"
+                  @click="emitEvent('view', vehicle.id)"
+                >
+                  <CIcon name="cil-magnifying-glass" />
+                </CButton>
+                <CButton
+                  size="sm"
+                  color="danger"
+                  variant="outline"
+                  shape="pill"
+                  class="vehicle-action-btn"
+                  v-c-tooltip="{ content: 'Delete', placement: 'top' }"
+                  @click="emitEvent('delete', vehicle.id)"
+                >
+                  <CIcon name="cil-trash" />
+                </CButton>
+              </div>
             </td>
           </tr>
         </tbody>

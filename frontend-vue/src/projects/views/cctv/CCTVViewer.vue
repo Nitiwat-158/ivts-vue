@@ -45,6 +45,9 @@
 <script>
 import CameraList from '@/projects/components/cctv/CameraList.vue'
 import CameraView from '@/projects/components/cctv/CameraView.vue'
+import yaml from 'js-yaml'
+
+import mediamtxConfigText from '!!raw-loader!@/assets/mediamtx.yml'
 
 export default {
   name: 'CCTVViewer',
@@ -54,33 +57,57 @@ export default {
   },
   data() {
     return {
-      cameras: [
-        { id: 'CAM-AS-01', name: 'AS Building Entrance', location: 'AS Building, 1st Floor Lobby', status: 'online', streamUrl: '' },
-        { id: 'CAM-AS-02', name: 'AS Building OSS Center', location: 'AS Building, 4th Floor One Stop Service', status: 'online', streamUrl: '' },
-        { id: 'CAM-GATE-01', name: 'Main Gate Entrance', location: 'Main Campus Entrance Road', status: 'online', streamUrl: '' },
-        { id: 'CAM-GATE-02', name: 'Main Gate Exit', location: 'Main Campus Exit Road', status: 'online', streamUrl: '' },
-        { id: 'CAM-LIB-01', name: 'M-Learning Space', location: 'Library and Information Center, Entrance', status: 'online', streamUrl: '' },
-        { id: 'CAM-LIB-02', name: 'M-Learning Space Inside', location: 'Library Zone A Reading Area', status: 'offline', streamUrl: '' },
-        { id: 'CAM-C3-01', name: 'C3 Building Parking', location: 'C3 Academic Building Parking Lot', status: 'maintenance', streamUrl: '' }
-      ],
+      cameras: [],
       selectedCamera: null
     }
   },
   created() {
-    // Select first online camera as default
-    const defaultCam = this.cameras.find(cam => cam.status === 'online') || this.cameras[0]
-    this.selectedCamera = defaultCam
+    // โหลดข้อมูลกล้องทันทีที่เปิดหน้า
+    this.loadCamerasFromYaml()
   },
   methods: {
+    loadCamerasFromYaml() {
+      try {
+        // แปลงข้อความ YAML เป็น JavaScript Object
+        const config = yaml.load(mediamtxConfigText)
+
+        if (config && config.paths) {
+          // ดึงรายชื่อกล้องจาก key 'paths'
+          const loadedCameras = Object.keys(config.paths).map((pathName) => {
+            return {
+              id: `CAM-${pathName.toUpperCase()}`,
+              name: `Node: ${pathName.toUpperCase()}`,
+              location: 'Campus Network Node',
+              status: 'online', // กำหนดสถานะตั้งต้นเป็น online
+              // สร้าง URL สำหรับ HLS สตรีม (พอร์ตเริ่มต้นคือ 8888)
+              streamUrl: `http://localhost:8888/${pathName}/index.m3u8`
+            }
+          })
+
+          this.cameras = loadedCameras
+          // เลือกกล้องตัวแรกเป็นค่าเริ่มต้น
+          this.selectedCamera = this.cameras.length > 0 ? this.cameras[0] : null
+        }
+      } catch (error) {
+        console.error('ไม่สามารถอ่านหรือแปลงไฟล์ mediamtx.yml ได้:', error)
+      }
+    },
     selectCamera(camera) {
       this.selectedCamera = camera
     },
     refreshAll() {
-      // Logic to trigger refresh on current child stream
+      // โหลดข้อมูลกล้องใหม่
+      this.loadCamerasFromYaml()
+      
       const current = this.selectedCamera
       this.selectedCamera = null
+      
       this.$nextTick(() => {
-        this.selectedCamera = current
+        // พยายามเลือกกล้องตัวเดิมกลับมาหลังจากการรีเฟรช
+        if (current) {
+          const found = this.cameras.find(c => c.id === current.id)
+          this.selectedCamera = found || (this.cameras.length > 0 ? this.cameras[0] : null)
+        }
       })
     }
   }
@@ -123,6 +150,8 @@ export default {
 .cctv-card {
   border: 0;
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  /* ทำให้การ์ดยืดเต็มความสูงของ Grid Column */
+  height: 100%;
 }
 
 .cctv-card h5 {

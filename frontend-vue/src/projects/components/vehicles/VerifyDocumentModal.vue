@@ -6,20 +6,21 @@
     centered
     backdrop
   >
-    <CModalHeader>Verify Document</CModalHeader>
+    <CModalHeader>{{ mode === 'view' ? 'Vehicle Details' : 'Verify Document' }}</CModalHeader>
 
     <CModalBody>
       <div class="verify-document-modal">
         <div class="verify-document-modal__image">
           <CImg
-            v-if="hasDocImage"
+            v-if="hasDocImage && !imageLoadFailed"
             :src="vehicle.docImageUrl"
             alt="Document Image"
             fluid
             rounded
+            @error="imageLoadFailed = true"
           />
           <div v-else class="verify-document-modal__placeholder">
-            ไม่มีรูปเอกสาร
+            ไม่สามารถโหลดรูปเอกสารได้
           </div>
         </div>
 
@@ -32,8 +33,17 @@
             <span class="label">ชื่อเจ้าของ</span>
             <span class="value">{{ ownerNameDisplay }}</span>
           </div>
+          
+          <div v-if="mode === 'view'" class="verify-document-modal__row mt-2">
+            <span class="label">สถานะบัญชี</span>
+            <span class="value">
+              <CBadge :color="accountStatusColor(vehicle.accountStatus)">
+                {{ vehicle.accountStatus || '-' }}
+              </CBadge>
+            </span>
+          </div>
 
-          <div v-if="showRejectReason" class="verify-document-modal__reason">
+          <div v-if="showRejectReason && mode === 'verify'" class="verify-document-modal__reason">
             <label class="reason-label">เหตุผลการปฏิเสธ</label>
             <CTextarea
               v-model="rejectReason"
@@ -45,34 +55,36 @@
       </div>
     </CModalBody>
 
-    <CModalFooter class="justify-content-end">
+    <template #footer>
       <CButton color="secondary" size="sm" variant="outline" @click="onCancel">
-        Cancel
+        {{ mode === 'view' ? 'Close' : 'Cancel' }}
       </CButton>
-      <CButton color="success" size="sm" class="ms-2" @click="onApprove">
-        Approve
-      </CButton>
-      <CButton
-        v-if="!showRejectReason"
-        color="danger"
-        size="sm"
-        class="ms-2"
-        variant="outline"
-        @click="onStartReject"
-      >
-        Reject
-      </CButton>
-      <CButton
-        v-else
-        color="danger"
-        size="sm"
-        class="ms-2"
-        @click="onConfirmReject"
-        :disabled="isRejectReasonEmpty"
-      >
-        ยืนยัน Reject
-      </CButton>
-    </CModalFooter>
+      <template v-if="mode === 'verify'">
+        <CButton color="success" size="sm" class="ms-2" @click="onApprove">
+          Approve
+        </CButton>
+        <CButton
+          v-if="!showRejectReason"
+          color="danger"
+          size="sm"
+          class="ms-2"
+          variant="outline"
+          @click="onStartReject"
+        >
+          Reject
+        </CButton>
+        <CButton
+          v-else
+          color="danger"
+          size="sm"
+          class="ms-2"
+          @click="onConfirmReject"
+          :disabled="isRejectReasonEmpty"
+        >
+          ยืนยัน Reject
+        </CButton>
+      </template>
+    </template>
   </CModal>
 </template>
 
@@ -84,15 +96,20 @@ export default {
       type: Boolean,
       default: false
     },
+    mode: {
+      type: String,
+      default: 'verify' // 'verify' or 'view'
+    },
     vehicle: {
       type: Object,
-      default: () => ({ plate: '', docImageUrl: '', ownerName: '' })
+      default: () => ({ plate: '', docImageUrl: '', owner: '', accountStatus: '' })
     }
   },
   data () {
     return {
       showRejectReason: false,
-      rejectReason: ''
+      rejectReason: '',
+      imageLoadFailed: false
     }
   },
   computed: {
@@ -103,7 +120,7 @@ export default {
       return (this.vehicle && this.vehicle.plate) || '-'
     },
     ownerNameDisplay () {
-      return (this.vehicle && this.vehicle.ownerName) || '-'
+      return (this.vehicle && this.vehicle.owner) || '-'
     },
     isRejectReasonEmpty () {
       return !this.rejectReason.trim()
@@ -114,10 +131,20 @@ export default {
       if (!newValue) {
         this.showRejectReason = false
         this.rejectReason = ''
+      } else {
+        this.imageLoadFailed = false
       }
+    },
+    vehicle () {
+      this.imageLoadFailed = false
     }
   },
   methods: {
+    accountStatusColor (status) {
+      if (status === 'Active') return 'success'
+      if (status === 'Suspended') return 'secondary'
+      return 'secondary'
+    },
     onVisibleChange (value) {
       this.$emit('update:visible', value)
     },
