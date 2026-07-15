@@ -83,24 +83,24 @@
       <h1>Tasklist: IVTS System Progress And Readiness</h1>
     </section>
     <section class="metrics">
-      <div class="metric"><div class="label">Done</div><div class="value">1</div><div class="note">Completed task rows</div></div>
-      <div class="metric"><div class="label">Blocked</div><div class="value">0</div><div class="note">Rows needing action</div></div>
+      <div class="metric"><div class="label">Done</div><div class="value">8</div><div class="note">Completed task rows</div></div>
+      <div class="metric"><div class="label">Blocked</div><div class="value">3</div><div class="note">Rows needing action</div></div>
       <div class="metric"><div class="label">Verifying</div><div class="value">0</div><div class="note">Rows under validation</div></div>
-      <div class="metric"><div class="label">In Progress</div><div class="value">0</div><div class="note">Discovery or active work</div></div>
-      <div class="metric"><div class="label">Pending</div><div class="value">4</div><div class="note">Not started rows</div></div>
+      <div class="metric"><div class="label">In Progress</div><div class="value">1</div><div class="note">Discovery or active work</div></div>
+      <div class="metric"><div class="label">Pending</div><div class="value">5</div><div class="note">Not started rows</div></div>
     </section>
     <section class="summary-board" aria-label="Summary">
 <div class="table-wrap">
 <table>
 <thead><tr><th>Field</th><th>Value</th></tr></thead>
 <tbody>
-<tr><td>Date</td><td>2026-07-10</td></tr>
+<tr><td>Date</td><td>2026-07-14</td></tr>
 <tr><td>Project</td><td>IVTS</td></tr>
 <tr><td>Module / Feature</td><td>system progress and readiness</td></tr>
 <tr><td>Requirement</td><td>Track actual project system progress from source and verification evidence</td></tr>
-<tr><td>Active Change Record</td><td><code>docs/changes/2026-06-18-&lt;project-code&gt;-tasklist-progress.md</code></td></tr>
+<tr><td>Active Change Record</td><td><code>docs/changes/2026-07-14-backend-models-routes.md</code></td></tr>
 <tr><td>Overall Status</td><td class="status-cell status-progress"><span>in_progress</span></td></tr>
-<tr><td>Overall Progress</td><td class="progress-cell"><span class="progress-number">25%</span><span class="progress-meter"><span style="width: 25%"></span></span></td></tr>
+<tr><td>Overall Progress</td><td class="progress-cell"><span class="progress-number">45%</span><span class="progress-meter"><span style="width: 45%"></span></span></td></tr>
 <tr><td>Progress Type</td><td>Evidence-backed readiness score, not final product completion</td></tr>
 </tbody>
 </table>
@@ -148,13 +148,13 @@
 <table>
 <thead><tr><th>Readiness Area</th><th>Weight</th><th>Earned</th><th>Basis</th></tr></thead>
 <tbody>
-<tr><td>Backend API/services verified</td><td>35</td><td>0</td><td>Not verified yet.</td></tr>
+<tr><td>Backend API/services verified</td><td>35</td><td>20</td><td>7 Mongoose models + 4 services + 10 routes written; node --check passed; live DB smoke pending.</td></tr>
 <tr><td>Integration/auth verified</td><td>15</td><td>0</td><td>Not verified yet.</td></tr>
 <tr><td>Frontend route/API mapped</td><td>20</td><td>20</td><td>CCTV route mapped and page implemented.</td></tr>
 <tr><td>Environment/static config checked</td><td>10</td><td>0</td><td>Not verified yet.</td></tr>
 <tr><td>Release verification</td><td>15</td><td>0</td><td>Not verified yet.</td></tr>
-<tr><td>Tasklist and handoff</td><td>5</td><td>5</td><td>CCTV tasks handoff completed.</td></tr>
-<tr><td><strong>Total</strong></td><td><strong>100</strong></td><td><strong>25</strong></td><td>Overall progress updated with CCTV implementation.</td></tr>
+<tr><td>Tasklist and handoff</td><td>5</td><td>5</td><td>CCTV tasks + backend models/routes handoff completed.</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>100</strong></td><td><strong>45</strong></td><td>Backend implementation gate completed; live smoke + IAM seed pending.</td></tr>
 </tbody>
 </table>
 </div>
@@ -162,7 +162,7 @@
       <div class="board-panel active" data-board-panel="t3">
         <div class="board-section-title">
           <h3>T3. Active Tasklist</h3>
-          <p class="subcopy">5 task rows. Use task filters for task status; blocker details are in the T5 tab.</p>
+          <p class="subcopy">14 task rows. Use task filters for task status; blocker details are in the T5 tab.</p>
         </div>
       <div class="toolbar">
         <div class="filters task-filters" aria-label="Task filters">
@@ -173,17 +173,26 @@
           <button type="button" data-task-filter="pending">Pending</button>
           <button type="button" data-task-filter="blocked">Tasks with blocker</button>
         </div>
-        <span id="visible-count">Showing 5 tasks</span>
+        <span id="visible-count">Showing 14 tasks</span>
       </div>
       <div class="table-wrap">
         <table class="task-table">
           <thead><tr><th>Task ID</th><th>Task</th><th>Agent / Owner</th><th>Status</th><th>Progress</th><th>Blocker</th><th>Next Action</th><th>Output / Evidence</th></tr></thead>
           <tbody id="task-body">
-            <tr data-status="pending" data-blocked="false"><td>ivts-SYS-001</td><td>Map API surface</td><td>Orchestrator</td><td><span class="badge pending">pending</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td>none</td><td>read route truth</td><td>source map</td></tr>
-            <tr data-status="pending" data-blocked="false"><td>ivts-SYS-002</td><td>Verify backend readiness</td><td>Backend</td><td><span class="badge pending">pending</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td>none</td><td>run backend tests</td><td>backend readiness evidence</td></tr>
+            <tr data-status="done" data-blocked="false"><td>ivts-SYS-001</td><td>Map API surface</td><td>Orchestrator</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>—</td><td>source map</td></tr>
+            <tr data-status="in_progress" data-blocked="true"><td>ivts-SYS-002</td><td>Verify backend readiness</td><td>Backend</td><td><span class="badge progress">in_progress</span></td><td><div class="small-progress"><strong>50%</strong><div class="track"><div class="fill" style="width:50%"></div></div></div></td><td><span class="badge blocker">B-001 IAM seed</span></td><td>run live smoke; seed IAM permissions</td><td>backend readiness evidence</td></tr>
             <tr data-status="pending" data-blocked="false"><td>ivts-SYS-003</td><td>Verify frontend readiness</td><td>Frontend</td><td><span class="badge pending">pending</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td>none</td><td>run frontend verification</td><td>frontend readiness evidence</td></tr>
             <tr data-status="pending" data-blocked="false"><td>ivts-SYS-004</td><td>Verify release readiness</td><td>Release/Ops</td><td><span class="badge pending">pending</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td>none</td><td>run smoke/e2e</td><td>release readiness evidence</td></tr>
             <tr data-status="done" data-blocked="false"><td>ivts-CCTV-001</td><td>Implement CCTV Viewer &amp; Nav</td><td>Frontend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>none</td><td>CCTV page implementation</td></tr>
+            <tr data-status="done" data-blocked="false"><td>ivts-BE-001</td><td>Create 7 Mongoose models</td><td>Backend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>—</td><td>7 model files</td></tr>
+            <tr data-status="done" data-blocked="false"><td>ivts-BE-002</td><td>Create vehicle_request service</td><td>Backend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>—</td><td>service file</td></tr>
+            <tr data-status="done" data-blocked="false"><td>ivts-BE-003</td><td>Create cctv service</td><td>Backend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>—</td><td>service file</td></tr>
+            <tr data-status="done" data-blocked="false"><td>ivts-BE-004</td><td>Create vehicle service</td><td>Backend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>—</td><td>service file</td></tr>
+            <tr data-status="done" data-blocked="false"><td>ivts-BE-005</td><td>Create tracking service</td><td>Backend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>—</td><td>service file</td></tr>
+            <tr data-status="done" data-blocked="false"><td>ivts-BE-006</td><td>Update ivts.routes.js</td><td>Backend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>—</td><td>updated routes file</td></tr>
+            <tr data-status="pending" data-blocked="true"><td>ivts-BE-007</td><td>Live smoke test</td><td>Backend</td><td><span class="badge pending">pending</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td><span class="badge blocker">B-001 IAM seed required</span></td><td>POST /requests/submit, GET /cctvs/:id</td><td>smoke evidence</td></tr>
+            <tr data-status="pending" data-blocked="true"><td>ivts-BE-008</td><td>Seed IAM permission paths</td><td>Ops</td><td><span class="badge pending">pending</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td><span class="badge blocker">requires IAM admin access</span></td><td>Seed /ivts/requests, /ivts/vehicles, /ivts/cctvs, /ivts/tracking</td><td>IAM permission records</td></tr>
+            <tr data-status="pending" data-blocked="false"><td>ivts-BE-009</td><td>Update PRD-ivts.md</td><td>Product</td><td><span class="badge pending">pending</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td>none</td><td>Update PRD with new collections and API surface</td><td>PRD update</td></tr>
           </tbody>
         </table>
       </div>
@@ -196,7 +205,8 @@
 <table>
 <thead><tr><th>Command / Check</th><th>Result</th><th>Evidence</th></tr></thead>
 <tbody>
-<tr><td>backend test</td><td class="status-cell status-muted"><span>not run</span></td><td></td></tr>
+<tr><td><code>node --check</code> all 12 new backend files</td><td class="status-cell status-done"><span>PASS</span></td><td>Exit code 0 — 2026-07-14</td></tr>
+<tr><td>backend npm test</td><td class="status-cell status-muted"><span>not run</span></td><td>requires running server + DB</td></tr>
 <tr><td>frontend lint/test/build</td><td class="status-cell status-muted"><span>not run</span></td><td></td></tr>
 <tr><td>live smoke/e2e</td><td class="status-cell status-muted"><span>not run</span></td><td></td></tr>
 </tbody>
@@ -211,8 +221,9 @@
 <table>
 <thead><tr><th>ID</th><th>Type</th><th>Status</th><th>Evidence</th><th>Impact</th><th>Next Action</th></tr></thead>
 <tbody>
-<tr><td>B-001</td><td>blocker</td><td class="status-cell status-blocked"><span>open</span></td><td></td><td></td><td></td></tr>
-<tr><td>R-001</td><td>risk</td><td class="status-cell status-blocked"><span>open</span></td><td></td><td></td><td></td></tr>
+<tr><td>B-001</td><td>blocker</td><td class="status-cell status-blocked"><span>open</span></td><td>IAM permission paths /ivts/requests, /ivts/vehicles, /ivts/cctvs, /ivts/tracking not yet seeded</td><td>All new routes return 403 until seeded</td><td>Dev/Ops: seed permission paths in IAM</td></tr>
+<tr><td>R-001</td><td>risk</td><td class="status-cell status-blocked"><span>open</span></td><td>Vehicle _id type (ObjectId vs Number) — confirm with existing DB data</td><td>Id type mismatch on queries</td><td>Dev: inspect existing vehicles collection</td></tr>
+<tr><td>R-002</td><td>risk</td><td class="status-cell status-blocked"><span>open</span></td><td>MEDIAMTX_BASE_URL env var not confirmed set</td><td>Stream URLs fall back to localhost</td><td>Ops: set MEDIAMTX_BASE_URL in .env files</td></tr>
 </tbody>
 </table>
 </div>
@@ -220,7 +231,7 @@
     </section>
     <section class="content">
 <h2 id="t6-decision">T6. Decision</h2>
-<p>Current project progress is not known until source discovery and verification are completed.</p>
+<p>Backend models, services, and routes are implemented and syntax-verified. System progress updated from 25% to 45% based on implementation gate completion. Live smoke tests blocked by IAM permission seeding requirement (B-001).</p>
     </section>
   </main>
   <script>
