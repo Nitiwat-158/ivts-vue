@@ -9,6 +9,7 @@ const Schema = mongoose.Schema;
  * PDPA: citizen_id is sensitive — access is permission-gated at the route level.
  */
 const ownerVehicleSchema = new Schema({
+  // Changed type from Schema.Types.ObjectId to Number to reference the sequential 'vehicle_numeric_id'
   vehicle_id: { type: Number, ref: 'Vehicle', required: true, index: true },
   owner_name: { type: String, trim: true, default: null },
   owner_surname: { type: String, trim: true, default: null },

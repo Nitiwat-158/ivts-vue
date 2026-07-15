@@ -277,7 +277,7 @@ async function _syncVehicleOnApproval(requestDoc, now) {
   const vi = requestDoc.vehicle_info || {};
   const oi = requestDoc.owner_info || {};
 
-  if (!vi.license_plate) return; // nothing to sync without a plate
+  if (!vi.license_plate) return; // Nothing to sync without a plate
 
   // Upsert vehicle by license_plate + province_license + user_id
   const vehicleFilter = {
@@ -303,13 +303,14 @@ async function _syncVehicleOnApproval(requestDoc, now) {
     runValidators: true
   });
 
-  if (!vehicleDoc || !vehicleDoc._id) return;
+  // Ensure the vehicle document exists and contains the generated sequential numeric ID
+  if (!vehicleDoc || !vehicleDoc.vehicle_numeric_id) return;
 
-  // Upsert owner_vehicle by vehicle_id
-  const ownerFilter = { vehicle_id: vehicleDoc._id };
+  // Upsert owner_vehicle by using the sequential vehicle_numeric_id
+  const ownerFilter = { vehicle_id: vehicleDoc.vehicle_numeric_id };
   const ownerUpdate = {
     $set: {
-      vehicle_id: vehicleDoc._id,
+      vehicle_id: vehicleDoc.vehicle_numeric_id, // Safely assign the sequential Number to meet schema requirements
       owner_name: oi.name || null,
       owner_surname: oi.surname || null,
       citizen_id: oi.citizen_id || null,
