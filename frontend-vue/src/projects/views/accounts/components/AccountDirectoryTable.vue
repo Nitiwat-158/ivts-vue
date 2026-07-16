@@ -334,6 +334,19 @@ export default {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 252, 0.98));
 }
 
+.account-page__mode-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.account-table-card__mode {
+  color: #5f6f86;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
 .account-table-card__header {
   display: flex;
   flex-wrap: wrap;

@@ -134,6 +134,9 @@ export default {
     this.loadData()
   },
   methods: {
+    isManageMode (mode) {
+      return mode === 'manage'
+    },
     async loadData (options = {}) {
       try {
         await this.$store.dispatch('accounts/explorer', {

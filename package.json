@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "js-yaml": "^5.2.1"
-  },
-  "devDependencies": {
-    "raw-loader": "^4.0.2"
-  }
-}

@@ -38,6 +38,7 @@
     "release": "npm-run-all clearCache lint build test:unit test:e2e"
   },
   "dependencies": {
+    "!!raw-loader!": "file:../../../../../assets/mediamtx.yml",
     "@bachdgvn/vue-otp-input": "^1.0.8",
     "@ckeditor/ckeditor5-build-classic": "^41.4.2",
     "@coreui/coreui-pro": "^3.1.1",
