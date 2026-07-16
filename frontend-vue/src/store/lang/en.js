@@ -267,6 +267,11 @@ const en = {
                 remove: "Remove",
                 invite: "Invite"
             },
+            modes: {
+                viewUsers: "View Users",
+                manageUsers: "Manage Users",
+                userContacts: "User Contacts"
+            },
             stats: {
                 total: {
                     label: "Total Accounts",
