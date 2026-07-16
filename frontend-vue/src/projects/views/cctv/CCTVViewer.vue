@@ -45,9 +45,7 @@
 <script>
 import CameraList from '@/projects/components/cctv/CameraList.vue'
 import CameraView from '@/projects/components/cctv/CameraView.vue'
-import yaml from 'js-yaml'
-
-///import mediamtxConfigText from '!!raw-loader!@/assets/mediamtx.yml'
+import api from '@/service/api'
 
 export default {
   name: 'CCTVViewer',
@@ -58,52 +56,49 @@ export default {
   data() {
     return {
       cameras: [],
-      selectedCamera: null
+      selectedCamera: null,
+      loading: false,
+      errorMessage: ''
     }
   },
   created() {
-    // โหลดข้อมูลกล้องทันทีที่เปิดหน้า
-    this.loadCamerasFromYaml()
+    this.loadCamerasFromApi()
   },
   methods: {
-    loadCamerasFromYaml() {
+    async loadCamerasFromApi() {
+      this.loading = true
+      this.errorMessage = ''
       try {
-        // แปลงข้อความ YAML เป็น JavaScript Object
-        const config = yaml.load(mediamtxConfigText)
+        const response = await api.ivtsCctvs('list')
+        const data = response && response.data ? response.data.data : null
+        const rows = data && Array.isArray(data.rows) ? data.rows : []
 
-        if (config && config.paths) {
-          // ดึงรายชื่อกล้องจาก key 'paths'
-          const loadedCameras = Object.keys(config.paths).map((pathName) => {
-            return {
-              id: `CAM-${pathName.toUpperCase()}`,
-              name: `Node: ${pathName.toUpperCase()}`,
-              location: 'Campus Network Node',
-              status: 'online', // กำหนดสถานะตั้งต้นเป็น online
-              // สร้าง URL สำหรับ HLS สตรีม (พอร์ตเริ่มต้นคือ 8888)
-              streamUrl: `http://localhost:8888/${pathName}/index.m3u8`
-            }
-          })
+        this.cameras = rows.map((camera) => ({
+          id: camera._id || camera.id || camera.mediamtx_path,
+          name: camera.camera_name || `Camera ${camera.mediamtx_path || ''}`,
+          location: (camera.location && camera.location.description) || 'Campus Network Node',
+          status: camera.status === 'active' ? 'online' : 'offline',
+          mediamtx_path: camera.mediamtx_path,
+          source_rtsp_url: camera.source_rtsp_url,
+          stream_urls: camera.stream_urls || {}
+        }))
 
-          this.cameras = loadedCameras
-          // เลือกกล้องตัวแรกเป็นค่าเริ่มต้น
-          this.selectedCamera = this.cameras.length > 0 ? this.cameras[0] : null
-        }
+        this.selectedCamera = this.cameras.length > 0 ? this.cameras[0] : null
       } catch (error) {
-        console.error('ไม่สามารถอ่านหรือแปลงไฟล์ mediamtx.yml ได้:', error)
+        console.error('Failed to load CCTV cameras:', error)
+        this.errorMessage = 'ไม่สามารถโหลดรายการกล้องจากเซิร์ฟเวอร์ได้'
+      } finally {
+        this.loading = false
       }
     },
     selectCamera(camera) {
       this.selectedCamera = camera
     },
-    refreshAll() {
-      // โหลดข้อมูลกล้องใหม่
-      this.loadCamerasFromYaml()
-      
+    async refreshAll() {
       const current = this.selectedCamera
+      await this.loadCamerasFromApi()
       this.selectedCamera = null
-      
       this.$nextTick(() => {
-        // พยายามเลือกกล้องตัวเดิมกลับมาหลังจากการรีเฟรช
         if (current) {
           const found = this.cameras.find(c => c.id === current.id)
           this.selectedCamera = found || (this.cameras.length > 0 ? this.cameras[0] : null)

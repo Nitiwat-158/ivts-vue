@@ -30,6 +30,7 @@
     "bootstrap:permissions:local": "node -r dotenv/config scripts/bootstrap-ivts-permissions.js dotenv_config_path=.env.local",
     "bootstrap:iam": "node -r dotenv/config scripts/bootstrap-iam-permissions.js",
     "bootstrap:iam:local": "node -r dotenv/config scripts/bootstrap-iam-permissions.js dotenv_config_path=.env.local",
+    "seed:cctvs": "node -r dotenv/config scripts/seed-cctvs.js dotenv_config_path=.env.local",
     "template:check": "node -c config/project.config.js && node -c scripts/bootstrap-iam-permissions.js"
   },
   "keywords": [],

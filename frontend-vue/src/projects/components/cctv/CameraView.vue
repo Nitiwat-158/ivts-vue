@@ -48,8 +48,8 @@
 
           <img
             v-else-if="showImagePlayer"
-            :key="timestam"
-            :src="buildStreamUrl(camera.streamUrl)"
+            :key="timestamp"
+            :src="buildStreamUrl(this.streamSourceUrl)"
             class="img-fluid stream-image"
             alt="CCTV Stream"
             @load="onLoaded"
@@ -115,19 +115,25 @@ export default {
       if (!this.camera) return 'secondary'
       return {
         online: 'success',
+        active: 'success',
         offline: 'danger',
+        inactive: 'danger',
         maintenance: 'warning'
       }[this.camera.status] || 'secondary'
     },
+    streamSourceUrl() {
+      if (!this.camera || !this.camera.stream_urls) return null
+      return this.camera.stream_urls.hls_proxy || this.camera.stream_urls.hls || null
+    },
     streamSourceType() {
-      if (!this.camera || !this.camera.streamUrl) {
+      if (!this.streamSourceUrl) {
         return 'none'
       }
-      const url = this.camera.streamUrl.trim().toLowerCase()
+      const url = String(this.streamSourceUrl).trim().toLowerCase()
       if (url.startsWith('rtsp://')) {
         return 'rtsp'
       }
-      if (url.includes('.m3u8') || url.match(/\.(mp4|webm|ogg)(\?|$)/i)) {
+      if (url.includes('/stream/hls') || url.includes('.m3u8') || url.match(/\.(mp4|webm|ogg)(\?|$)/i)) {
         return 'video'
       }
       return 'image'
@@ -176,14 +182,14 @@ export default {
     },
     initHls() {
       this.destroyHls()
-      if (!this.showVideoPlayer || !this.camera || !this.camera.streamUrl) {
+      if (!this.showVideoPlayer || !this.camera || !this.streamSourceUrl) {
         setTimeout(() => { this.loading = false }, 600)
         return
       }
       
       this.$nextTick(() => {
         const video = this.$refs.videoPlayer
-        const streamUrl = this.buildStreamUrl(this.camera.streamUrl)
+        const streamUrl = this.buildStreamUrl(this.streamSourceUrl)
         
         // Fallback manual timeout just in case hls.js hangs without firing events
         const manualTimeout = setTimeout(() => {

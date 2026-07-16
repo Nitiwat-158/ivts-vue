@@ -233,6 +233,14 @@ router.get('/cctvs/:id', canViewCctvs, async function (request, response) {
   }
 });
 
+router.get('/cctvs/:id/stream/hls', canViewCctvs, async function (request, response) {
+  try {
+    await cctvService.proxyHlsStream(request.params.id, request, response);
+  } catch (error) {
+    return fail(response, error);
+  }
+});
+
 // ═════════════════════════════════════════════════════════════════════════════
 // NEW: Tracking  (GET /tracking/logs, GET /tracking/history)
 // Mount: /api/v1/ivts/tracking/*
