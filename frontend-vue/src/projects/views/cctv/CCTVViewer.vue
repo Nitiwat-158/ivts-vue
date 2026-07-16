@@ -47,7 +47,7 @@ import CameraList from '@/projects/components/cctv/CameraList.vue'
 import CameraView from '@/projects/components/cctv/CameraView.vue'
 import yaml from 'js-yaml'
 
-import mediamtxConfigText from '!!raw-loader!@/assets/mediamtx.yml'
+///import mediamtxConfigText from '!!raw-loader!@/assets/mediamtx.yml'
 
 export default {
   name: 'CCTVViewer',

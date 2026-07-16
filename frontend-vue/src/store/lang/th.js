@@ -249,6 +249,11 @@ const th = {
                 remove: "ลบ",
                 invite: "เชิญ"
             },
+            modes: {
+                viewUsers: "ดูผู้ใช้",
+                manageUsers: "จัดการผู้ใช้",
+                userContacts: "ข้อมูลติดต่อผู้ใช้"
+            },
             stats: {
                 total: {
                     label: "บัญชีทั้งหมด",

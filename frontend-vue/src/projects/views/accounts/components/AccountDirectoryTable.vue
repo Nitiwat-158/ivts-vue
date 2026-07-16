@@ -7,6 +7,7 @@
             <CIcon name="cil-contact" class="mr-2 account-heading-icon" />
             <span>{{ $t('accounts.directory.title') }}</span>
           </h5>
+          <div class="account-table-card__mode">{{ modeLabel }}</div>
           <div class="text-muted small">{{ resultSummary }}</div>
         </div>
         <div class="account-table-card__tools">
@@ -27,7 +28,7 @@
           </select>
         </div>
         <CButton
-          v-if="allowAction"
+          v-if="showInviteButton"
           color="success"
           variant="outline"
           class="account-invite-btn"
@@ -74,6 +75,26 @@
             <span class="account-chip">{{ item.groupLabel }}</span>
           </td>
         </template>
+        <template #status="{ item }">
+          <td>
+            <span class="account-status">{{ item.statusLabel }}</span>
+          </td>
+        </template>
+        <template #email="{ item }">
+          <td>
+            <div class="account-contact-cell">{{ item.email }}</div>
+          </td>
+        </template>
+        <template #msisdn="{ item }">
+          <td>
+            <div class="account-contact-cell">{{ item.msisdn }}</div>
+          </td>
+        </template>
+        <template #lineId="{ item }">
+          <td>
+            <div class="account-contact-cell">{{ item.lineId }}</div>
+          </td>
+        </template>
         <template #lastLogin="{ item }">
           <td>
             <div class="account-login-meta">{{ item.lastLoginLabel }}</div>
@@ -82,7 +103,7 @@
         <template #actions="{ item }">
           <td class="text-center">
             <CButton
-              v-if="allowAction"
+              v-if="showAccessAction"
               size="sm"
               color="dark"
               variant="outline"
@@ -108,7 +129,7 @@
               <CIcon name="cil-pencil" />
             </CButton>
             <CButton
-              v-if="allowAction"
+              v-if="showRemoveAction"
               size="sm"
               color="danger"
               variant="outline"
@@ -156,21 +177,15 @@ export default {
       type: Object,
       default: () => ({ page: 1, limit: 25, total: 0, totalPages: 1, search: '' })
     },
-    loading: { type: Boolean, default: false }
+    loading: { type: Boolean, default: false },
+    mode: { type: String, default: 'view' }
   },
   data () {
     return {
       localSearch: '',
       searchTimer: null,
       pageSizeOptions: [25, 50, 100],
-      brokenImageIds: {},
-      fields: [
-        { key: 'code', label: 'Code' },
-        { key: 'fullName', label: 'Full Name' },
-        { key: 'groupLabel', label: 'Group' },
-        { key: 'lastLogin', label: 'Last Login' },
-        { key: 'actions', label: '#', _style: 'width: 320px; text-align:center;' }
-      ]
+      brokenImageIds: {}
     }
   },
   watch: {
@@ -185,6 +200,29 @@ export default {
     }
   },
   computed: {
+    fields () {
+      if (this.mode === 'contacts') {
+        return [
+          { key: 'fullName', label: 'Full Name' },
+          { key: 'email', label: 'Email' },
+          { key: 'msisdn', label: 'Phone' },
+          { key: 'lineId', label: 'Line ID' },
+          { key: 'actions', label: '#', _style: 'width: 280px; text-align:center;' }
+        ]
+      }
+
+      const fields = [
+        { key: 'code', label: 'Code' },
+        { key: 'fullName', label: 'Full Name' },
+        { key: 'groupLabel', label: 'Group' }
+      ]
+      if (this.mode === 'manage') {
+        fields.push({ key: 'status', label: 'Status' })
+      }
+      fields.push({ key: 'lastLogin', label: 'Last Login' })
+      fields.push({ key: 'actions', label: '#', _style: 'width: 320px; text-align:center;' })
+      return fields
+    },
     currentLimit () {
       return Number(this.pagination && this.pagination.limit ? this.pagination.limit : 25)
     },
@@ -202,6 +240,15 @@ export default {
     totalItems () {
       return Number(this.pagination && this.pagination.total ? this.pagination.total : this.items.length) || 0
     },
+    showInviteButton () {
+      return this.mode !== 'contacts' && this.allowAction
+    },
+    showAccessAction () {
+      return this.mode !== 'contacts' && this.allowAction
+    },
+    showRemoveAction () {
+      return this.mode === 'manage' && this.allowAction
+    },
     totalPages () {
       return Math.max(Number(this.pagination && this.pagination.totalPages ? this.pagination.totalPages : 1) || 1, 1)
     },
@@ -212,6 +259,16 @@ export default {
     rangeEnd () {
       if (!this.totalItems || this.items.length === 0) return 0
       return Math.min(this.rangeStart + this.items.length - 1, this.totalItems)
+    },
+    modeLabel () {
+      switch (this.mode) {
+        case 'manage':
+          return this.$t('accounts.directory.modes.manageUsers')
+        case 'contacts':
+          return this.$t('accounts.directory.modes.userContacts')
+        default:
+          return this.$t('accounts.directory.modes.viewUsers')
+      }
     },
     resultSummary () {
       return this.$t('accounts.directory.table.resultSummary', {
@@ -275,6 +332,19 @@ export default {
   border-radius: 1.5rem;
   box-shadow: 0 14px 30px rgba(44, 52, 71, 0.06);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 252, 0.98));
+}
+
+.account-page__mode-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.account-table-card__mode {
+  color: #5f6f86;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
 }
 
 .account-table-card__header {

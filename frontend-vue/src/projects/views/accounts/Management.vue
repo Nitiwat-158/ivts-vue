@@ -9,10 +9,40 @@
       @refresh="loadData"
     />
 
+    <div class="account-page__mode-switcher">
+      <CButton
+        :color="activeMode === 'view' ? 'primary' : 'secondary'"
+        variant="outline"
+        size="sm"
+        class="mr-2"
+        @click="activeMode = 'view'"
+      >
+        {{ $t('accounts.directory.modes.viewUsers') }}
+      </CButton>
+      <CButton
+        :color="activeMode === 'manage' ? 'primary' : 'secondary'"
+        variant="outline"
+        size="sm"
+        class="mr-2"
+        @click="activeMode = 'manage'"
+      >
+        {{ $t('accounts.directory.modes.manageUsers') }}
+      </CButton>
+      <CButton
+        :color="activeMode === 'contacts' ? 'primary' : 'secondary'"
+        variant="outline"
+        size="sm"
+        @click="activeMode = 'contacts'"
+      >
+        {{ $t('accounts.directory.modes.userContacts') }}
+      </CButton>
+    </div>
+
     <AccountDirectoryTable
       :items="items"
       :pagination="pagination"
       :loading="loading"
+      :mode="activeMode"
       @invite="openInviteModal"
       @edit="openEditModal"
       @access="openPermissionsModal"
@@ -66,6 +96,7 @@ export default {
   components: { AppSectionHero, AccountDirectoryTable, InviteAccountModal, EditAccountModal, AccountPermissionsModal },
   data () {
     return {
+      activeMode: 'view',
       showEditModal: false,
       showPermissionsModal: false,
       showInviteModal: false,
@@ -103,6 +134,9 @@ export default {
     this.loadData()
   },
   methods: {
+    isManageMode (mode) {
+      return mode === 'manage'
+    },
     async loadData (options = {}) {
       try {
         await this.$store.dispatch('accounts/explorer', {
@@ -221,5 +255,15 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.account-page {}
+.account-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.account-page__mode-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
 </style>
