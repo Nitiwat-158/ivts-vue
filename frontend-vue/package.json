@@ -38,7 +38,6 @@
     "release": "npm-run-all clearCache lint build test:unit test:e2e"
   },
   "dependencies": {
-    "!!raw-loader!": "file:../../../../../assets/mediamtx.yml",
     "@bachdgvn/vue-otp-input": "^1.0.8",
     "@ckeditor/ckeditor5-build-classic": "^41.4.2",
     "@coreui/coreui-pro": "^3.1.1",
@@ -52,6 +51,7 @@
     "hls.js": "^1.6.16",
     "html2pdf.js": "^0.10.3",
     "idb": "^8.0.3",
+    "leaflet": "^1.9.4",
     "moment": "^2.29.4",
     "quill": "~2.0.3",
     "sass": "^1.69.5",
