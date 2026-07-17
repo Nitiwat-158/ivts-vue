@@ -1,65 +1,178 @@
 <template>
   <div class="dashboard-page">
-    <CRow>
-      <CCol lg="8" class="mb-4">
-        <CCard class="h-100 dashboard-card">
-          <CCardBody>
-            <div class="dashboard-kicker">{{ $t('ivtsDashboard.kicker') }}</div>
-            <h2 class="dashboard-title">{{ $t('ivtsDashboard.title') }}</h2>
-            <p class="dashboard-text">{{ $t('ivtsDashboard.subtitle') }}</p>
+    <!-- 1) Top Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+      <div class="d-flex align-items-center mb-3 mb-md-0">
+        <h3 class="mb-0 mr-4 font-weight-bold">Dashboard</h3>
+        <div class="top-links d-none d-md-flex">
+          <a href="#" @click.prevent class="mr-4">ทะเบียนรถ</a>
+          <a href="#" @click.prevent class="mr-4">จัดการกล้อง</a>
+          <a href="#" @click.prevent class="mr-4">ติดตามเส้นทาง</a>
+          <a href="#" @click.prevent>รายงาน</a>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <CInput
+          placeholder="ค้นหาทะเบียนรถหรือเจ้าของ"
+          class="mb-0 mr-3"
+          style="width: 250px;"
+        />
+        <CSelect
+          :options="['วันนี้', 'สัปดาห์นี้', 'กำหนดเอง']"
+          class="mb-0"
+          style="width: 140px;"
+        />
+      </div>
+    </div>
 
-            <div class="dashboard-actions">
-              <router-link class="btn btn-primary" to="/ivts/registry">
-                {{ $t('ivtsDashboard.actions.openRegistry') }}
-              </router-link>
+    <!-- 2) Main Section -->
+    <CRow class="mb-4">
+      <!-- Map Column -->
+      <CCol lg="7" class="mb-4 mb-lg-0">
+        <CCard class="h-100 mb-0">
+          <CCardHeader>
+            <strong style="font-size: 1.1rem;">แผนที่ตำแหน่งกล้อง</strong>
+          </CCardHeader>
+          <CCardBody class="d-flex flex-column p-0">
+            <div id="map-container" class="flex-grow-1" style="min-height: 400px; z-index: 1;"></div>
+            <div class="map-legend p-3 d-flex align-items-center text-muted border-top">
+              <span class="mr-4 d-flex align-items-center">
+                <span class="legend-dot bg-success"></span> กล้องปกติ (Active)
+              </span>
+              <span class="d-flex align-items-center">
+                <span class="legend-dot bg-danger"></span> ขัดข้อง (Inactive)
+              </span>
             </div>
           </CCardBody>
         </CCard>
       </CCol>
 
-      <CCol lg="4" class="mb-4">
-        <CCard class="h-100 dashboard-card">
-          <CCardBody>
-            <div class="dashboard-kicker">{{ $t('ivtsDashboard.scopeTitle') }}</div>
-            <h4 class="dashboard-subtitle">{{ $t('ivtsDashboard.scopeHeading') }}</h4>
-            <ul class="dashboard-list">
-              <li>{{ $t('ivtsDashboard.scopeItems.signIn') }}</li>
-              <li>{{ $t('ivtsDashboard.scopeItems.delegatedPermission') }}</li>
-              <li>{{ $t('ivtsDashboard.scopeItems.accountDirectory') }}</li>
-              <li>{{ $t('ivtsDashboard.scopeItems.ivtsRegistry') }}</li>
-            </ul>
+      <!-- Alerts Column -->
+      <CCol lg="5">
+        <CCard class="h-100 mb-0">
+          <CCardHeader>
+            <strong style="font-size: 1.1rem;">แจ้งเตือน (Alerts)</strong>
+          </CCardHeader>
+          <CCardBody class="p-0 overflow-auto" style="max-height: 480px;">
+            <CListGroup flush>
+              <CListGroupItem 
+                v-for="(alert, index) in alerts" 
+                :key="index"
+                action
+                class="d-flex justify-content-between align-items-start alert-item border-bottom"
+                @click="onAlertClick(alert)"
+              >
+                <div class="d-flex w-100 py-1">
+                  <div class="alert-icon mr-3 mt-1">
+                    <div class="alert-circle" :class="alert.type === 'offline' ? 'bg-danger' : 'bg-warning'"></div>
+                  </div>
+                  <div>
+                    <h6 class="mb-1 font-weight-bold" :class="alert.type === 'offline' ? 'text-danger' : 'text-warning'">
+                      {{ alert.type === 'offline' ? 'กล้อง Offline' : 'พบรถไม่มีทะเบียนในระบบ' }}
+                    </h6>
+                    <p class="mb-1 text-dark" style="font-size: 0.9rem;">
+                      <span class="font-weight-bold">{{ alert.cameraId }}</span>
+                      <template v-if="alert.type === 'offline'">
+                        <span class="text-muted ml-1">— ไม่มีสัญญาณ {{ alert.duration }}</span>
+                      </template>
+                    </p>
+                    <small class="text-muted">{{ alert.time }}</small>
+                  </div>
+                </div>
+              </CListGroupItem>
+            </CListGroup>
           </CCardBody>
         </CCard>
       </CCol>
     </CRow>
 
+    <!-- Divider -->
+    <hr class="mb-4" style="border-top: 1px solid #e2e8f0;" />
+
+    <!-- 3) Stats Section -->
+    <CRow class="mb-4">
+      <!-- Small Cards -->
+      <CCol sm="6" lg="3" class="mb-3 mb-lg-0">
+        <CCard class="h-100 mb-0 stat-card">
+          <CCardBody class="text-center d-flex flex-column justify-content-center">
+            <div class="text-muted font-weight-bold small mb-2">จำนวนกล้องทั้งหมด</div>
+            <h2 class="mb-0 font-weight-bold text-dark">42</h2>
+          </CCardBody>
+        </CCard>
+      </CCol>
+      <CCol sm="6" lg="3" class="mb-3 mb-lg-0">
+        <CCard class="h-100 mb-0 stat-card">
+          <CCardBody class="text-center d-flex flex-column justify-content-center">
+            <div class="text-muted font-weight-bold small mb-2">Active / Inactive</div>
+            <h2 class="mb-0 font-weight-bold">
+              <span class="text-success">38</span> 
+              <span class="text-muted mx-1">/</span> 
+              <span class="text-danger">4</span>
+            </h2>
+          </CCardBody>
+        </CCard>
+      </CCol>
+      <CCol sm="6" lg="3" class="mb-3 mb-lg-0">
+        <CCard class="h-100 mb-0 stat-card">
+          <CCardBody class="text-center d-flex flex-column justify-content-center">
+            <div class="text-muted font-weight-bold small mb-2">จำนวนรถวันนี้</div>
+            <h2 class="mb-1 font-weight-bold text-dark">1,284</h2>
+            <div class="small font-weight-bold text-success">▲ 12% เทียบเมื่อวาน</div>
+          </CCardBody>
+        </CCard>
+      </CCol>
+      <CCol sm="6" lg="3" class="mb-3 mb-lg-0">
+        <CCard class="h-100 mb-0 stat-card">
+          <CCardBody class="d-flex flex-column justify-content-center">
+            <div class="text-muted font-weight-bold small mb-2 text-center">จำนวนรถรายชั่วโมง (Mock)</div>
+            <div class="mock-chart-container mt-2">
+              <svg viewBox="0 0 100 35" class="w-100" style="height: 40px; overflow: visible;">
+                <polyline 
+                  fill="none" 
+                  stroke="#321fdb" 
+                  stroke-width="2" 
+                  points="0,30 15,15 30,20 45,5 60,10 75,0 90,15 100,5" 
+                />
+                <circle cx="0" cy="30" r="2.5" fill="#321fdb"/>
+                <circle cx="15" cy="15" r="2.5" fill="#321fdb"/>
+                <circle cx="30" cy="20" r="2.5" fill="#321fdb"/>
+                <circle cx="45" cy="5" r="2.5" fill="#321fdb"/>
+                <circle cx="60" cy="10" r="2.5" fill="#321fdb"/>
+                <circle cx="75" cy="0" r="2.5" fill="#321fdb"/>
+                <circle cx="90" cy="15" r="2.5" fill="#321fdb"/>
+                <circle cx="100" cy="5" r="2.5" fill="#321fdb"/>
+              </svg>
+            </div>
+          </CCardBody>
+        </CCard>
+      </CCol>
+    </CRow>
+
+    <!-- Top Locations -->
     <CRow>
-      <CCol md="4" class="mb-4">
-        <CCard class="dashboard-card h-100">
-          <CCardBody>
-            <div class="dashboard-stat__label">{{ $t('ivtsDashboard.cards.identity.label') }}</div>
-            <div class="dashboard-stat__value">{{ $t('ivtsDashboard.cards.identity.value') }}</div>
-            <div class="dashboard-stat__hint">{{ $t('ivtsDashboard.cards.identity.hint') }}</div>
-          </CCardBody>
-        </CCard>
-      </CCol>
-
-      <CCol md="4" class="mb-4">
-        <CCard class="dashboard-card h-100">
-          <CCardBody>
-            <div class="dashboard-stat__label">{{ $t('ivtsDashboard.cards.apiFlow.label') }}</div>
-            <div class="dashboard-stat__value">{{ $t('ivtsDashboard.cards.apiFlow.value') }}</div>
-            <div class="dashboard-stat__hint">{{ $t('ivtsDashboard.cards.apiFlow.hint') }}</div>
-          </CCardBody>
-        </CCard>
-      </CCol>
-
-      <CCol md="4" class="mb-4">
-        <CCard class="dashboard-card h-100">
-          <CCardBody>
-            <div class="dashboard-stat__label">{{ $t('ivtsDashboard.cards.owner.label') }}</div>
-            <div class="dashboard-stat__value">{{ $t('ivtsDashboard.cards.owner.value') }}</div>
-            <div class="dashboard-stat__hint">{{ $t('ivtsDashboard.cards.owner.hint') }}</div>
+      <CCol>
+        <CCard class="mb-0 shadow-sm border-0 bg-light">
+          <CCardBody class="py-3">
+            <div class="d-flex align-items-center flex-wrap">
+              <strong class="mr-4 text-dark mb-2 mb-md-0">Top Locations วันนี้:</strong>
+              <div class="d-flex flex-wrap flex-grow-1 justify-content-around">
+                <div class="px-3 d-flex align-items-center mt-2 mt-md-0">
+                  <span class="badge badge-primary mr-2" style="font-size: 0.9rem;">#1</span>
+                  <span class="font-weight-bold mr-2 text-dark">CAM01_Gate_in</span>
+                  <span class="text-muted">— 450 คัน</span>
+                </div>
+                <div class="px-3 d-flex align-items-center mt-2 mt-md-0">
+                  <span class="badge badge-secondary mr-2" style="font-size: 0.9rem;">#2</span>
+                  <span class="font-weight-bold mr-2 text-dark">CAM05_MainRoad</span>
+                  <span class="text-muted">— 380 คัน</span>
+                </div>
+                <div class="px-3 d-flex align-items-center mt-2 mt-md-0">
+                  <span class="badge badge-secondary mr-2" style="font-size: 0.9rem;">#3</span>
+                  <span class="font-weight-bold mr-2 text-dark">CAM02_ParkingA</span>
+                  <span class="text-muted">— 210 คัน</span>
+                </div>
+              </div>
+            </div>
           </CCardBody>
         </CCard>
       </CCol>
@@ -68,72 +181,145 @@
 </template>
 
 <script>
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
 export default {
-  name: 'Dashboard'
+  name: 'Dashboard',
+  data() {
+    return {
+      map: null,
+      cameras: [
+        { id: 'CAM01_Gate_in', status: 'active', lat: 20.045121, lng: 99.889515 },
+        { id: 'CAM02_Gate_in', status: 'active', lat: 20.045117, lng: 99.889724 },
+        { id: 'CAM03_M_Tjunction', status: 'active', lat: 20.045144, lng: 99.891147 },
+        { id: 'CAM04_M_landao', status: 'active', lat: 20.045144, lng: 99.891147 },
+        { id: 'CAM05_Mgemstaion_landao', status: 'active', lat: 20.045634, lng: 99.891312 },
+        { id: 'CAM06_E1_Parking', status: 'inactive', lat: 20.045749, lng: 99.892071 },
+        { id: 'CAM07_E3_Parking', status: 'inactive', lat: 20.045764, lng: 99.892975 }
+      ],
+      alerts: [
+        { type: 'offline', cameraId: 'CAM07_E3_Parking', duration: '2 ชั่วโมง', time: '14:00' },
+        { type: 'unregistered', cameraId: 'CAM01_Gate_in', time: '15:45' },
+        { type: 'unregistered', cameraId: 'CAM05_Mgemstation_landao', time: '15:30' },
+        { type: 'offline', cameraId: 'CAM06_E1_Parking', duration: '5 ชั่วโมง', time: '11:00' },
+        { type: 'unregistered', cameraId: 'CAM02_Gate_in', time: '10:15' }
+      ]
+    }
+  },
+  mounted() {
+    this.initMap();
+  },
+  beforeDestroy() {
+    if (this.map) {
+      this.map.remove();
+    }
+  },
+  methods: {
+    initMap() {
+      // ตั้งค่าแผนที่เริ่มต้นที่เชียงราย (Dummy location)
+      this.map = L.map('map-container').setView([20.04489, 99.878202], 13);
+      
+      // ใช้ OpenStreetMap (ฟรี ไม่ใช้ API key)
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(this.map);
+
+      // วาด Marker จาก Dummy Data
+      this.cameras.forEach(cam => {
+        const iconHtml = `<div class="camera-dot ${cam.status === 'active' ? 'bg-success' : 'bg-danger'}"></div>`;
+        const icon = L.divIcon({
+          className: 'custom-leaflet-icon',
+          html: iconHtml,
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
+        });
+
+        const marker = L.marker([cam.lat, cam.lng], { icon }).addTo(this.map);
+        marker.on('click', () => {
+          this.onCameraClick(cam);
+        });
+        marker.bindTooltip(cam.id);
+      });
+    },
+    onCameraClick(cam) {
+      window.alert(`จะนำไปหน้าดูกล้องวงจรปิด: ${cam.id}`);
+    },
+    onAlertClick(alert) {
+      console.log('Clicked alert:', alert);
+      window.alert(`ตรวจสอบเหตุการณ์: ${alert.cameraId}`);
+    }
+  }
 }
 </script>
 
 <style scoped>
 .dashboard-page {
-  padding: 0.25rem;
+  padding: 1rem 0.5rem;
 }
 
-.dashboard-card {
-  border: 0;
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+.top-links a {
+  color: #4f5d73;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+}
+.top-links a:hover {
+  color: #321fdb;
 }
 
-.dashboard-kicker {
-  margin-bottom: 0.75rem;
-  color: #64748b;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.camera-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+.camera-dot:hover {
+  transform: scale(1.3);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+  z-index: 10;
 }
 
-.dashboard-title {
-  margin-bottom: 0.75rem;
-  color: #0f172a;
-  font-size: 2rem;
-  font-weight: 700;
+::v-deep .custom-leaflet-icon {
+  background: transparent;
+  border: none;
 }
 
-.dashboard-subtitle {
-  margin-bottom: 0.75rem;
-  color: #0f172a;
-  font-weight: 700;
+.legend-dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  margin-right: 6px;
 }
 
-.dashboard-text,
-.dashboard-stat__hint {
-  color: #475569;
-  line-height: 1.6;
+.alert-item {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.alert-item:hover {
+  background-color: #f8f9fa;
 }
 
-.dashboard-actions {
-  margin-top: 1.5rem;
+.alert-circle {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
 }
 
-.dashboard-list {
-  margin: 0;
-  padding-left: 1.25rem;
-  color: #334155;
-  line-height: 1.8;
+.stat-card {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  border: 1px solid #e2e8f0;
 }
 
-.dashboard-stat__label {
-  color: #64748b;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.text-warning {
+  color: #f9b115 !important;
 }
-
-.dashboard-stat__value {
-  margin: 0.5rem 0;
-  color: #0f172a;
-  font-size: 1.5rem;
-  font-weight: 700;
+.bg-warning {
+  background-color: #f9b115 !important;
 }
 </style>
