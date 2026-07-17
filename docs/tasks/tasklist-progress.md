@@ -55,6 +55,12 @@ Adjust weights per project, but keep them evidence-backed.
 | ivts-BE-007 | Live smoke test | Backend | Dev | ivts-BE-006 | pending | 0 | not run | — | not run | B-001 IAM seed required | POST /requests/submit, GET /cctvs/:id | smoke evidence |
 | ivts-BE-008 | Seed IAM permission paths | Ops | Dev | ivts-BE-006 | pending | 0 | not started | — | not run | requires IAM admin access | Seed /ivts/requests, /ivts/vehicles, /ivts/cctvs, /ivts/tracking | IAM permission records |
 | ivts-BE-009 | Update PRD-ivts.md | Product | Dev | ivts-BE-006 | pending | 0 | not started | — | — | none | Update PRD with new collections and API surface | PRD update |
+| ivts-UM-001 | Source Discovery | Backend | AI | none | done | 100 | Code files and database model identified | [iam-admin-client.js](file:///g:/MFU/Project/ivts-vue/ivts-vue/backend-node/server/Project/security/service/iam-admin-client.js) | — | none | — | Tasklist created |
+| ivts-UM-002 | Modify forwardAccountsList | Backend | AI | ivts-UM-001 | pending | 0 | Not started | [user.model.js](file:///g:/MFU/Project/ivts-vue/ivts-vue/backend-node/server/Project/ivts/models/user.model.js) | — | none | Update forwardAccountsList logic to query local database | Modified code |
+| ivts-UM-003 | Run test:all | Backend | AI | ivts-UM-002 | pending | 0 | Not started | package.json | — | none | Run npm test suite | Test output |
+| ivts-UM-004 | Update tasklist progress | Ops | AI | ivts-UM-003 | pending | 0 | Not started | docs/tasks/tasklist-progress.md | — | none | Run node scripts/render-tasklist-progress-html.js . | HTML output |
+| ivts-UM-005 | Create change record T1-T20 | Ops | AI | ivts-UM-004 | pending | 0 | Not started | docs/changes/2026-07-17-user-management-db.md | — | none | Save change note | T1-T20 Markdown file |
+
 
 ## T4. Verification Log
 

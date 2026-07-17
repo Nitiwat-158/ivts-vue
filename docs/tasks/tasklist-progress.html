@@ -83,11 +83,11 @@
       <h1>Tasklist: IVTS System Progress And Readiness</h1>
     </section>
     <section class="metrics">
-      <div class="metric"><div class="label">Done</div><div class="value">8</div><div class="note">Completed task rows</div></div>
+      <div class="metric"><div class="label">Done</div><div class="value">9</div><div class="note">Completed task rows</div></div>
       <div class="metric"><div class="label">Blocked</div><div class="value">3</div><div class="note">Rows needing action</div></div>
       <div class="metric"><div class="label">Verifying</div><div class="value">0</div><div class="note">Rows under validation</div></div>
       <div class="metric"><div class="label">In Progress</div><div class="value">1</div><div class="note">Discovery or active work</div></div>
-      <div class="metric"><div class="label">Pending</div><div class="value">5</div><div class="note">Not started rows</div></div>
+      <div class="metric"><div class="label">Pending</div><div class="value">9</div><div class="note">Not started rows</div></div>
     </section>
     <section class="summary-board" aria-label="Summary">
 <div class="table-wrap">
@@ -162,7 +162,7 @@
       <div class="board-panel active" data-board-panel="t3">
         <div class="board-section-title">
           <h3>T3. Active Tasklist</h3>
-          <p class="subcopy">14 task rows. Use task filters for task status; blocker details are in the T5 tab.</p>
+          <p class="subcopy">19 task rows. Use task filters for task status; blocker details are in the T5 tab.</p>
         </div>
       <div class="toolbar">
         <div class="filters task-filters" aria-label="Task filters">
@@ -173,7 +173,7 @@
           <button type="button" data-task-filter="pending">Pending</button>
           <button type="button" data-task-filter="blocked">Tasks with blocker</button>
         </div>
-        <span id="visible-count">Showing 14 tasks</span>
+        <span id="visible-count">Showing 19 tasks</span>
       </div>
       <div class="table-wrap">
         <table class="task-table">
@@ -193,6 +193,11 @@
             <tr data-status="pending" data-blocked="true"><td>ivts-BE-007</td><td>Live smoke test</td><td>Backend</td><td><span class="badge pending">pending</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td><span class="badge blocker">B-001 IAM seed required</span></td><td>POST /requests/submit, GET /cctvs/:id</td><td>smoke evidence</td></tr>
             <tr data-status="pending" data-blocked="true"><td>ivts-BE-008</td><td>Seed IAM permission paths</td><td>Ops</td><td><span class="badge pending">pending</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td><span class="badge blocker">requires IAM admin access</span></td><td>Seed /ivts/requests, /ivts/vehicles, /ivts/cctvs, /ivts/tracking</td><td>IAM permission records</td></tr>
             <tr data-status="pending" data-blocked="false"><td>ivts-BE-009</td><td>Update PRD-ivts.md</td><td>Product</td><td><span class="badge pending">pending</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td>none</td><td>Update PRD with new collections and API surface</td><td>PRD update</td></tr>
+            <tr data-status="done" data-blocked="false"><td>ivts-UM-001</td><td>Source Discovery</td><td>Backend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>—</td><td>Tasklist created</td></tr>
+            <tr data-status="pending" data-blocked="false"><td>ivts-UM-002</td><td>Modify forwardAccountsList</td><td>Backend</td><td><span class="badge pending">pending</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td>none</td><td>Update forwardAccountsList logic to query local database</td><td>Modified code</td></tr>
+            <tr data-status="pending" data-blocked="false"><td>ivts-UM-003</td><td>Run test:all</td><td>Backend</td><td><span class="badge pending">pending</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td>none</td><td>Run npm test suite</td><td>Test output</td></tr>
+            <tr data-status="pending" data-blocked="false"><td>ivts-UM-004</td><td>Update tasklist progress</td><td>Ops</td><td><span class="badge pending">pending</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td>none</td><td>Run node scripts/render-tasklist-progress-html.js .</td><td>HTML output</td></tr>
+            <tr data-status="pending" data-blocked="false"><td>ivts-UM-005</td><td>Create change record T1-T20</td><td>Ops</td><td><span class="badge pending">pending</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td>none</td><td>Save change note</td><td>T1-T20 Markdown file</td></tr>
           </tbody>
         </table>
       </div>

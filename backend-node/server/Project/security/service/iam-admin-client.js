@@ -929,88 +929,91 @@ async function forwardMyPermissions(request, response) {
 
 async function forwardAccountsList(request, response) {
   try {
-    const headers = {
-      lang: request.headers && request.headers.lang ? request.headers.lang : 'th'
-    };
-    const [scopedMetadata, assignmentRows] = await Promise.all([
-      resolveScopedSecurityMetadata(headers),
-      fetchActiveSecurityAssignments(headers)
-    ]);
+    const User = require('../../ivts/models/user.model');
+    const query = request.query || {};
+    const page = Math.max(Number(query.page) || 1, 1);
+    const limit = Math.max(Number(query.limit) || 25, 1);
+    const search = String(query.search || '').trim();
 
-    let result = null;
-    const allowedGroupIds = scopedMetadata.allowedGroupIds || new Set();
-    const allowedGroupsById = scopedMetadata.allowedGroupsById || new Map();
-    const scopedGroupsByAccountId = {};
-    assignmentRows.forEach(function (item) {
-      const groupId = getAssignmentGroupId(item);
-      if (!groupId || (scopedMetadata.expectedTypeTitle && !allowedGroupIds.has(groupId))) return;
-      const accountId = getAssignmentAccountId(item);
-      if (!accountId) return;
-      const group = item && item.group && typeof item.group === 'object'
-        ? item.group
-        : allowedGroupsById.get(groupId);
-      if (!group) return;
-      if (!scopedGroupsByAccountId[accountId]) scopedGroupsByAccountId[accountId] = [];
-      scopedGroupsByAccountId[accountId].push(group);
+    const filter = {};
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { surname: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { _id: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const total = await User.countDocuments(filter);
+    const docs = await User.find(filter)
+      .sort({ created_at: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
+
+    const mappedData = docs.map(user => {
+      const roleKey = user.role || 'user';
+      const roleTitleTh = roleKey === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้ใช้งานทั่วไป';
+      const roleTitleEn = roleKey === 'admin' ? 'Administrator' : 'General User';
+
+      return {
+        _id: user._id,
+        code: user._id,
+        email: user.email || '',
+        userinfo: {
+          prefix: [],
+          firstName: [
+            { key: 'th', value: user.name || '' },
+            { key: 'en', value: user.name || '' }
+          ],
+          lastName: [
+            { key: 'th', value: user.surname || '' },
+            { key: 'en', value: user.surname || '' }
+          ]
+        },
+        securityGroups: [
+          {
+            _id: roleKey === 'admin' ? 'group_admin' : 'group_user',
+            key: roleKey,
+            title: [
+              { key: 'th', value: roleTitleTh },
+              { key: 'en', value: roleTitleEn }
+            ]
+          }
+        ],
+        status: {
+          key: 'ACTIVE',
+          title: [
+            { key: 'th', value: 'ใช้งานได้' },
+            { key: 'en', value: 'Active' }
+          ]
+        },
+        control: {
+          device: []
+        },
+        lifecycle: {
+          provisioning: {
+            state: 'ACTIVE'
+          }
+        }
+      };
     });
 
-    const allowedAccountIds = new Set(
-      assignmentRows
-        .filter(function (item) {
-          const groupId = getAssignmentGroupId(item);
-          return !scopedMetadata.expectedTypeTitle || (groupId && allowedGroupIds.has(groupId));
-        })
-        .map(getAssignmentAccountId)
-        .filter(Boolean)
-    );
-    const allAllowedAccountIds = Array.from(allowedAccountIds);
-    const paginationRequest = readAccountPagination(request.query || {}, allAllowedAccountIds.length);
-    const searchTerm = getAccountSearchTerm(request.query || {});
-    const canFetchPageOnly = scopedMetadata.expectedTypeTitle && paginationRequest.shouldPaginate && !searchTerm;
-    const accountIdsForFetch = canFetchPageOnly
-      ? allAllowedAccountIds.slice(paginationRequest.start, paginationRequest.end)
-      : allAllowedAccountIds;
-    const accountIdsForFetchSet = new Set(accountIdsForFetch);
+    const totalPages = Math.ceil(total / limit) || 1;
 
-    if (scopedMetadata.expectedTypeTitle) {
-      if (allowedAccountIds.size) {
-        result = await fetchAccountsList(headers, Object.assign({}, request.query || {}, {
-          accountIds: accountIdsForFetch.join(',')
-        }));
-      } else {
-        result = { status: true, data: [] };
+    return response.status(200).json({
+      status: true,
+      data: mappedData,
+      pagination: {
+        page: page,
+        limit: limit,
+        total: total,
+        totalPages: totalPages,
+        hasMore: page < totalPages,
+        search: search
       }
-    } else {
-      result = await fetchAccountsList(headers, request.query || {});
-    }
-
-    if (result && Array.isArray(result.data) && scopedMetadata.expectedTypeTitle) {
-      result.data = result.data
-        .filter(function (item) {
-          const accountId = item && item._id ? String(item._id) : '';
-          const accountScopeIds = canFetchPageOnly ? accountIdsForFetchSet : allowedAccountIds;
-          return accountId && accountScopeIds.has(accountId);
-        })
-        .map(function (item) {
-          const accountId = item && item._id ? String(item._id) : '';
-          const scopedSecurityGroups = Array.isArray(item && item.securityGroups)
-            ? item.securityGroups.filter(function (group) {
-              const groupId = group && group._id ? String(group._id) : String(group || '');
-              return groupId && allowedGroupIds.has(groupId);
-            })
-            : [];
-          const resolvedGroups = scopedSecurityGroups.length ? scopedSecurityGroups : (scopedGroupsByAccountId[accountId] || []);
-          return Object.assign({}, item, {
-            securityGroups: dedupeByGroupTitle(resolvedGroups, function (group) { return group; })
-          });
-        });
-    }
-    const paginated = buildAccountListPagination(result && result.data, request.query || {}, canFetchPageOnly
-      ? { alreadyPaged: true, total: allowedAccountIds.size }
-      : {});
-    result.data = paginated.data;
-    result.pagination = paginated.pagination;
-    return response.status(200).json(result);
+    });
   } catch (err) {
     const normalized = normalizeError(err, 'iam_accounts_proxy_failed');
     return response.status(normalized.statusCode).json(normalized.payload);
