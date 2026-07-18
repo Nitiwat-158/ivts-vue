@@ -5,6 +5,7 @@ import '../theme/app_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/top_bar_actions.dart';
 import '../widgets/vehicle_card.dart';
+import 'location_screen.dart';
 import 'vehicles_list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -56,12 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onBack: () => setState(() => _tabIndex = 0),
         );
       case 2:
-        return _PlaceholderSection(
-          icon: Icons.location_on_rounded,
-          title: 'Location',
-          subtitle: 'ตำแหน่งรถและเส้นทางจะถูกแสดงที่นี่',
-          accent: AppColors.success,
-        );
+        return const LocationScreen();
       case 3:
         return _PlaceholderSection(
           icon: Icons.access_time_rounded,
@@ -116,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: _tabIndex == 1
+        leading: _tabIndex == 1 || _tabIndex == 2
             ? IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new_rounded),
                 onPressed: () => setState(() => _tabIndex = 0),
