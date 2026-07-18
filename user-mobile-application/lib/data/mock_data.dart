@@ -1,3 +1,4 @@
+import '../models/history_entry.dart';
 import '../models/vehicle.dart';
 
 class MockData {
@@ -37,4 +38,35 @@ class MockData {
   ];
 
   static Vehicle get mostRecentlyMoved => vehicles.first;
+
+  static final List<TripHistory> tripHistory = [
+    const TripHistory(
+      vehicleCode: 'สน 1669',
+      vehicleId: 'CR0001',
+      dateGroup: 'Today',
+      date: '11/04/2026',
+      time: '03:16 PM',
+    ),
+    const TripHistory(
+      vehicleCode: 'สน 1669',
+      vehicleId: 'CR0001',
+      dateGroup: '7 days ago',
+      date: '10/04/2026',
+      time: '09:52 AM',
+    ),
+    const TripHistory(
+      vehicleCode: 'สน 1669',
+      vehicleId: 'CR0001',
+      dateGroup: '7 days ago',
+      date: '09/04/2026',
+      time: '01:05 PM',
+    ),
+  ];
+
+  static final List<TripWaypoint> tripWaypoints = [
+    const TripWaypoint(time: '03:16 PM', description: 'ประตูหน้ามหาลัย'),
+    const TripWaypoint(time: '03:16 PM', description: 'เข้าจอดที่อาคารเรียนรวม 5'),
+    const TripWaypoint(time: '04:24 PM', description: 'ออกจากอาคารเรียนรวม 5'),
+    const TripWaypoint(time: '04:26 PM', description: 'ถึงที่จอดรถหอพักนักศึกษา'),
+  ];
 }
