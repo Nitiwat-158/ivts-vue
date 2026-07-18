@@ -1,8 +1,8 @@
 <template>
   <div class="security-page">
     <AppSectionHero
-      title="Setting Message Authen"
-      subtitle="Manage login message banners, display periods, and activation state from one workflow."
+      :title="$t('settingMessageAuthen.title')"
+      :subtitle="$t('settingMessageAuthen.subtitle')"
       :meta-label="'Last updated'"
       :meta-value="lastUpdatedLabel"
       @refresh="loadData"
@@ -11,7 +11,7 @@
     <CRow>
       <CCol col="12">
         <ManagementTableBase
-          title="Setting Message Authen"
+          :title="$t('settingMessageAuthen.tableTitle')"
           icon="cil-envelope-open"
           add-label="Add Message"
           empty-message="No setting message authen found"

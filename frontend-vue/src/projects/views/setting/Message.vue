@@ -1,15 +1,15 @@
 <template>
   <div class="security-page">
     <AppSectionHero
-      title="Setting Message"
-      subtitle="Manage localized message templates and keep reusable communication copy aligned."
+      :title="$t('settingMessage.title')"
+      :subtitle="$t('settingMessage.subtitle')"
       :meta-label="'Last updated'"
       :meta-value="lastUpdatedLabel"
       @refresh="loadData"
     />
 
     <ManagementTableBase
-      title="Message Management"
+      :title="$t('settingMessage.tableTitle')"
       icon="cil-description"
       add-label="Add Message"
       empty-message="No messages found"

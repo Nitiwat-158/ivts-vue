@@ -21,14 +21,14 @@
         <!-- Connecting overlay -->
         <div v-if="loading" class="overlay d-flex flex-column align-items-center justify-content-center text-white">
           <CSpinner color="light" size="sm" class="mb-2" />
-          <span>Connecting to Stream...</span>
+          <span>{{ $t('cctvViewer.connecting') }}</span>
         </div>
 
         <!-- Offline screen -->
         <div v-else-if="camera.status === 'offline'" class="overlay d-flex flex-column align-items-center justify-content-center text-white">
           <CIcon name="cil-warning" size="xl" class="text-danger mb-2" />
-          <h5 class="mb-0">Camera Connection Lost</h5>
-          <small class="text-muted">Please check the device hardware or configuration</small>
+          <h5 class="mb-0">{{ $t('cctvViewer.connectionLost') }}</h5>
+          <small class="text-muted">{{ $t('cctvViewer.checkHardware') }}</small>
         </div>
 
         <!-- Main Stream display -->
@@ -58,7 +58,7 @@
 
           <div v-else class="overlay d-flex flex-column align-items-center justify-content-center text-white px-4 text-center">
             <CIcon name="cil-ban" size="xl" class="text-warning mb-2" />
-            <h5 class="mb-1">ไม่สามารถแสดงผลสตรีมได้</h5>
+            <h5 class="mb-1">{{ $t('cctvViewer.cannotStream') }}</h5>
             <small class="text-muted">
               {{ unsupportedMessage }}
             </small>
@@ -66,8 +66,8 @@
 
           <div v-if="streamError && !loading" class="overlay d-flex flex-column align-items-center justify-content-center text-white px-4 text-center">
             <CIcon name="cil-warning" size="xl" class="text-danger mb-2" />
-            <h5 class="mb-1">เกิดข้อผิดพลาดในการเชื่อมต่อ</h5>
-            <small class="text-muted">ตรวจสอบ URL และการเข้าถึงกล้องอีกครั้ง</small>
+            <h5 class="mb-1">{{ $t('cctvViewer.connectionError') }}</h5>
+            <small class="text-muted">{{ $t('cctvViewer.checkUrlAccess') }}</small>
           </div>
         </div>
       </div>
@@ -83,8 +83,8 @@
     </div>
     <div v-else class="no-camera-selected d-flex flex-column align-items-center justify-content-center p-5 bg-light rounded text-muted">
       <CIcon name="cil-video" size="xl" class="mb-3" />
-      <h5>No Camera Selected</h5>
-      <p class="small">Choose a camera from the side menu to begin live monitoring.</p>
+      <h5>{{ $t('cctvViewer.noCamera') }}</h5>
+      <p class="small">{{ $t('cctvViewer.selectCameraHint') }}</p>
     </div>
   </div>
 </template>
@@ -146,9 +146,9 @@ export default {
     },
     unsupportedMessage() {
       if (this.streamSourceType === 'rtsp') {
-        return 'RTSP ไม่สามารถเล่นได้โดยตรงในเว็บเบราว์เซอร์ โปรดใช้ URL ที่เป็น HTTP/HTTPS snapshot หรือ proxy service ที่แปลงสตรีมให้เข้ากับเบราว์เซอร์'
+        return this.$t('cctvViewer.rtspUnsupported')
       }
-      return 'กรุณาตรวจสอบ URL ของกล้อง หรือใช้ URL สำหรับรูปภาพ/สตรีมที่เบราว์เซอร์รองรับ'
+      return this.$t('cctvViewer.unsupportedUrl')
     }
   },
   watch: {

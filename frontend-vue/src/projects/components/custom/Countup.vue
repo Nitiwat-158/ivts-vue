@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p class="font-weight-bold text-right"> ️ ผ่านไปแล้ว: {{ elapsedTime }} </p>
+    <p class="font-weight-bold text-right"> ⏳ {{ $t('countup.elapsed') }} {{ elapsedTime }} </p>
   </div>
 </template>
 
@@ -28,9 +28,9 @@ export default {
       const seconds = duration.seconds();
 
       let parts = [];
-      if (hours > 0) parts.push(`${hours} ชั่วโมง`);
-      if (minutes > 0) parts.push(`${minutes} นาที`);
-      parts.push(`${seconds} วินาที`);
+      if (hours > 0) parts.push(`${hours} ${this.$t('countup.hours')}`);
+      if (minutes > 0) parts.push(`${minutes} ${this.$t('countup.minutes')}`);
+      parts.push(`${seconds} ${this.$t('countup.seconds')}`);
 
       return parts.join(' ');
     }

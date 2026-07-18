@@ -2,7 +2,7 @@
   <div class="vehicle-table-wrapper">
     <div v-if="vehicles.length === 0" class="vehicle-table-empty text-center py-5" style="background-color: #f1f3f5; min-height: 200px; display: flex; align-items: center; justify-content: center;">
       <h4 class="text-secondary font-weight-normal mb-0" style="color: #4f5d73;">
-        No items <CIcon name="cil-ban" class="text-danger ml-2" size="xl" />
+        {{ $t('vehicleManagement.noItems') }} <CIcon name="cil-ban" class="text-danger ml-2" size="xl" />
       </h4>
     </div>
 
@@ -18,11 +18,11 @@
                 @update:checked="toggleSelectAll"
               />
             </th>
-            <th>ทะเบียนรถ</th>
-            <th>เจ้าของ</th>
-            <th>สถานะเอกสาร</th>
-            <th>สถานะบัญชี</th>
-            <th class="text-end">Actions</th>
+            <th>{{ $t('ivts.vehicles') }}</th>
+            <th>{{ $t('ivts.owner') }}</th>
+            <th>{{ $t('ivts.docStatus') }}</th>
+            <th>{{ $t('ivts.accountStatus') }}</th>
+            <th class="text-end">{{ $t('vehicleManagement.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -72,7 +72,7 @@
                   variant="outline"
                   shape="pill"
                   class="vehicle-action-btn"
-                  v-c-tooltip="{ content: 'Approve', placement: 'top' }"
+                  v-c-tooltip="{ content: $t('vehicleManagement.tooltipApprove'), placement: 'top' }"
                   @click="emitEvent('approve', vehicle.id)"
                 >
                   <CIcon name="cil-check" />
@@ -84,7 +84,7 @@
                   variant="outline"
                   shape="pill"
                   class="vehicle-action-btn"
-                  v-c-tooltip="{ content: 'Reject', placement: 'top' }"
+                  v-c-tooltip="{ content: $t('vehicleManagement.tooltipReject'), placement: 'top' }"
                   @click="emitEvent('reject', vehicle.id)"
                 >
                   <CIcon name="cil-x" />
@@ -95,7 +95,7 @@
                   variant="outline"
                   shape="pill"
                   class="vehicle-action-btn"
-                  v-c-tooltip="{ content: 'View', placement: 'top' }"
+                  v-c-tooltip="{ content: $t('vehicleManagement.tooltipView'), placement: 'top' }"
                   @click="emitEvent('view', vehicle.id)"
                 >
                   <CIcon name="cil-magnifying-glass" />
@@ -106,7 +106,7 @@
                   variant="outline"
                   shape="pill"
                   class="vehicle-action-btn"
-                  v-c-tooltip="{ content: 'Delete', placement: 'top' }"
+                  v-c-tooltip="{ content: $t('vehicleManagement.tooltipDelete'), placement: 'top' }"
                   @click="emitEvent('delete', vehicle.id)"
                 >
                   <CIcon name="cil-trash" />

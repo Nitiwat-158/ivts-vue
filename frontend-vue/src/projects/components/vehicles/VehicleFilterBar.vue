@@ -4,7 +4,7 @@
       <CInput
         :value="searchTerm"
         @update:value="searchTerm = $event"
-        placeholder="ค้นหาด้วยทะเบียนรถหรือชื่อผู้ใช้"
+        :placeholder="$t('ivts.searchPlateUser')"
         size="sm"
         class="mb-0"
       />
@@ -33,7 +33,7 @@
     <div class="vehicle-filter-bar__action">
       <CButton size="sm" color="success" variant="outline" class="font-weight-bold" @click="onExport">
         <CIcon name="cil-cloud-download" class="mr-1" />
-        Export
+        {{ $t('vehicleManagement.export') }}
       </CButton>
     </div>
   </div>
@@ -46,13 +46,17 @@ export default {
     return {
       searchTerm: '',
       status: 'all',
-      statusOptions: [
-        { value: 'all', label: 'ทั้งหมด' },
-        { value: 'pending', label: 'รอตรวจสอบ' },
-        { value: 'approved', label: 'อนุมัติแล้ว' },
-        { value: 'rejected', label: 'ถูกปฏิเสธ' }
-      ],
       searchTimeout: null
+    }
+  },
+  computed: {
+    statusOptions() {
+      return [
+        { value: 'all', label: this.$t('ivts.filterAll') },
+        { value: 'pending', label: this.$t('ivts.filterPending') },
+        { value: 'approved', label: this.$t('ivts.filterApproved') },
+        { value: 'rejected', label: this.$t('ivts.filterRejected') }
+      ]
     }
   },
   watch: {

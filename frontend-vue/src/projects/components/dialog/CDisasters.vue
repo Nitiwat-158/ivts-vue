@@ -16,7 +16,7 @@
 
             <CCard class="bg-style2 p-0">
                     <CCardHeader class="bg-gradient-danger text-white" style="border-top-left-radius: 1rem; border-top-right-radius: 1rem;" >
-                      <span  class="font-weight-bold h6"><CIcon name="cil-bell" size="lg"/> แจ้งเหตุฉุกเฉิน </span>
+                      <span  class="font-weight-bold h6"><CIcon name="cil-bell" size="lg"/> {{ $t('dialog.disasterAlert') }} </span>
                       <div class="card-header-actions" @click="handleClose">
                         <CIcon name="cil-x" size="lg" />
                       </div>

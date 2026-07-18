@@ -6,12 +6,12 @@
     backdrop
   >
     <CModalHeader>
-      ยืนยันการลบรถ
+      {{ $t('ivts.confirmDeleteVehicle') }}
     </CModalHeader>
 
     <CModalBody>
       <p>
-        คุณแน่ใจหรือไม่ว่าต้องการลบรถทะเบียน {{ vehiclePlate }}? การกระทำนี้ไม่สามารถย้อนกลับได้
+        {{ $t('ivts.confirmDeleteVehicleText', { plate: vehiclePlate }) }}
       </p>
     </CModalBody>
 

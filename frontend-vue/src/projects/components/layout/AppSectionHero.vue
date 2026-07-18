@@ -10,10 +10,10 @@
         <div v-if="showMeta || showRefresh" class="app-section-hero__actions">
           <div v-if="showMeta" class="app-section-hero__meta">
             <div class="app-section-hero__meta-label">{{ metaLabel }}</div>
-            <div class="app-section-hero__meta-value">{{ metaValue }}</div>
+            <div class="app-section-hero__meta-value">{{ computedMetaValue }}</div>
           </div>
 
-          <CButton v-if="showRefresh" color="light" class="app-section-hero__refresh" @click="$emit('refresh')">
+          <CButton v-if="showRefresh" color="light" class="app-section-hero__refresh" @click="handleRefresh">
             <CIcon name="cil-reload" class="mr-2" />
             {{ refreshLabel }}
           </CButton>
@@ -56,12 +56,51 @@ export default {
     metaLabel: { type: String, default: '' },
     metaValue: { type: String, default: '' }
   },
+  data() {
+    return {
+      localDate: new Date(),
+      forceLocal: false
+    }
+  },
   computed: {
     statItems () {
       return Array.isArray(this.stats) ? this.stats : []
     },
     showMeta () {
-      return !!(this.metaLabel || this.metaValue)
+      return !!(this.metaLabel || this.metaValue || this.forceLocal)
+    },
+    computedMetaValue () {
+      const label = (this.metaLabel || '').toUpperCase();
+      if (label.includes('UPDATE')) {
+        if (this.forceLocal) {
+          return this.formatThaiDate(this.localDate);
+        }
+        // Guard clause: if received value is falsy or contains the 1970/2513 epoch bug
+        if (!this.metaValue || this.metaValue === '-' || String(this.metaValue).includes('2513') || String(this.metaValue).includes('1970')) {
+          return this.formatThaiDate(this.localDate);
+        }
+      }
+      return this.metaValue;
+    }
+  },
+  created () {
+    this.localDate = new Date();
+  },
+  methods: {
+    formatThaiDate(dateObj) {
+      if (!dateObj) return '';
+      const d = dateObj.getDate().toString().padStart(2, '0');
+      const m = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+      const y = dateObj.getFullYear() + 543;
+      const hh = dateObj.getHours().toString().padStart(2, '0');
+      const mm = dateObj.getMinutes().toString().padStart(2, '0');
+      const ss = dateObj.getSeconds().toString().padStart(2, '0');
+      return `${d}/${m}/${y} ${hh}:${mm}:${ss}`;
+    },
+    handleRefresh() {
+      this.localDate = new Date();
+      this.forceLocal = true;
+      this.$emit('refresh');
     }
   }
 }

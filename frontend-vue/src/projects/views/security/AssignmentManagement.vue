@@ -1,8 +1,8 @@
 <template>
   <div class="security-page">
     <AppSectionHero
-      title="Assignment Management"
-      subtitle="Bind accounts to groups, define data scope, and control delegated access boundaries."
+      :title="$t('assignmentManagement.title')"
+      :subtitle="$t('assignmentManagement.subtitle')"
       :stats="heroStats"
       :meta-label="'Last updated'"
       :meta-value="lastUpdatedLabel"
@@ -13,7 +13,7 @@
       <CCardBody>
         <div class="d-flex justify-content-between align-items-center mb-3">
           <div class="small text-muted">Manage account-to-group assignments with explicit scope.</div>
-          <CButton v-if="canAddAssignment" color="dark" @click="openCreate">Add Assignment</CButton>
+          <CButton v-if="canAddAssignment" color="dark" @click="openCreate">{{ $t('assignmentManagement.actions.add') }}</CButton>
         </div>
         <CDataTable
           :items="assignments"
@@ -39,7 +39,7 @@
       </CCardBody>
     </CCard>
 
-    <CModal :show.sync="showModal" title="Assignment" size="lg">
+    <CModal :show.sync="showModal" :title="$t('assignmentManagement.title')" size="lg">
       <CRow>
         <CCol md="6">
           <label class="small text-muted">Account</label>
@@ -63,8 +63,8 @@
         </CCol>
       </CRow>
       <template #footer>
-        <CButton color="light" @click="closeModal">Cancel</CButton>
-        <CButton color="dark" @click="save">Save</CButton>
+        <CButton color="light" @click="closeModal">{{ $t('common.actions.cancel') || 'Cancel' }}</CButton>
+        <CButton color="dark" @click="save">{{ $t('common.actions.save') || 'Save' }}</CButton>
       </template>
     </CModal>
   </div>
@@ -98,17 +98,17 @@ export default {
       lastUpdatedAt: null,
       draft: emptyDraft(),
       fields: [
-        { key: 'accountLabel', label: 'Account' },
-        { key: 'groupLabel', label: 'Group' },
-        { key: 'dataScope', label: 'Data Scope' },
-        { key: 'scopeUnits', label: 'Scope Units' },
-        { key: 'active', label: 'Status' },
-        { key: 'actions', label: '#', _style: 'width: 180px; text-align: right;' }
+        { key: 'accountLabel', label: this.$t('assignmentManagement.fields.account') },
+        { key: 'groupLabel', label: this.$t('assignmentManagement.fields.group') },
+        { key: 'dataScope', label: this.$t('assignmentManagement.fields.dataScope') },
+        { key: 'scopeUnits', label: this.$t('assignmentManagement.fields.scopeUnits') },
+        { key: 'active', label: this.$t('assignmentManagement.fields.active') },
+        { key: 'actions', label: this.$t('assignmentManagement.fields.actions'), _style: 'width: 180px; text-align: right;' }
       ],
       scopeOptions: [
-        { value: 'self', label: 'Self' },
-        { value: 'unit', label: 'Unit' },
-        { value: 'org', label: 'Org' }
+        { value: 'self', label: this.$t('assignmentManagement.scopes.self') },
+        { value: 'unit', label: this.$t('assignmentManagement.scopes.unit') },
+        { value: 'org', label: this.$t('assignmentManagement.scopes.org') }
       ],
       activeOptions: [
         { value: 'true', label: 'Active' },
@@ -127,9 +127,9 @@ export default {
     },
     heroStats () {
       return [
-        { label: 'Assignments', value: this.assignments.length, icon: 'cil-link', iconClass: 'security-stat__icon--primary' },
-        { label: 'Active', value: this.assignments.filter(item => item.active).length, icon: 'cil-check-circle', iconClass: 'security-stat__icon--success' },
-        { label: 'Scoped', value: this.assignments.filter(item => item.dataScope !== 'self').length, icon: 'cil-filter', iconClass: 'security-stat__icon--warning' }
+        { label: this.$t('assignmentManagement.stats.assignments'), value: this.assignments.length, icon: 'cil-link', iconClass: 'security-stat__icon--primary' },
+        { label: this.$t('assignmentManagement.stats.active'), value: this.assignments.filter(item => item.active).length, icon: 'cil-check-circle', iconClass: 'security-stat__icon--success' },
+        { label: this.$t('assignmentManagement.stats.scoped'), value: this.assignments.filter(item => item.dataScope !== 'self').length, icon: 'cil-filter', iconClass: 'security-stat__icon--warning' }
       ]
     },
     accountOptions () {

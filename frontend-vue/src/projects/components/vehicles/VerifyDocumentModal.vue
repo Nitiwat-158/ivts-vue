@@ -20,22 +20,22 @@
             @error="imageLoadFailed = true"
           />
           <div v-else class="verify-document-modal__placeholder">
-            ไม่สามารถโหลดรูปเอกสารได้
+            {{ $t('ivts.cannotLoadDoc') }}
           </div>
         </div>
 
         <div class="verify-document-modal__info">
           <div class="verify-document-modal__row">
-            <span class="label">ทะเบียนรถ</span>
+            <span class="label">{{ $t('ivts.vehicles') }}</span>
             <span class="value">{{ vehiclePlateDisplay }}</span>
           </div>
           <div class="verify-document-modal__row">
-            <span class="label">ชื่อเจ้าของ</span>
+            <span class="label">{{ $t('ivts.ownerName') }}</span>
             <span class="value">{{ ownerNameDisplay }}</span>
           </div>
           
           <div v-if="mode === 'view'" class="verify-document-modal__row mt-2">
-            <span class="label">สถานะบัญชี</span>
+            <span class="label">{{ $t('ivts.accountStatus') }}</span>
             <span class="value">
               <CBadge :color="accountStatusColor(vehicle.accountStatus)">
                 {{ vehicle.accountStatus || '-' }}
@@ -44,11 +44,11 @@
           </div>
 
           <div v-if="showRejectReason && mode === 'verify'" class="verify-document-modal__reason">
-            <label class="reason-label">เหตุผลการปฏิเสธ</label>
+            <label class="reason-label">{{ $t('ivts.rejectReason') }}</label>
             <CTextarea
               v-model="rejectReason"
               rows="4"
-              placeholder="กรุณาระบุเหตุผลการปฏิเสธ"
+              :placeholder="$t('ivts.rejectReasonPlaceholder')"
             />
           </div>
         </div>
@@ -81,7 +81,7 @@
           @click="onConfirmReject"
           :disabled="isRejectReasonEmpty"
         >
-          ยืนยัน Reject
+          {{ $t('ivts.confirmReject') }}
         </CButton>
       </template>
     </template>

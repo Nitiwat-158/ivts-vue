@@ -1,15 +1,15 @@
 <template>
   <div class="security-page">
     <AppSectionHero
-      title="Setting Group"
-      subtitle="Maintain reusable master groups, language titles, and visibility state for downstream settings."
+      :title="$t('settingGroup.title')"
+      :subtitle="$t('settingGroup.subtitle')"
       :meta-label="'Last updated'"
       :meta-value="lastUpdatedLabel"
       @refresh="loadData"
     />
 
     <ManagementTableBase
-      title="Group Management"
+      :title="$t('settingGroup.tableTitle')"
       icon="cil-people"
       add-label="Add Group"
       empty-message="No groups found"

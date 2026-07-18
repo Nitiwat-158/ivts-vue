@@ -1,21 +1,17 @@
 <template>
   <div class="business-ops-page">
-    <div class="ops-header">
-      <div>
-        <div class="ops-header__eyebrow">{{ profile.eyebrow }}</div>
-        <h1>{{ profile.title }}</h1>
-        <div class="ops-header__meta">{{ profile.period }} · {{ lastUpdatedLabel }}</div>
-      </div>
-      <div class="ops-header__actions">
-        <CButton color="primary" variant="outline" @click="refresh">
-          <CIcon name="cil-reload" class="mr-2" />
-          Refresh
-        </CButton>
-        <router-link class="btn btn-outline-secondary" to="/security/permissions/matrix">
-          <CIcon name="cil-lock-locked" class="mr-2" />
-          Access Matrix
-        </router-link>
-      </div>
+    <AppSectionHero
+      :title="profile.title"
+      :subtitle="profile.period"
+      meta-label="LAST UPDATED"
+      :meta-value="lastUpdatedLabel"
+      @refresh="refresh"
+    />
+    <div class="mb-3 text-right">
+      <router-link class="btn btn-outline-secondary btn-sm" to="/security/permissions/matrix">
+        <CIcon name="cil-lock-locked" class="mr-2" />
+        Access Matrix
+      </router-link>
     </div>
 
     <CRow>
@@ -162,8 +158,8 @@
 const PROFILE = {
 
   eyebrow: 'IVTS Operations',
-  title: 'IVTS Operating Desk',
-  period: 'Current agreement cycle',
+  title: 'ivtsOperatingDesk.title',
+  period: 'ivtsOperatingDesk.period',
   workstreamMeta: 'Drafting, legal review, approval, renewal',
   decisionMeta: 'Agreements waiting for action',
   boardMeta: 'IVTS operation lanes',
@@ -198,8 +194,13 @@ const PROFILE = {
   ]
 }
 
+import AppSectionHero from '@/projects/components/layout/AppSectionHero.vue'
+
 export default {
   name: 'BusinessOperations',
+  components: {
+    AppSectionHero
+  },
   data () {
     return {
       lastUpdated: new Date(),
@@ -208,18 +209,24 @@ export default {
   },
   computed: {
     profile () {
-      return PROFILE
+      return {
+        ...PROFILE,
+        title: this.$t(PROFILE.title),
+        period: this.$t(PROFILE.period)
+      }
     },
     activeStream () {
       return this.profile.workstreams.find(item => item.id === this.activeStreamId) || this.profile.workstreams[0]
     },
     lastUpdatedLabel () {
-      return new Intl.DateTimeFormat('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        hour: '2-digit',
-        minute: '2-digit'
-      }).format(this.lastUpdated)
+      if (!this.lastUpdated) return ''
+      const d = this.lastUpdated.getDate().toString().padStart(2, '0')
+      const m = (this.lastUpdated.getMonth() + 1).toString().padStart(2, '0')
+      const y = this.lastUpdated.getFullYear() + 543
+      const hh = this.lastUpdated.getHours().toString().padStart(2, '0')
+      const mm = this.lastUpdated.getMinutes().toString().padStart(2, '0')
+      const ss = this.lastUpdated.getSeconds().toString().padStart(2, '0')
+      return `${d}/${m}/${y} ${hh}:${mm}:${ss}`
     }
   },
   methods: {

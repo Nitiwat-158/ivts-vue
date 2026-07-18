@@ -123,46 +123,7 @@ function localizedText(value, lang) {
   return String(value).trim()
 }
 
-const HEADER_COPY = {
-  en: {
-    avatarAlt: 'Account photo',
-    checkProfile: 'Profile Information',
-    logout: 'Sign out',
-    accountFallback: 'Account',
-    noOrganizationData: 'No organization data',
-    unit: 'Unit',
-    affiliation: 'Affiliation',
-    accountCode: 'Account Code',
-    role: 'Role',
-    email: 'Email',
-    position: 'Position',
-    personnelType: 'Personnel Type',
-    changeProfilePhoto: 'Change profile photo',
-    imageTypeError: 'Please choose an image file.',
-    imageSizeError: 'Image must be smaller than 3 MB.',
-    imageReadError: 'Unable to read the selected image.',
-    imageSaveError: 'Unable to update profile photo.'
-  },
-  th: {
-    avatarAlt: 'รูปบัญชีผู้ใช้',
-    checkProfile: 'ข้อมูลโปรไฟล์',
-    logout: 'ออกจากระบบ',
-    accountFallback: 'บัญชีผู้ใช้',
-    noOrganizationData: 'ไม่พบข้อมูลหน่วยงาน',
-    unit: 'หน่วยงาน',
-    affiliation: 'สังกัด',
-    accountCode: 'Account Code',
-    role: 'Role',
-    email: 'อีเมล',
-    position: 'ตำแหน่ง',
-    personnelType: 'ประเภทบุคลากร',
-    changeProfilePhoto: 'เปลี่ยนรูปโปรไฟล์',
-    imageTypeError: 'กรุณาเลือกรูปภาพเท่านั้น',
-    imageSizeError: 'รูปต้องมีขนาดไม่เกิน 3 MB',
-    imageReadError: 'ไม่สามารถอ่านรูปที่เลือกได้',
-    imageSaveError: 'ไม่สามารถอัปเดตรูปโปรไฟล์ได้'
-  }
-}
+
 
 export default {
   name: 'TheHeaderDropdownAccnt',
@@ -257,7 +218,25 @@ export default {
       lang: 'setting/lang'
     }),
     copy() {
-      return this.lang === 'th' ? HEADER_COPY.th : HEADER_COPY.en
+      return {
+        avatarAlt: this.$t('headerAccount.avatarAlt'),
+        checkProfile: this.$t('headerAccount.checkProfile'),
+        logout: this.$t('headerAccount.logout'),
+        accountFallback: this.$t('headerAccount.accountFallback'),
+        noOrganizationData: this.$t('headerAccount.noOrganizationData'),
+        unit: this.$t('headerAccount.unit'),
+        affiliation: this.$t('headerAccount.affiliation'),
+        accountCode: this.$t('headerAccount.accountCode'),
+        role: this.$t('headerAccount.role'),
+        email: this.$t('headerAccount.email'),
+        position: this.$t('headerAccount.position'),
+        personnelType: this.$t('headerAccount.personnelType'),
+        changeProfilePhoto: this.$t('headerAccount.changeProfilePhoto'),
+        imageTypeError: this.$t('headerAccount.imageTypeError'),
+        imageSizeError: this.$t('headerAccount.imageSizeError'),
+        imageReadError: this.$t('headerAccount.imageReadError'),
+        imageSaveError: this.$t('headerAccount.imageSaveError')
+      }
     },
     account() {
       return this.profile || {}

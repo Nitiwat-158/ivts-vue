@@ -1,15 +1,15 @@
 <template>
   <div class="security-page">
     <AppSectionHero
-      title="Setting Verification"
-      subtitle="Manage verification definitions, related groups, and status mappings from one place."
+      :title="$t('settingVerification.title')"
+      :subtitle="$t('settingVerification.subtitle')"
       :meta-label="'Last updated'"
       :meta-value="lastUpdatedLabel"
       @refresh="loadData"
     />
 
     <ManagementTableBase
-      title="Verification Management"
+      :title="$t('settingVerification.tableTitle')"
       icon="cil-shield-check"
       add-label="Add Verification"
       empty-message="No verification settings found"

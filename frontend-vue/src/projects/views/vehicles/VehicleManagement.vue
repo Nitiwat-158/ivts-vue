@@ -14,8 +14,8 @@
         <div class="d-flex align-items-center mr-3 mb-2 mb-md-0">
           <CIcon name="cil-car-alt" class="mr-2 text-danger" size="xl" />
           <div>
-            <h5 class="mb-0 font-weight-bold" style="color: #3c4b64;">Vehicle Management</h5>
-            <small class="text-muted">Showing 1-{{ vehicles.length || 0 }} of {{ vehicles.length || 0 }} vehicles</small>
+            <h5 class="mb-0 font-weight-bold" style="color: #3c4b64;">{{ $t('vehicleManagement.sectionTitle') }}</h5>
+            <small class="text-muted">{{ $t('vehicleManagement.showing', { count: vehicles.length || 0, total: vehicles.length || 0 }) }}</small>
           </div>
         </div>
         
@@ -92,7 +92,7 @@ export default {
   },
   data () {
     return {
-      lastUpdatedLabel: '2026-07-11',
+      lastUpdated: new Date(),
       vehicles: [],
       stats: { total: 0, pending: 0, approved: 0, rejected: 0 },
       searchQuery: '',
@@ -107,28 +107,38 @@ export default {
     }
   },
   computed: {
+    lastUpdatedLabel () {
+      if (!this.lastUpdated) return ''
+      const d = this.lastUpdated.getDate().toString().padStart(2, '0')
+      const m = (this.lastUpdated.getMonth() + 1).toString().padStart(2, '0')
+      const y = this.lastUpdated.getFullYear() + 543
+      const hh = this.lastUpdated.getHours().toString().padStart(2, '0')
+      const mm = this.lastUpdated.getMinutes().toString().padStart(2, '0')
+      const ss = this.lastUpdated.getSeconds().toString().padStart(2, '0')
+      return `${d}/${m}/${y} ${hh}:${mm}:${ss}`
+    },
     heroStats () {
       return [
         {
-          label: this.$t('Total Vehicles'),
+          label: this.$t('vehicleManagement.statTotal'),
           value: String(this.stats.total),
           icon: 'cil-car-alt',
           iconClass: 'app-section-stat__icon--total'
         },
         {
-          label: this.$t('Pending Verification'),
+          label: this.$t('vehicleManagement.statPending'),
           value: String(this.stats.pending),
           icon: 'cil-history',
           iconClass: 'app-section-stat__icon--attention'
         },
         {
-          label: this.$t('Approved'),
+          label: this.$t('vehicleManagement.statApproved'),
           value: String(this.stats.approved),
           icon: 'cil-check-circle',
           iconClass: 'app-section-stat__icon--active'
         },
         {
-          label: this.$t('Rejected'),
+          label: this.$t('vehicleManagement.statRejected'),
           value: String(this.stats.rejected),
           icon: 'cil-x-circle',
           iconClass: 'app-section-stat__icon--danger'
@@ -152,11 +162,12 @@ export default {
       try {
         console.log('Fetching vehicles with status filter:', this.statusFilter)
         this.loading = true
+        this.lastUpdated = new Date()
         const response = await fetchVehicles(this.searchQuery, this.statusFilter)
         this.vehicles = response
         this.calculateStats(response)
       } catch (error) {
-        this.notifyToast('ไม่สามารถโหลดข้อมูลรถได้', 'danger')
+        this.notifyToast(this.$t('ivts.toast.loadVehicleFailed'), 'danger')
       } finally {
         this.loading = false
       }
@@ -187,10 +198,10 @@ export default {
     async handleApprove (id) {
       try {
         await approveVehicle(id)
-        this.notifyToast('อนุมัติเรียบร้อย', 'success')
+        this.notifyToast(this.$t('ivts.toast.approveSuccess'), 'success')
         await this.loadVehicles()
       } catch (error) {
-        this.notifyToast('อนุมัติไม่สำเร็จ', 'danger')
+        this.notifyToast(this.$t('ivts.toast.approveFailed'), 'danger')
       }
     },
     handleReject (id) {
@@ -240,10 +251,10 @@ export default {
       try {
         await deleteVehicle(this.currentVehicle.id)
         this.showDeleteModal = false
-        this.notifyToast('ลบรถเรียบร้อย', 'success')
+        this.notifyToast(this.$t('ivts.toast.deleteSuccess'), 'success')
         await this.loadVehicles()
       } catch (error) {
-        this.notifyToast('ลบรถไม่สำเร็จ', 'danger')
+        this.notifyToast(this.$t('ivts.toast.deleteFailed'), 'danger')
       }
     },
     async confirmVerify () {
@@ -251,10 +262,10 @@ export default {
       try {
         await approveVehicle(this.currentVehicle.id)
         this.showVerifyModal = false
-        this.notifyToast('อนุมัติเอกสารเรียบร้อย', 'success')
+        this.notifyToast(this.$t('ivts.toast.approveDocSuccess'), 'success')
         await this.loadVehicles()
       } catch (error) {
-        this.notifyToast('อนุมัติเอกสารไม่สำเร็จ', 'danger')
+        this.notifyToast(this.$t('ivts.toast.approveDocFailed'), 'danger')
       }
     },
     async confirmReject ({ vehicle, reason }) {
@@ -262,10 +273,10 @@ export default {
       try {
         await rejectVehicle(vehicle.id, reason)
         this.showVerifyModal = false
-        this.notifyToast('ปฏิเสธเอกสารเรียบร้อย', 'success')
+        this.notifyToast(this.$t('ivts.toast.rejectDocSuccess'), 'success')
         await this.loadVehicles()
       } catch (error) {
-        this.notifyToast('ปฏิเสธเอกสารไม่สำเร็จ', 'danger')
+        this.notifyToast(this.$t('ivts.toast.rejectDocFailed'), 'danger')
       }
     },
     notifyToast (message, color = 'info') {

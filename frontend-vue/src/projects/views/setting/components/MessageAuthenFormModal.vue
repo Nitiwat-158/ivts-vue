@@ -8,7 +8,7 @@
       <div class="message-modal__hero">
         <label class="h4 mb-1">{{ title }}</label>
         <div class="text-muted">
-          {{ isEditMode ? 'Update login announcement that supports multiple languages.' : 'Configure login announcement that supports multiple languages.' }}
+          {{ isEditMode ? $t('settingModals.messageAuthen.updateDesc') : $t('settingModals.messageAuthen.createDesc') }}
         </div>
       </div>
     </div>
@@ -19,23 +19,23 @@
       <CCol md="7" col="12">
         <CCard class="bg-style2 h-100 panel-card content-panel-card">
           <CCardBody class="content-panel-body">
-            <h5 class="mb-3 panel-title">Content</h5>
+            <h5 class="mb-3 panel-title">{{ $t('settingModals.common.content') }}</h5>
 
             <div class="content-block mb-4">
               <CPInput
                 v-model.trim="activeTitle"
-                :label="'Title'"
+                :label="$t('settingModals.common.title')"
                 :required="true"
                 placeholder=""
               />
               <div class="d-flex justify-content-between align-items-center content-meta-row">
-                <small class="text-muted">Recommended 80 characters max</small>
+                <small class="text-muted">{{ $t('settingModals.messageAuthen.recommendedMax') }}</small>
                 <small :class="titleCounterClass">{{ titleLength }}/80</small>
               </div>
             </div>
 
             <div class="content-block mb-0">
-              <label class="content-label">Description</label>
+              <label class="content-label">{{ $t('settingModals.common.description') }}</label>
               <QEditor :content="activeDescriptionItem" />
             </div>
           </CCardBody>
@@ -45,7 +45,7 @@
       <CCol md="5" col="12">
         <CCard class="bg-style2 h-100 panel-card">
           <CCardBody>
-            <h5 class="mb-3 panel-title">Settings</h5>
+            <h5 class="mb-3 panel-title">{{ $t('settingModals.common.settings') }}</h5>
 
             <div class="status-pill mb-3 ">
               <span class="status-dot" :class="{ inactive: statusOption !== 'active' }"></span>
@@ -54,22 +54,22 @@
 
             <CRow class="mt-2">
               <CCol md="6" col="12">
-                <CPDateInput v-model="localForm.startDate" type="date" label="Start date"
+                <CPDateInput v-model="localForm.startDate" type="date" :label="$t('settingModals.messageAuthen.startDate')"
                              :required="true"/>
               </CCol>
               <CCol md="6" col="12">
-                <CPDateInput v-model="localForm.endDate" type="date" label="End date"
+                <CPDateInput v-model="localForm.endDate" type="date" :label="$t('settingModals.messageAuthen.endDate')"
                              :required="true"/>
               </CCol>
             </CRow>
             <small v-if="!isDateRangeValid" class="text-danger d-block mb-3">
-              End date must be the same or later than start date.
+              {{ $t('settingModals.messageAuthen.dateError') }}
             </small>
 
             <CPSelect
               v-model="statusSelected"
               :options="statusOptions"
-              label="Status"
+              :label="$t('settingModals.common.status')"
               :required="true"
               label-key="label"
               track-by="value"
@@ -85,14 +85,14 @@
 
             <AuditInfoCard
               v-if="isEditMode"
-              title="Created"
+              :title="$t('settingModals.common.created')"
               icon="cil-user-follow"
               :by="createdByLabel"
               :at="createdAtLabel"
             />
             <AuditInfoCard
               v-if="isEditMode"
-              title="Updated"
+              :title="$t('settingModals.common.updated')"
               icon="cil-history"
               :by="updatedByLabel"
               :at="updatedAtLabel"
@@ -106,7 +106,7 @@
     <div class="modal-footer-wrap d-flex w-100 justify-content-end mt-3">
       <CButton class="mr-2 footer-btn-cancel footer-action-btn" color="danger" variant="outline" shape="pill" @click="onCancel">
         <CIcon name="cil-ban" class="mr-1 action-icon" />
-        <span class="font-weight-bold pr-1 pl-1"> Cancel </span>
+        <span class="font-weight-bold pr-1 pl-1"> {{ $t('common.actions.cancel') || 'Cancel' }} </span>
       </CButton>
       <CButton class="mr-2 footer-btn-secondary footer-action-btn" color="secondary" variant="outline" shape="pill" @click="onSubmit(true)">
         <CIcon name="cil-notes" class="mr-1 action-icon" />
@@ -151,7 +151,7 @@ export default {
   components: { QEditor, CPInput, CPDateInput, CPSelect, ModalLanguageToolbar, AuditInfoCard },
   props: {
     show: { type: Boolean, default: false },
-    title: { type: String, default: 'Create Setting Message Authen' },
+    title: { type: String, default: function() { return this.$t('settingModals.messageAuthen.createTitle') || 'Create Setting Message Authen' } },
     value: {
       type: Object,
       default: () => ({
@@ -172,21 +172,21 @@ export default {
       activeLang: 'th',
       statusOption: 'active',
       statusOptions: [
-        { value: 'active', label: 'Active' },
-        { value: 'inactive', label: 'Inactive' },
-        { value: 'draft', label: 'Draft' }
+        { value: 'active', label: this.$t('settingModals.common.active') },
+        { value: 'inactive', label: this.$t('settingModals.common.inactive') },
+        { value: 'draft', label: this.$t('settingModals.common.draft') }
       ]
     }
   },
   computed: {
     submitLabel () {
-      return this.isEditMode ? 'Update' : 'Save'
+      return this.isEditMode ? (this.$t('common.actions.update') || 'Update') : (this.$t('common.actions.save') || 'Save')
     },
     submitIcon () {
       return this.isEditMode ? 'cil-pencil' : 'cil-save'
     },
     draftLabel () {
-      return this.isEditMode ? 'Update as Draft' : 'Save as Draft'
+      return this.isEditMode ? (this.$t('settingModals.messageAuthen.updateDraft') || 'Update as Draft') : (this.$t('settingModals.messageAuthen.saveDraft') || 'Save as Draft')
     },
     languages () {
       const titleKeys = this.localForm.titleItems.map(item => item.key)

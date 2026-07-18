@@ -1,19 +1,13 @@
 <template>
   <div class="cctv-viewer-page">
-    <!-- Header Area based on IVTSRegistry layout -->
-    <div class="ivts-header mb-4">
-      <div>
-        <div class="ivts-header__eyebrow">MFU Security Operations</div>
-        <h1>{{ $t('nav.cctvViewer') }}</h1>
-        <p>Live security monitoring nodes registered under the campus network security framework.</p>
-      </div>
-      <div class="ivts-header__actions">
-        <CButton color="primary" variant="outline" @click="refreshAll">
-          <CIcon name="cil-reload" class="mr-2" />
-          Refresh Nodes
-        </CButton>
-      </div>
-    </div>
+    <!-- Header Area -->
+    <AppSectionHero
+      :title="$t('nav.cctvViewer') || 'CCTV Viewer'"
+      :subtitle="$t('cctvViewer.subtitle')"
+      :meta-label="$t('cctvViewer.lastUpdated')"
+      :meta-value="lastUpdatedLabel"
+      @refresh="refreshAll"
+    />
 
     <!-- Main Layout Grid -->
     <CRow>
@@ -21,8 +15,8 @@
       <CCol lg="4" class="mb-4">
         <CCard class="cctv-card h-100">
           <CCardHeader class="d-flex justify-content-between align-items-center bg-white border-bottom-0 pt-3 pb-0">
-            <h5 class="mb-0 text-dark font-weight-bold">Camera Nodes</h5>
-            <CBadge color="dark">{{ cameras.length }} Nodes</CBadge>
+            <h5 class="mb-0 text-dark font-weight-bold">{{ $t('cctvViewer.cameraNodes') }}</h5>
+            <CBadge color="dark">{{ cameras.length }} {{ $t('cctvViewer.nodes') }}</CBadge>
           </CCardHeader>
           <CCardBody>
             <CameraList
@@ -43,6 +37,7 @@
 </template>
 
 <script>
+import AppSectionHero from '@/projects/components/layout/AppSectionHero.vue'
 import CameraList from '@/projects/components/cctv/CameraList.vue'
 import CameraView from '@/projects/components/cctv/CameraView.vue'
 import api from '@/service/api'
@@ -50,15 +45,29 @@ import api from '@/service/api'
 export default {
   name: 'CCTVViewer',
   components: {
+    AppSectionHero,
     CameraList,
     CameraView
   },
   data() {
     return {
+      lastUpdated: new Date(),
       cameras: [],
       selectedCamera: null,
       loading: false,
       errorMessage: ''
+    }
+  },
+  computed: {
+    lastUpdatedLabel() {
+      if (!this.lastUpdated) return ''
+      const d = this.lastUpdated.getDate().toString().padStart(2, '0')
+      const m = (this.lastUpdated.getMonth() + 1).toString().padStart(2, '0')
+      const y = this.lastUpdated.getFullYear() + 543
+      const hh = this.lastUpdated.getHours().toString().padStart(2, '0')
+      const mm = this.lastUpdated.getMinutes().toString().padStart(2, '0')
+      const ss = this.lastUpdated.getSeconds().toString().padStart(2, '0')
+      return `${d}/${m}/${y} ${hh}:${mm}:${ss}`
     }
   },
   created() {
@@ -86,7 +95,7 @@ export default {
         this.selectedCamera = this.cameras.length > 0 ? this.cameras[0] : null
       } catch (error) {
         console.error('Failed to load CCTV cameras:', error)
-        this.errorMessage = 'ไม่สามารถโหลดรายการกล้องจากเซิร์ฟเวอร์ได้'
+        this.errorMessage = this.$t('cctvViewer.connectionError')
       } finally {
         this.loading = false
       }
@@ -95,6 +104,7 @@ export default {
       this.selectedCamera = camera
     },
     async refreshAll() {
+      this.lastUpdated = new Date()
       const current = this.selectedCamera
       await this.loadCamerasFromApi()
       this.selectedCamera = null

@@ -8,7 +8,7 @@
       <div class="message-modal__hero">
         <label class="h4 mb-1">{{ title }}</label>
         <div class="text-muted">
-          {{ isEditMode ? 'Update group that supports multiple languages.' : 'Configure group that supports multiple languages.' }}
+          {{ isEditMode ? $t('settingModals.group.updateDesc') : $t('settingModals.group.createDesc') }}
         </div>
       </div>
     </div>
@@ -19,9 +19,9 @@
       <CCol md="7" col="12">
         <CCard class="bg-style2 h-100 panel-card content-panel-card">
           <CCardBody class="content-panel-body">
-            <h5 class="mb-3 panel-title">Content</h5>
-            <CPInput v-model.trim="activeTitle" :label="'Title'" :required="true" placeholder="" />
-            <CPQuillEditor v-model="activeDescription" :label="'Description'" placeholder="" />
+            <h5 class="mb-3 panel-title">{{ $t('settingModals.common.content') }}</h5>
+            <CPInput v-model.trim="activeTitle" :label="$t('settingModals.common.title')" :required="true" placeholder="" />
+            <CPQuillEditor v-model="activeDescription" :label="$t('settingModals.common.description')" placeholder="" />
           </CCardBody>
         </CCard>
       </CCol>
@@ -29,14 +29,14 @@
       <CCol md="5" col="12">
         <CCard class="bg-style2 h-100 panel-card">
           <CCardBody>
-            <h5 class="mb-3 panel-title">Settings</h5>
+            <h5 class="mb-3 panel-title">{{ $t('settingModals.common.settings') }}</h5>
 
-            <CPInput v-model="keyValue" :label="'Key'" placeholder="" />
+            <CPInput v-model="keyValue" :label="$t('settingModals.common.key')" placeholder="" />
 
             <CPSelect
               v-model="stateSelected"
               :options="stateOptions"
-              label="State"
+              :label="$t('settingModals.common.state')"
               :required="true"
               label-key="label"
               track-by="value"
@@ -50,14 +50,14 @@
             />
             <AuditInfoCard
               v-if="isEditMode"
-              title="Created"
+              :title="$t('settingModals.common.created')"
               icon="cil-user-follow"
               :by="createdByLabel"
               :at="createdAtLabel"
             />
             <AuditInfoCard
               v-if="isEditMode"
-              title="Updated"
+              :title="$t('settingModals.common.updated')"
               icon="cil-history"
               :by="updatedByLabel"
               :at="updatedAtLabel"
@@ -70,7 +70,7 @@
     <div class="modal-footer-wrap d-flex w-100 justify-content-end mt-3">
       <CButton class="mr-2 footer-btn-cancel footer-action-btn" color="danger" variant="outline" shape="pill" @click="onCancel">
         <CIcon name="cil-ban" class="mr-1 action-icon" />
-        <span class="font-weight-bold pr-1 pl-1"> Cancel </span>
+        <span class="font-weight-bold pr-1 pl-1"> {{ $t('common.actions.cancel') || 'Cancel' }} </span>
       </CButton>
       <CButton color="success" shape="pill" class="footer-btn-save footer-action-btn" @click="onSubmit">
         <CIcon :name="submitIcon" class="mr-1 action-icon" />
@@ -117,7 +117,7 @@ export default {
   mixins: [RequiredValidation],
   props: {
     show: { type: Boolean, default: false },
-    title: { type: String, default: 'Create Group' },
+    title: { type: String, default: function() { return this.$t('settingModals.group.createGroup') || 'Create Group' } },
     value: { type: Object, default: () => createEmptyForm() }
   },
   data () {
@@ -125,8 +125,8 @@ export default {
       localForm: createEmptyForm(),
       activeLang: 'th',
       stateOptions: [
-        { value: 'active', label: 'Active' },
-        { value: 'inactive', label: 'Inactive' }
+        { value: 'active', label: this.$t('settingModals.common.active') },
+        { value: 'inactive', label: this.$t('settingModals.common.inactive') }
       ]
     }
   },
@@ -135,7 +135,7 @@ export default {
       return !!(this.localForm && this.localForm._id)
     },
     submitLabel () {
-      return this.isEditMode ? 'Update' : 'Save'
+      return this.isEditMode ? (this.$t('common.actions.update') || 'Update') : (this.$t('common.actions.save') || 'Save')
     },
     submitIcon () {
       return this.isEditMode ? 'cil-pencil' : 'cil-save'

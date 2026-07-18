@@ -1,33 +1,33 @@
 <template>
   <div class="receive-form-page">
     <AppSectionHero
-      title="แบบฟอร์มรับ / สืบมา"
-      subtitle="หน้าจอ mockup สำหรับบันทึกข้อมูลเอกสาร, แนบไฟล์, และตรวจผลลัพธ์ OCR ก่อนบันทึกเข้าระบบ"
+      :title="$t('receiveForm.title')"
+      :subtitle="$t('receiveForm.subtitle')"
       :stats="heroStats"
       :show-refresh="false"
-      :meta-label="'โหมดข้อมูล'"
-      :meta-value="'Mock data'"
+      :meta-label="$t('receiveForm.metaLabel')"
+      :meta-value="$t('receiveForm.metaValue')"
     />
 
     <CCard class="bg-style2 mb-4 page-card">
       <CCardBody>
         <div class="section-title">
           <CIcon name="cil-description" class="mr-2" />
-          ข้อมูลเอกสาร
+          {{ $t('receiveForm.sections.documentInfo') }}
         </div>
 
         <CRow>
           <CCol md="4" sm="6">
-            <CPInput v-model="form.documentNo" label="เลขที่เอกสาร" required />
+            <CPInput v-model="form.documentNo" :label="$t('receiveForm.fields.documentNo')" required />
           </CCol>
           <CCol md="4" sm="6">
-            <CPDateInput v-model="form.receivedDate" label="วันที่รับเอกสาร" required />
+            <CPDateInput v-model="form.receivedDate" :label="$t('receiveForm.fields.receivedDate')" required />
           </CCol>
           <CCol md="4" sm="6">
             <CPSelect
               v-model="form.documentType"
               :options="documentTypeOptions"
-              label="ประเภทเอกสาร"
+              :label="$t('receiveForm.fields.documentType')"
               label-key="label"
               track-by="value"
               required
@@ -37,13 +37,13 @@
 
         <CRow>
           <CCol md="4" sm="6">
-            <CPInput v-model="form.senderName" label="หน่วยงาน/ผู้ส่ง" required />
+            <CPInput v-model="form.senderName" :label="$t('receiveForm.fields.senderName')" required />
           </CCol>
           <CCol md="4" sm="6">
             <CPSelect
               v-model="form.destination"
               :options="destinationOptions"
-              label="หน่วยงานผู้รับผิดชอบ"
+              :label="$t('receiveForm.fields.destination')"
               label-key="label"
               track-by="value"
             />
@@ -52,7 +52,7 @@
             <CPSelect
               v-model="form.priority"
               :options="priorityOptions"
-              label="ระดับความเร่งด่วน"
+              :label="$t('receiveForm.fields.priority')"
               label-key="label"
               track-by="value"
             />
@@ -61,20 +61,20 @@
 
         <CRow>
           <CCol md="4" sm="6">
-            <CPInput v-model="form.contactName" label="ผู้ประสานงาน" />
+            <CPInput v-model="form.contactName" :label="$t('receiveForm.fields.contactName')" />
           </CCol>
           <CCol md="4" sm="6">
-            <CPInput v-model="form.contactPhone" label="เบอร์ติดต่อ" />
+            <CPInput v-model="form.contactPhone" :label="$t('receiveForm.fields.contactPhone')" />
           </CCol>
           <CCol md="4" sm="6">
-            <CPNumberInput v-model="form.expectedDocuments" label="จำนวนรายการคาดการณ์" :min="1" />
+            <CPNumberInput v-model="form.expectedDocuments" :label="$t('receiveForm.fields.expectedDocuments')" :min="1" />
           </CCol>
         </CRow>
 
         <div class="textarea-block">
           <CPQuillEditor
             v-model="form.note"
-            label="หมายเหตุ"
+            :label="$t('receiveForm.fields.note')"
             :editor-class="'receive-form-editor'"
           />
         </div>
@@ -86,22 +86,22 @@
         <div class="upload-header">
           <div class="section-title mb-0">
             <CIcon name="cil-cloud-upload" class="mr-2" />
-            อัปโหลดไฟล์
+            {{ $t('receiveForm.sections.uploadFiles') }}
           </div>
 
           <div class="upload-actions">
             <CButton color="light" class="action-pill" @click="triggerFilePicker">
               <CIcon name="cil-folder-open" class="mr-2" />
-              เลือกไฟล์
+              {{ $t('receiveForm.upload.selectFile') }}
             </CButton>
             <CButton color="danger" variant="outline" class="action-pill" @click="clearUploads">
               <CIcon name="cil-trash" class="mr-2" />
-              ล้างรายการ
+              {{ $t('receiveForm.upload.clearUploads') }}
             </CButton>
           </div>
         </div>
 
-        <div class="upload-caption">อัปโหลดเอกสารไฟล์ PDF / JPG / JPEG / PNG เพื่อจำลองขั้นตอน OCR</div>
+        <div class="upload-caption">{{ $t('receiveForm.upload.caption') }}</div>
 
         <input
           ref="fileInput"
@@ -116,11 +116,11 @@
           <div class="upload-dropzone__icon">
             <CIcon name="cil-cloud-upload" />
           </div>
-          <div class="upload-dropzone__title">เลือกไฟล์</div>
+          <div class="upload-dropzone__title">{{ $t('receiveForm.upload.selectFile') }}</div>
           <div class="upload-dropzone__hint">
-            ประเภทที่รองรับ: PDF, JPG, JPEG, PNG
+            {{ $t('receiveForm.upload.dropzoneHint') }}
           </div>
-          <div class="upload-dropzone__hint">ขนาดไฟล์ไม่เกิน 10MB</div>
+          <div class="upload-dropzone__hint">{{ $t('receiveForm.upload.sizeHint') }}</div>
         </div>
 
         <div v-if="uploadedFiles.length" class="file-grid">
@@ -137,7 +137,7 @@
 
         <div v-else class="upload-empty">
           <CIcon name="cil-folder-open" />
-          <div>ยังไม่มีไฟล์ที่อัปโหลด</div>
+          <div>{{ $t('receiveForm.upload.empty') }}</div>
         </div>
       </CCardBody>
     </CCard>
@@ -147,7 +147,7 @@
         <div class="ocr-header">
           <div class="section-title mb-0">
             <CIcon name="cil-layers" class="mr-2" />
-            ผลลัพธ์ OCR
+            {{ $t('receiveForm.sections.ocrResults') }}
           </div>
 
           <CButton color="info" class="refresh-button" @click="refreshMockResults">
@@ -213,7 +213,7 @@
           <CCardBody>
             <div class="section-title">
               <CIcon name="cil-list-rich" class="mr-2" />
-              รายการที่เตรียมบันทึก
+              {{ $t('receiveForm.sections.selectedItems') }}
             </div>
 
             <div v-if="selectedItems.length" class="selected-list">
@@ -221,17 +221,17 @@
                 <div>
                   <div class="selected-row__title">{{ item.documentName }}</div>
                   <div class="selected-row__detail">
-                    {{ item.categoryLabel }} • {{ item.referenceNo }} • ความมั่นใจ {{ item.confidenceLabel }}
+                    {{ item.categoryLabel }} • {{ item.referenceNo }} • {{ $t('receiveForm.selectedList.confidence') }} {{ item.confidenceLabel }}
                   </div>
                 </div>
                 <CButton size="sm" color="danger" variant="outline" shape="pill" @click="removeSelectedItem(item.id)">
-                  ลบ
+                  {{ $t('receiveForm.selectedList.remove') }}
                 </CButton>
               </div>
             </div>
 
             <div v-else class="selected-empty">
-              ยังไม่มีรายการที่เลือกจากผล OCR
+              {{ $t('receiveForm.selectedList.empty') }}
             </div>
           </CCardBody>
         </CCard>
@@ -242,24 +242,24 @@
           <CCardBody>
             <div class="section-title">
               <CIcon name="cil-speedometer" class="mr-2" />
-              สรุปการบันทึก
+              {{ $t('receiveForm.sections.summary') }}
             </div>
 
             <div class="summary-list">
               <div class="summary-row">
-                <span>จำนวนไฟล์</span>
+                <span>{{ $t('receiveForm.summaryList.totalFiles') }}</span>
                 <strong>{{ uploadedFiles.length }}</strong>
               </div>
               <div class="summary-row">
-                <span>ผล OCR พร้อมใช้งาน</span>
+                <span>{{ $t('receiveForm.summaryList.readyOcr') }}</span>
                 <strong>{{ readyCount }}</strong>
               </div>
               <div class="summary-row">
-                <span>รายการที่เลือก</span>
+                <span>{{ $t('receiveForm.summaryList.selectedItems') }}</span>
                 <strong>{{ selectedItems.length }}</strong>
               </div>
               <div class="summary-row">
-                <span>เอกสารคาดการณ์</span>
+                <span>{{ $t('receiveForm.summaryList.expectedDocs') }}</span>
                 <strong>{{ form.expectedDocuments || '-' }}</strong>
               </div>
             </div>
@@ -267,11 +267,11 @@
             <div class="summary-actions">
               <CButton color="success" block class="mb-2" @click="saveMock">
                 <CIcon name="cil-save" class="mr-2" />
-                บันทึกข้อมูล
+                {{ $t('receiveForm.actions.save') }}
               </CButton>
               <CButton color="light" block @click="resetForm">
                 <CIcon name="cil-reload" class="mr-2" />
-                เริ่มใหม่
+                {{ $t('receiveForm.actions.reset') }}
               </CButton>
             </div>
           </CCardBody>
@@ -290,14 +290,14 @@ import CPNumberInput from '@/projects/components/custom/CPNumberInput'
 import CPQuillEditor from '@/projects/components/custom/CPQuillEditor'
 import { notifyInfo, notifySuccess, notifyWarning } from '@/projects/utils/notify'
 
-function createFormState() {
+function createFormState(t) {
   return {
     documentNo: 'REC-2026-0038',
     receivedDate: '2026-03-10',
-    documentType: { value: 'incoming', label: 'หนังสือรับเข้า' },
+    documentType: { value: 'incoming', label: t('receiveForm.documentTypes.incoming') },
     senderName: 'สำนักวิชาวิทยาศาสตร์สุขภาพ',
-    destination: { value: 'saraban', label: 'งานสารบรรณกลาง' },
-    priority: { value: 'normal', label: 'ปกติ' },
+    destination: { value: 'saraban', label: t('receiveForm.destinations.saraban') },
+    priority: { value: 'normal', label: t('receiveForm.priorities.normal') },
     contactName: 'กัญญารัตน์ ศรีคำ',
     contactPhone: '053-917-000',
     expectedDocuments: 5,
@@ -305,7 +305,7 @@ function createFormState() {
   }
 }
 
-function createOcrResults() {
+function createOcrResults(t) {
   return [
     {
       id: 'ocr-001',
@@ -350,7 +350,7 @@ function createOcrResults() {
   ].map(item => ({
     ...item,
     confidenceLabel: `${item.confidence}%`,
-    statusLabel: item.statusKey === 'ready' ? 'พร้อมบันทึก' : 'ตรวจสอบ'
+    statusLabel: item.statusKey === 'ready' ? t('receiveForm.status.ready') : t('receiveForm.status.review')
   }))
 }
 
@@ -366,33 +366,33 @@ export default {
   },
   data() {
     return {
-      form: createFormState(),
+      form: createFormState(this.$t.bind(this)),
       uploadedFiles: [],
-      ocrResults: createOcrResults(),
+      ocrResults: createOcrResults(this.$t.bind(this)),
       selectedItems: [],
       documentTypeOptions: [
-        { value: 'incoming', label: 'หนังสือรับเข้า' },
-        { value: 'memo', label: 'บันทึกข้อความ' },
-        { value: 'project', label: 'เอกสารโครงการ' }
+        { value: 'incoming', label: this.$t('receiveForm.documentTypes.incoming') },
+        { value: 'memo', label: this.$t('receiveForm.documentTypes.memo') },
+        { value: 'project', label: this.$t('receiveForm.documentTypes.project') }
       ],
       destinationOptions: [
-        { value: 'saraban', label: 'งานสารบรรณกลาง' },
-        { value: 'secretary', label: 'สำนักงานเลขานุการ' },
-        { value: 'academic', label: 'ฝ่ายวิชาการ' }
+        { value: 'saraban', label: this.$t('receiveForm.destinations.saraban') },
+        { value: 'secretary', label: this.$t('receiveForm.destinations.secretary') },
+        { value: 'academic', label: this.$t('receiveForm.destinations.academic') }
       ],
       priorityOptions: [
-        { value: 'normal', label: 'ปกติ' },
-        { value: 'urgent', label: 'ด่วน' },
-        { value: 'very-urgent', label: 'ด่วนมาก' }
+        { value: 'normal', label: this.$t('receiveForm.priorities.normal') },
+        { value: 'urgent', label: this.$t('receiveForm.priorities.urgent') },
+        { value: 'very-urgent', label: this.$t('receiveForm.priorities.veryUrgent') }
       ],
       ocrFields: [
         { key: 'index', label: '#', _style: 'width: 60px; text-align:center;' },
-        { key: 'documentName', label: 'ชื่อเอกสาร' },
-        { key: 'referenceNo', label: 'เลขอ้างอิง', _style: 'width: 150px;' },
-        { key: 'categoryLabel', label: 'ประเภท', _style: 'width: 160px;' },
-        { key: 'confidenceLabel', label: 'ความมั่นใจ', _style: 'width: 180px;' },
-        { key: 'statusLabel', label: 'สถานะ', _style: 'width: 130px;' },
-        { key: 'actions', label: 'การดำเนินการ', _style: 'width: 140px; text-align:center;' }
+        { key: 'documentName', label: this.$t('receiveForm.ocrTable.documentName') },
+        { key: 'referenceNo', label: this.$t('receiveForm.ocrTable.referenceNo'), _style: 'width: 150px;' },
+        { key: 'categoryLabel', label: this.$t('receiveForm.ocrTable.category'), _style: 'width: 160px;' },
+        { key: 'confidenceLabel', label: this.$t('receiveForm.ocrTable.confidence'), _style: 'width: 180px;' },
+        { key: 'statusLabel', label: this.$t('receiveForm.ocrTable.status'), _style: 'width: 130px;' },
+        { key: 'actions', label: this.$t('receiveForm.ocrTable.actions'), _style: 'width: 140px; text-align:center;' }
       ]
     }
   },
@@ -402,9 +402,9 @@ export default {
     },
     heroStats() {
       return [
-        { label: 'Uploaded Files', value: this.uploadedFiles.length, hint: 'จำนวนไฟล์ที่แนบใน mock session', icon: 'cil-cloud-upload', iconClass: 'app-section-stat__icon--total' },
-        { label: 'OCR Ready', value: this.readyCount, hint: 'รายการที่พร้อมบันทึกโดยไม่ต้องแก้เพิ่ม', icon: 'cil-check-circle', iconClass: 'app-section-stat__icon--active' },
-        { label: 'Selected Items', value: this.selectedItems.length, hint: 'รายการที่ถูกเลือกเพื่อบันทึกเข้าระบบ', icon: 'cil-list-rich', iconClass: 'app-section-stat__icon--attention' }
+        { label: this.$t('receiveForm.stats.uploadedFiles'), value: this.uploadedFiles.length, hint: this.$t('receiveForm.stats.uploadedFilesHint'), icon: 'cil-cloud-upload', iconClass: 'app-section-stat__icon--total' },
+        { label: this.$t('receiveForm.stats.ocrReady'), value: this.readyCount, hint: this.$t('receiveForm.stats.ocrReadyHint'), icon: 'cil-check-circle', iconClass: 'app-section-stat__icon--active' },
+        { label: this.$t('receiveForm.stats.selectedItems'), value: this.selectedItems.length, hint: this.$t('receiveForm.stats.selectedItemsHint'), icon: 'cil-list-rich', iconClass: 'app-section-stat__icon--attention' }
       ]
     }
   },
@@ -428,14 +428,14 @@ export default {
 
       this.uploadedFiles = [...this.uploadedFiles, ...nextItems]
       event.target.value = ''
-      notifyInfo(this.$store, `เพิ่มไฟล์จำลองแล้ว ${nextItems.length} รายการ`)
+      notifyInfo(this.$store, this.$t('receiveForm.messages.filesAdded', { count: nextItems.length }))
     },
     removeUpload(id) {
       this.uploadedFiles = this.uploadedFiles.filter(item => item.id !== id)
     },
     clearUploads() {
       this.uploadedFiles = []
-      notifyWarning(this.$store, 'ล้างรายการไฟล์ที่อัปโหลดแล้ว')
+      notifyWarning(this.$store, this.$t('receiveForm.messages.filesCleared'))
     },
     refreshMockResults() {
       this.ocrResults = this.ocrResults.map(item => {
@@ -447,13 +447,13 @@ export default {
           confidence,
           confidenceLabel: `${confidence}%`,
           statusKey,
-          statusLabel: statusKey === 'ready' ? 'พร้อมบันทึก' : 'ตรวจสอบ'
+          statusLabel: statusKey === 'ready' ? this.$t('receiveForm.status.ready') : this.$t('receiveForm.status.review')
         }
       })
     },
     addSelectedItem(item) {
       if (this.selectedItems.some(selected => selected.id === item.id)) {
-        notifyInfo(this.$store, 'รายการนี้ถูกเลือกไว้แล้ว')
+        notifyInfo(this.$store, this.$t('receiveForm.messages.alreadySelected'))
         return
       }
       this.selectedItems = [...this.selectedItems, { ...item }]
@@ -463,21 +463,21 @@ export default {
     },
     saveMock() {
       if (!this.form.documentNo || !this.form.receivedDate || !this.form.senderName) {
-        notifyWarning(this.$store, 'กรุณากรอกข้อมูลเอกสารให้ครบก่อนบันทึก')
+        notifyWarning(this.$store, this.$t('receiveForm.messages.fillRequired'))
         return
       }
 
       if (!this.selectedItems.length) {
-        notifyWarning(this.$store, 'กรุณาเลือกรายการจากผล OCR อย่างน้อย 1 รายการ')
+        notifyWarning(this.$store, this.$t('receiveForm.messages.selectOcrRequired'))
         return
       }
 
-      notifySuccess(this.$store, `บันทึกข้อมูล mock สำเร็จ ${this.selectedItems.length} รายการ`)
+      notifySuccess(this.$store, this.$t('receiveForm.messages.saveSuccess', { count: this.selectedItems.length }))
     },
     resetForm() {
-      this.form = createFormState()
+      this.form = createFormState(this.$t.bind(this))
       this.uploadedFiles = []
-      this.ocrResults = createOcrResults()
+      this.ocrResults = createOcrResults(this.$t.bind(this))
       this.selectedItems = []
     },
     formatBytes(bytes) {

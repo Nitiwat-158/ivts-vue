@@ -5,7 +5,7 @@
     <div class="message-modal__header mb-4">
       <div class="message-modal__hero">
         <label class="h4 mb-1">{{ title }}</label>
-        <div class="text-muted">{{ isEditMode ? 'Update system message that supports multiple languages.' : 'Configure system message that supports multiple languages.' }}</div>
+        <div class="text-muted">{{ isEditMode ? $t('settingModals.message.updateDesc') : $t('settingModals.message.createDesc') }}</div>
       </div>
     </div>
 
@@ -15,28 +15,28 @@
       <CCol md="7" col="12">
         <CCard class="bg-style2 h-100 panel-card content-panel-card">
           <CCardBody class="content-panel-body">
-            <h5 class="mb-3 panel-title">Content</h5>
-            <CPInput v-model.trim="activeMessage" :label="'Message'" :required="true" placeholder="" />
-            <CPQuillEditor v-model="activeDescription" :label="'Description'" placeholder="" />
+            <h5 class="mb-3 panel-title">{{ $t('settingModals.common.content') }}</h5>
+            <CPInput v-model.trim="activeMessage" :label="$t('settingModals.message.message')" :required="true" placeholder="" />
+            <CPQuillEditor v-model="activeDescription" :label="$t('settingModals.common.description')" placeholder="" />
           </CCardBody>
         </CCard>
       </CCol>
       <CCol md="5" col="12">
         <CCard class="bg-style2 h-100 panel-card">
           <CCardBody>
-            <h5 class="mb-3 panel-title">Settings</h5>
-            <CPInput v-model.number="local.number" type="number" :label="'Number'" :required="true" placeholder="" />
-            <CPInput v-model.number="local.code" type="number" :label="'Code'" :required="true" placeholder="" />
+            <h5 class="mb-3 panel-title">{{ $t('settingModals.common.settings') }}</h5>
+            <CPInput v-model.number="local.number" type="number" :label="$t('settingModals.message.number')" :required="true" placeholder="" />
+            <CPInput v-model.number="local.code" type="number" :label="$t('settingModals.message.code')" :required="true" placeholder="" />
             <AuditInfoCard
               v-if="isEditMode"
-              title="Created"
+              :title="$t('settingModals.common.created')"
               icon="cil-user-follow"
               :by="createdByLabel"
               :at="createdAtLabel"
             />
             <AuditInfoCard
               v-if="isEditMode"
-              title="Updated"
+              :title="$t('settingModals.common.updated')"
               icon="cil-history"
               :by="updatedByLabel"
               :at="updatedAtLabel"
@@ -49,7 +49,7 @@
     <div class="modal-footer-wrap d-flex w-100 justify-content-end mt-3">
       <CButton class="mr-2 footer-btn-cancel footer-action-btn" color="danger" variant="outline" shape="pill" @click="onCancel">
         <CIcon name="cil-ban" class="mr-1 action-icon" />
-        <span class="font-weight-bold pr-1 pl-1"> Cancel </span>
+        <span class="font-weight-bold pr-1 pl-1"> {{ $t('common.actions.cancel') || 'Cancel' }} </span>
       </CButton>
       <CButton color="success" shape="pill" class="footer-btn-save footer-action-btn" :disabled="!canSubmit" @click="submit">
         <CIcon :name="submitIcon" class="mr-1 action-icon" />
@@ -93,7 +93,7 @@ export default {
   mixins: [RequiredValidation],
   props: {
     show: { type: Boolean, default: false },
-    title: { type: String, default: 'Create Message' },
+    title: { type: String, default: function() { return this.$t('settingModals.message.createMessage') || 'Create Message' } },
     value: { type: Object, default: () => emptyForm() }
   },
   data () {
@@ -107,7 +107,7 @@ export default {
       return !!(this.local && this.local._id)
     },
     submitLabel () {
-      return this.isEditMode ? 'Update' : 'Save'
+      return this.isEditMode ? (this.$t('common.actions.update') || 'Update') : (this.$t('common.actions.save') || 'Save')
     },
     submitIcon () {
       return this.isEditMode ? 'cil-pencil' : 'cil-save'

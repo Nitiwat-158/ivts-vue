@@ -75,17 +75,17 @@ export default {
       type: String,
       default: 'cil-fastfood'
     },
-    caption: {
+    title: {
       type: String,
-      default: 'อาหาร'
+      default: function() { return this.$t('asset.food') }
     },
     fields:{
       type: Array,
       default() {
         return [
           {key: "index", label: "#", _style: 'width:50px; text-align: center'},
-          {key: "name", label: "รายการ"},
-          {key: "total", label: "จำนวน"},
+          {key: "name", label: this.$t('asset.item')},
+          {key: "total", label: this.$t('asset.amount')},
         ]
       }
     },

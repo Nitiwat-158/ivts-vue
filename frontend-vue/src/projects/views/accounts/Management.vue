@@ -100,7 +100,8 @@ export default {
       showEditModal: false,
       showPermissionsModal: false,
       showInviteModal: false,
-      selectedAccount: null
+      selectedAccount: null,
+      lastUpdated: new Date()
     }
   },
   computed: {
@@ -108,7 +109,6 @@ export default {
       items: 'accounts/items',
       pagination: 'accounts/pagination',
       loading: 'accounts/loading',
-      lastUpdatedLabel: 'accounts/lastUpdatedLabel',
       statusOptions: 'accounts/statusOptions',
       groupOptions: 'accounts/groupOptions',
       accessGroups: 'accounts/accessGroups',
@@ -116,6 +116,16 @@ export default {
       accountSessions: 'accounts/accountSessions',
       trustedDevices: 'accounts/trustedDevices'
     }),
+    lastUpdatedLabel () {
+      if (!this.lastUpdated) return ''
+      const d = this.lastUpdated.getDate().toString().padStart(2, '0')
+      const m = (this.lastUpdated.getMonth() + 1).toString().padStart(2, '0')
+      const y = this.lastUpdated.getFullYear() + 543
+      const hh = this.lastUpdated.getHours().toString().padStart(2, '0')
+      const mm = this.lastUpdated.getMinutes().toString().padStart(2, '0')
+      const ss = this.lastUpdated.getSeconds().toString().padStart(2, '0')
+      return `${d}/${m}/${y} ${hh}:${mm}:${ss}`
+    },
     activeCount () {
       return this.items.filter(item => item && item.statusKey === 'ACTIVE').length
     },
@@ -139,6 +149,7 @@ export default {
     },
     async loadData (options = {}) {
       try {
+        this.lastUpdated = new Date()
         await this.$store.dispatch('accounts/explorer', {
           page: options.page || this.pagination.page || 1,
           limit: options.limit || this.pagination.limit || 25,

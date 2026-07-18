@@ -53,6 +53,70 @@ const en = {
             updated: "Updated"
         }
     },
+    ivts: {
+        dashboard: "Dashboard",
+        dashboardSubtitle: "Multi-camera Vehicle Tracking System",
+        vehicles: "Vehicles",
+        cameras: "Cameras",
+        userManagement: "User Management",
+        reports: "Reports",
+        searchByPlateOrOwner: "Search by plate or owner",
+        cameraLocations: "Camera locations",
+        cameraActive: "Active",
+        cameraInactive: "Inactive",
+        alerts: "Alerts",
+        cameraOffline: "Camera offline",
+        noSignalFor: "No signal for {min} min",
+        unregisteredVehicle: "Unregistered vehicle detected",
+        summary: "Summary",
+        totalCameras: "Total cameras",
+        vehiclesToday: "Vehicles today",
+        comparedToYesterday: "Compared to yesterday",
+        hourlyTraffic: "Hourly traffic",
+        topLocationsToday: "Top locations today",
+        unitCars: "cars",
+        addCamera: "Add camera",
+        editSave: "Edit / Save",
+        deleteCamera: "Delete camera",
+        searchCameras: "Search cameras",
+        id: "ID",
+        location: "Location",
+        status: "Status",
+        timeRange: {
+            today: "Today",
+            thisWeek: "This week",
+            custom: "Custom"
+        },
+        owner: "Owner",
+        modelColor: "Model / Color",
+        pathStatus: "Path status",
+        detectionTimeline: "Detection timeline",
+        cannotLoadDoc: "Cannot load document image",
+        ownerName: "Owner name",
+        accountStatus: "Account status",
+        rejectReason: "Reject reason",
+        rejectReasonPlaceholder: "Please specify reject reason",
+        confirmReject: "Confirm Reject",
+        docStatus: "Document status",
+        searchPlateUser: "Search by plate or user name",
+        filterAll: "All",
+        filterPending: "Pending",
+        filterApproved: "Approved",
+        filterRejected: "Rejected",
+        confirmDeleteVehicle: "Confirm delete vehicle",
+        confirmDeleteVehicleText: "Are you sure you want to delete vehicle {plate}? This action cannot be undone.",
+        toast: {
+            loadVehicleFailed: "Failed to load vehicles",
+            approveSuccess: "Approved successfully",
+            approveFailed: "Failed to approve",
+            deleteSuccess: "Deleted successfully",
+            deleteFailed: "Failed to delete",
+            approveDocSuccess: "Document approved successfully",
+            approveDocFailed: "Failed to approve document",
+            rejectDocSuccess: "Document rejected successfully",
+            rejectDocFailed: "Failed to reject document"
+        }
+    },
     auth: {
         errors: {
             title: "Authentication Error"
@@ -102,8 +166,11 @@ const en = {
     },
     nav: {
         dashboard: "Dashboard",
-        cctvViewer: "CCTV Viewer",
+        cctvViewer: "Cameras",
         ivtsRegistry: "IVTS Registry",
+        vehicleManagement: "Vehicles",
+        userManagement: "User Management",
+        reports: "Reports",
         businessOperations: "IVTS Operations",
         banks: "Banks",
         template: "Template",
@@ -892,5 +959,321 @@ const en = {
 en.nav = Object.assign({}, en.nav || {}, {
     projectOperations: 'Application Workspace'
 })
+
+en.vehicleManagement = {
+    title: 'Vehicle Management',
+    subtitle: 'Manage and review registered vehicle records',
+    sectionTitle: 'Vehicle Management',
+    showing: 'Showing 1-{count} of {total} vehicles',
+    statTotal: 'Total Vehicles',
+    statPending: 'Pending Verification',
+    statApproved: 'Approved',
+    statRejected: 'Rejected',
+    actions: 'Actions',
+    noItems: 'No items',
+    export: 'Export',
+    tooltipApprove: 'Approve',
+    tooltipReject: 'Reject',
+    tooltipView: 'View',
+    tooltipDelete: 'Delete'
+}
+
+en.cctvViewer = {
+    subtitle: 'Live security monitoring nodes registered under the campus network security framework.',
+    lastUpdated: 'Last Updated',
+    cameraNodes: 'Camera Nodes',
+    nodes: 'Nodes',
+    searchPlaceholder: 'Search camera...',
+    noCamerasFound: 'No cameras found',
+    connecting: 'Connecting to Stream...',
+    connectionLost: 'Camera Connection Lost',
+    checkHardware: 'Please check the device hardware or configuration',
+    cannotStream: 'Cannot display stream',
+    connectionError: 'Connection error',
+    checkUrlAccess: 'Please check the URL and access permissions and try again',
+    noCamera: 'No Camera Selected',
+    selectCameraHint: 'Choose a camera from the side menu to begin live monitoring.',
+    rtspUnsupported: 'RTSP cannot be played directly in a web browser. Please use an HTTP/HTTPS snapshot URL or a proxy service to transcode the stream.',
+    unsupportedUrl: 'Please check the camera URL, or use an image/stream URL supported by the browser.'
+}
+
+en.settingGroup = {
+    title: "Setting Group",
+    subtitle: "Maintain reusable master groups, language titles, and visibility state for downstream settings.",
+    tableTitle: "Group Management"
+}
+
+en.settingMessageAuthen = {
+    title: "Setting Message Authen",
+    subtitle: "Manage login message banners, display periods, and activation state from one workflow.",
+    tableTitle: "Setting Message Authen"
+}
+
+en.settingMessage = {
+    title: "Setting Message",
+    subtitle: "Manage localized message templates and keep reusable communication copy aligned.",
+    tableTitle: "Message Management"
+}
+
+en.settingVerification = {
+    title: "Setting Verification",
+    subtitle: "Manage verification definitions, related groups, and status mappings from one place.",
+    tableTitle: "Verification Management"
+}
+
+en.ivtsOperatingDesk = {
+    title: "IVTS Operating Desk",
+    period: "Period 2026",
+    menu: {
+        dashboard: "Dashboard",
+        approveVehicle: "Approve Vehicle",
+        history: "History",
+        report: "Report"
+    }
+}
+
+en.ivtsRegistry = {
+    title: "IVTS Registry",
+    subtitle: "Track agreements, ownership, review state, and renewal timing in one IAM-protected workspace.",
+    stats: {
+        totalRegistry: "Total Registry",
+        activeRegistry: "Active Registry",
+        expiringSoon: "Expiring Soon",
+        pendingReview: "Pending Review"
+    },
+    searchPlaceholder: "Search agreements...",
+    settingModals: {
+        common: {
+            content: "Content",
+            title: "Title",
+            description: "Description",
+            settings: "Settings",
+            key: "Key",
+            state: "State",
+            status: "Status",
+            active: "Active",
+            inactive: "Inactive",
+            draft: "Draft",
+            created: "Created",
+            updated: "Updated"
+        },
+        group: {
+            createDesc: "Configure group that supports multiple languages.",
+            updateDesc: "Update group that supports multiple languages.",
+            createGroup: "Create Group"
+        },
+        message: {
+            createDesc: "Configure system message that supports multiple languages.",
+            updateDesc: "Update system message that supports multiple languages.",
+            message: "Message",
+            number: "Number",
+            code: "Code",
+            createMessage: "Create Message"
+        },
+        verification: {
+            createDesc: "Configure verification setting with multilingual content.",
+            updateDesc: "Update verification setting with multilingual content.",
+            group: "Group",
+            status: "Status",
+            createVerification: "Create Verification"
+        },
+        messageAuthen: {
+            createDesc: "Configure login announcement that supports multiple languages.",
+            updateDesc: "Update login announcement that supports multiple languages.",
+            recommendedMax: "Recommended 80 characters max",
+            startDate: "Start date",
+            endDate: "End date",
+            dateError: "End date must be the same or later than start date.",
+            createTitle: "Create Setting Message Authen",
+            saveDraft: "Save as Draft",
+            updateDraft: "Update as Draft"
+        }
+    },
+    table: {
+        agreementNo: "Agreement No",
+        partner: "Partner",
+        owner: "Owner",
+        period: "Period",
+        status: "Status",
+        expires: "Expires",
+        actions: "Actions"
+    }
+}
+
+en.assignmentManagement = {
+    title: "Assignment Management",
+    subtitle: "Bind accounts to groups, define data scope, and control delegated access boundaries.",
+    tableTitle: "Assignment Management",
+    stats: {
+        assignments: "Assignments",
+        active: "Active",
+        scoped: "Scoped"
+    },
+    fields: {
+        account: "Account",
+        group: "Group",
+        dataScope: "Data Scope",
+        scopeUnits: "Scope Units",
+        active: "Status",
+        actions: "#"
+    },
+    form: {
+        account: "Account",
+        group: "Group",
+        dataScope: "Data Scope",
+        active: "Active",
+        scopeUnits: "Scope Units",
+        scopeUnitsHint: "Comma-separated org unit codes/names"
+    },
+    actions: {
+        add: "Add Assignment",
+        edit: "Edit",
+        delete: "Delete"
+    },
+    messages: {
+        loadError: "Cannot load assignments.",
+        created: "Assignment created.",
+        updated: "Assignment updated.",
+        saveError: "Cannot save assignment.",
+        removed: "Assignment removed.",
+        removeError: "Cannot remove assignment."
+    },
+    scopes: {
+        self: "Self",
+        unit: "Unit",
+        org: "Org"
+    }
+}
+
+en.receiveForm = {
+    title: "Receive / Investigate Form",
+    subtitle: "Mockup screen for recording document details, uploading files, and verifying OCR results before saving to the system",
+    metaLabel: "Data Mode",
+    metaValue: "Mock data",
+    sections: {
+        documentInfo: "Document Information",
+        uploadFiles: "Upload Files",
+        ocrResults: "OCR Results",
+        selectedItems: "Items to Save",
+        summary: "Save Summary"
+    },
+    fields: {
+        documentNo: "Document No.",
+        receivedDate: "Received Date",
+        documentType: "Document Type",
+        senderName: "Sender/Department",
+        destination: "Responsible Department",
+        priority: "Priority Level",
+        contactName: "Coordinator",
+        contactPhone: "Contact Phone",
+        expectedDocuments: "Expected Documents Count",
+        note: "Note"
+    },
+    upload: {
+        selectFile: "Select File",
+        clearUploads: "Clear Uploads",
+        caption: "Upload PDF / JPG / JPEG / PNG files to simulate the OCR process",
+        dropzoneHint: "Supported types: PDF, JPG, JPEG, PNG",
+        sizeHint: "File size must not exceed 10MB",
+        empty: "No files uploaded yet"
+    },
+    ocrTable: {
+        documentName: "Document Name",
+        referenceNo: "Reference No.",
+        category: "Category",
+        confidence: "Confidence",
+        status: "Status",
+        actions: "Actions"
+    },
+    selectedList: {
+        empty: "No items selected from OCR results yet",
+        remove: "Remove",
+        confidence: "Confidence"
+    },
+    summaryList: {
+        totalFiles: "Total Files",
+        readyOcr: "Ready OCR Results",
+        selectedItems: "Selected Items",
+        expectedDocs: "Expected Docs"
+    },
+    actions: {
+        save: "Save Data",
+        reset: "Start Over"
+    },
+    stats: {
+        uploadedFiles: "Uploaded Files",
+        uploadedFilesHint: "Number of attached files in the mock session",
+        ocrReady: "OCR Ready",
+        ocrReadyHint: "Items ready to be saved without further editing",
+        selectedItems: "Selected Items",
+        selectedItemsHint: "Items selected to be saved to the system"
+    },
+    status: {
+        ready: "Ready",
+        review: "Review"
+    },
+    messages: {
+        filesAdded: "Added {count} mock files",
+        filesCleared: "Uploaded files cleared",
+        alreadySelected: "This item is already selected",
+        fillRequired: "Please fill in all document details before saving",
+        selectOcrRequired: "Please select at least 1 item from the OCR results",
+        saveSuccess: "Successfully saved {count} mock items"
+    },
+    documentTypes: {
+        incoming: "Incoming Document",
+        memo: "Memo",
+        project: "Project Document"
+    },
+    destinations: {
+        saraban: "Central Saraban",
+        secretary: "Secretary Office",
+        academic: "Academic Department"
+    },
+    priorities: {
+        normal: "Normal",
+        urgent: "Urgent",
+        veryUrgent: "Very Urgent"
+    },
+    headerAccount: {
+        avatarAlt: "Account photo",
+        checkProfile: "Profile Information",
+        logout: "Sign out",
+        accountFallback: "Account",
+        noOrganizationData: "No organization data",
+        unit: "Unit",
+        affiliation: "Affiliation",
+        accountCode: "Account Code",
+        role: "Role",
+        email: "Email",
+        position: "Position",
+        personnelType: "Personnel Type",
+        changeProfilePhoto: "Change profile photo",
+        imageTypeError: "Please choose an image file.",
+        imageSizeError: "Image must be smaller than 3 MB.",
+        imageReadError: "Unable to read the selected image.",
+        imageSaveError: "Unable to update profile photo."
+    },
+    countup: {
+        elapsed: "Elapsed:",
+        hours: "hours",
+        minutes: "minutes",
+        seconds: "seconds"
+    },
+    dialog: {
+        disasterAlert: "Emergency Alert"
+    },
+    asset: {
+        food: "Food",
+        item: "Item",
+        license: "License No.",
+        distance: "Distance",
+        amount: "Amount"
+    },
+    dashboard: {
+        cctvAlert: "Will navigate to CCTV view:",
+        eventAlert: "Check event:"
+    }
+}
 
 export default en

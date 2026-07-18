@@ -3,7 +3,7 @@
     <div class="search-box mb-3">
       <CInput
         v-model="searchQuery"
-        placeholder="Search camera..."
+        :placeholder="$t('cctvViewer.searchPlaceholder')"
         size="sm"
         class="mb-0"
       >
@@ -30,7 +30,7 @@
         </div>
       </div>
       <div v-if="filteredCameras.length === 0" class="empty-state text-center p-3 text-muted">
-        No cameras found
+        {{ $t('cctvViewer.noCamerasFound') }}
       </div>
     </div>
   </div>

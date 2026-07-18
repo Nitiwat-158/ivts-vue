@@ -55,6 +55,70 @@ const th = {
             updated: "แก้ไขเมื่อ"
         }
     },
+    ivts: {
+        dashboard: "Dashboard",
+        dashboardSubtitle: "ระบบติดตามยานพาหนะผ่านกล้อง CCTV",
+        vehicles: "ทะเบียนรถ",
+        cameras: "จัดการกล้อง",
+        userManagement: "จัดการสิทธิ์ผู้ใช้",
+        reports: "รายงาน",
+        searchByPlateOrOwner: "ค้นหาทะเบียนรถหรือเจ้าของ",
+        cameraLocations: "ตำแหน่งกล้องบนแผนที่",
+        cameraActive: "กล้องปกติ (Active)",
+        cameraInactive: "ขัดข้อง (Inactive)",
+        alerts: "แจ้งเตือน",
+        cameraOffline: "กล้อง offline",
+        noSignalFor: "ไม่มีสัญญาณมา {min} นาที",
+        unregisteredVehicle: "พบรถไม่มีทะเบียนในระบบ",
+        summary: "สถิติสรุป",
+        totalCameras: "กล้องทั้งหมด",
+        vehiclesToday: "รถวันนี้",
+        comparedToYesterday: "เทียบเมื่อวาน",
+        hourlyTraffic: "รถรายชั่วโมง",
+        topLocationsToday: "Top locations วันนี้",
+        unitCars: "คัน",
+        addCamera: "เพิ่มกล้อง",
+        editSave: "แก้ไข / บันทึก",
+        deleteCamera: "ลบกล้อง",
+        searchCameras: "ค้นหากล้อง",
+        id: "รหัส",
+        location: "ตำแหน่ง",
+        status: "สถานะ",
+        timeRange: {
+            today: "วันนี้",
+            thisWeek: "สัปดาห์นี้",
+            custom: "กำหนดเอง"
+        },
+        owner: "เจ้าของ",
+        modelColor: "รุ่น / สี",
+        pathStatus: "สถานะเส้นทาง",
+        detectionTimeline: "ไทม์ไลน์การตรวจจับ",
+        cannotLoadDoc: "ไม่สามารถโหลดรูปเอกสารได้",
+        ownerName: "ชื่อเจ้าของ",
+        accountStatus: "สถานะบัญชี",
+        rejectReason: "เหตุผลการปฏิเสธ",
+        rejectReasonPlaceholder: "กรุณาระบุเหตุผลการปฏิเสธ",
+        confirmReject: "ยืนยัน Reject",
+        docStatus: "สถานะเอกสาร",
+        searchPlateUser: "ค้นหาด้วยทะเบียนรถหรือชื่อผู้ใช้",
+        filterAll: "ทั้งหมด",
+        filterPending: "รอตรวจสอบ",
+        filterApproved: "อนุมัติแล้ว",
+        filterRejected: "ถูกปฏิเสธ",
+        confirmDeleteVehicle: "ยืนยันการลบรถ",
+        confirmDeleteVehicleText: "คุณแน่ใจหรือไม่ว่าต้องการลบรถทะเบียน {plate}? การกระทำนี้ไม่สามารถย้อนกลับได้",
+        toast: {
+            loadVehicleFailed: "ไม่สามารถโหลดข้อมูลรถได้",
+            approveSuccess: "อนุมัติเรียบร้อย",
+            approveFailed: "อนุมัติไม่สำเร็จ",
+            deleteSuccess: "ลบรถเรียบร้อย",
+            deleteFailed: "ลบรถไม่สำเร็จ",
+            approveDocSuccess: "อนุมัติเอกสารเรียบร้อย",
+            approveDocFailed: "อนุมัติเอกสารไม่สำเร็จ",
+            rejectDocSuccess: "ปฏิเสธเอกสารเรียบร้อย",
+            rejectDocFailed: "ปฏิเสธเอกสารไม่สำเร็จ"
+        }
+    },
     auth: {
         errors: {
             title: "เกิดข้อผิดพลาดในการยืนยันตัวตน"
@@ -103,9 +167,12 @@ const th = {
         }
     },
     nav: {
-        dashboard: "แดชบอร์ด",
-        cctvViewer: "กล้อง CCTV",
+        dashboard: "Dashboard",
+        cctvViewer: "จัดการกล้อง",
         ivtsRegistry: "ทะเบียน IVTS",
+        vehicleManagement: "ทะเบียนรถ",
+        userManagement: "จัดการสิทธิ์ผู้ใช้",
+        reports: "รายงาน",
         businessOperations: "งานปฏิบัติการ IVTS",
         banks: "ธนาคาร",
         template: "ต้นแบบ",
@@ -874,5 +941,321 @@ const th = {
 th.nav = Object.assign({}, th.nav || {}, {
     projectOperations: 'พื้นที่แอปพลิเคชัน'
 })
+
+th.vehicleManagement = {
+    title: 'จัดการทะเบียนรถ',
+    subtitle: 'จัดการและตรวจสอบข้อมูลยานพาหนะที่ลงทะเบียน',
+    sectionTitle: 'จัดการทะเบียนรถ',
+    showing: 'แสดง 1-{count} จาก {total} คัน',
+    statTotal: 'รถทั้งหมด',
+    statPending: 'รอตรวจสอบ',
+    statApproved: 'อนุมัติแล้ว',
+    statRejected: 'ถูกปฏิเสธ',
+    actions: 'จัดการ',
+    noItems: 'ไม่พบรายการ',
+    export: 'ส่งออก',
+    tooltipApprove: 'อนุมัติ',
+    tooltipReject: 'ปฏิเสธ',
+    tooltipView: 'ดูรายละเอียด',
+    tooltipDelete: 'ลบ'
+}
+
+th.cctvViewer = {
+    subtitle: 'โหนดกล้องรักษาความปลอดภัยที่ลงทะเบียนในเครือข่าย campus',
+    lastUpdated: 'อัปเดตล่าสุด',
+    cameraNodes: 'กล้องทั้งหมด',
+    nodes: 'โหนด',
+    searchPlaceholder: 'ค้นหากล้อง...',
+    noCamerasFound: 'ไม่พบกล้อง',
+    connecting: 'กำลังเชื่อมต่อ...',
+    connectionLost: 'การเชื่อมต่อกล้องขาดหาย',
+    checkHardware: 'กรุณาตรวจสอบฮาร์ดแวร์หรือการตั้งค่าของกล้อง',
+    cannotStream: 'ไม่สามารถแสดงผลสตรีมได้',
+    connectionError: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
+    checkUrlAccess: 'ตรวจสอบ URL และการเข้าถึงถูกต้องอีกครั้ง',
+    noCamera: 'ยังไม่ได้เลือกกล้อง',
+    selectCameraHint: 'เลือกกล้องจากเมนูด้านซ้ายเพื่อเริ่มดูภาพสด',
+    rtspUnsupported: 'RTSP ไม่สามารถเล่นได้โดยตรงในเว็บเบราว์เซอร์ โปรดใช้ URL ที่เป็น HTTP/HTTPS snapshot หรือ proxy service ที่แปลงสตรีมให้เข้ากับเบราว์เซอร์',
+    unsupportedUrl: 'กรุณาตรวจสอบ URL ของกล้อง หรือใช้ URL สำหรับรูปภาพ/สตรีมที่เบราว์เซอร์รองรับ'
+}
+
+th.settingGroup = {
+    title: "Setting Group",
+    subtitle: "Maintain reusable master groups, language titles, and visibility state for downstream settings.",
+    tableTitle: "Group Management"
+}
+
+th.settingMessageAuthen = {
+    title: "Setting Message Authen",
+    subtitle: "Manage login message banners, display periods, and activation state from one workflow.",
+    tableTitle: "Setting Message Authen"
+}
+
+th.settingMessage = {
+    title: "Setting Message",
+    subtitle: "Manage localized message templates and keep reusable communication copy aligned.",
+    tableTitle: "Message Management"
+}
+
+th.settingVerification = {
+    title: "Setting Verification",
+    subtitle: "Manage verification definitions, related groups, and status mappings from one place.",
+    tableTitle: "Verification Management"
+}
+
+th.ivtsOperatingDesk = {
+    title: "IVTS Operating Desk",
+    period: "Period 2026",
+    menu: {
+        dashboard: "Dashboard",
+        approveVehicle: "Approve Vehicle",
+        history: "History",
+        report: "Report"
+    }
+}
+
+th.ivtsRegistry = {
+    title: "IVTS Registry",
+    subtitle: "Track agreements, ownership, review state, and renewal timing in one IAM-protected workspace.",
+    stats: {
+        totalRegistry: "Total Registry",
+        activeRegistry: "Active Registry",
+        expiringSoon: "Expiring Soon",
+        pendingReview: "Pending Review"
+    },
+    searchPlaceholder: "Search agreements...",
+    settingModals: {
+        common: {
+            content: "Content",
+            title: "Title",
+            description: "Description",
+            settings: "Settings",
+            key: "Key",
+            state: "State",
+            status: "Status",
+            active: "Active",
+            inactive: "Inactive",
+            draft: "Draft",
+            created: "Created",
+            updated: "Updated"
+        },
+        group: {
+            createDesc: "Configure group that supports multiple languages.",
+            updateDesc: "Update group that supports multiple languages.",
+            createGroup: "Create Group"
+        },
+        message: {
+            createDesc: "Configure system message that supports multiple languages.",
+            updateDesc: "Update system message that supports multiple languages.",
+            message: "Message",
+            number: "Number",
+            code: "Code",
+            createMessage: "Create Message"
+        },
+        verification: {
+            createDesc: "Configure verification setting with multilingual content.",
+            updateDesc: "Update verification setting with multilingual content.",
+            group: "Group",
+            status: "Status",
+            createVerification: "Create Verification"
+        },
+        messageAuthen: {
+            createDesc: "Configure login announcement that supports multiple languages.",
+            updateDesc: "Update login announcement that supports multiple languages.",
+            recommendedMax: "Recommended 80 characters max",
+            startDate: "Start date",
+            endDate: "End date",
+            dateError: "End date must be the same or later than start date.",
+            createTitle: "Create Setting Message Authen",
+            saveDraft: "Save as Draft",
+            updateDraft: "Update as Draft"
+        }
+    },
+    table: {
+        agreementNo: "Agreement No",
+        partner: "Partner",
+        owner: "Owner",
+        period: "Period",
+        status: "Status",
+        expires: "Expires",
+        actions: "Actions"
+    }
+}
+
+th.assignmentManagement = {
+    title: "Assignment Management",
+    subtitle: "Bind accounts to groups, define data scope, and control delegated access boundaries.",
+    tableTitle: "Assignment Management",
+    stats: {
+        assignments: "Assignments",
+        active: "Active",
+        scoped: "Scoped"
+    },
+    fields: {
+        account: "Account",
+        group: "Group",
+        dataScope: "Data Scope",
+        scopeUnits: "Scope Units",
+        active: "Status",
+        actions: "#"
+    },
+    form: {
+        account: "Account",
+        group: "Group",
+        dataScope: "Data Scope",
+        active: "Active",
+        scopeUnits: "Scope Units",
+        scopeUnitsHint: "Comma-separated org unit codes/names"
+    },
+    actions: {
+        add: "Add Assignment",
+        edit: "Edit",
+        delete: "Delete"
+    },
+    messages: {
+        loadError: "Cannot load assignments.",
+        created: "Assignment created.",
+        updated: "Assignment updated.",
+        saveError: "Cannot save assignment.",
+        removed: "Assignment removed.",
+        removeError: "Cannot remove assignment."
+    },
+    scopes: {
+        self: "Self",
+        unit: "Unit",
+        org: "Org"
+    }
+}
+
+th.receiveForm = {
+    title: "แบบฟอร์มรับ / สืบมา",
+    subtitle: "หน้าจอ mockup สำหรับบันทึกข้อมูลเอกสาร, แนบไฟล์, และตรวจผลลัพธ์ OCR ก่อนบันทึกเข้าระบบ",
+    metaLabel: "โหมดข้อมูล",
+    metaValue: "Mock data",
+    sections: {
+        documentInfo: "ข้อมูลเอกสาร",
+        uploadFiles: "อัปโหลดไฟล์",
+        ocrResults: "ผลลัพธ์ OCR",
+        selectedItems: "รายการที่เตรียมบันทึก",
+        summary: "สรุปการบันทึก"
+    },
+    fields: {
+        documentNo: "เลขที่เอกสาร",
+        receivedDate: "วันที่รับเอกสาร",
+        documentType: "ประเภทเอกสาร",
+        senderName: "หน่วยงาน/ผู้ส่ง",
+        destination: "หน่วยงานผู้รับผิดชอบ",
+        priority: "ระดับความเร่งด่วน",
+        contactName: "ผู้ประสานงาน",
+        contactPhone: "เบอร์ติดต่อ",
+        expectedDocuments: "จำนวนรายการคาดการณ์",
+        note: "หมายเหตุ"
+    },
+    upload: {
+        selectFile: "เลือกไฟล์",
+        clearUploads: "ล้างรายการ",
+        caption: "อัปโหลดเอกสารไฟล์ PDF / JPG / JPEG / PNG เพื่อจำลองขั้นตอน OCR",
+        dropzoneHint: "ประเภทที่รองรับ: PDF, JPG, JPEG, PNG",
+        sizeHint: "ขนาดไฟล์ไม่เกิน 10MB",
+        empty: "ยังไม่มีไฟล์ที่อัปโหลด"
+    },
+    ocrTable: {
+        documentName: "ชื่อเอกสาร",
+        referenceNo: "เลขอ้างอิง",
+        category: "ประเภท",
+        confidence: "ความมั่นใจ",
+        status: "สถานะ",
+        actions: "การดำเนินการ"
+    },
+    selectedList: {
+        empty: "ยังไม่มีรายการที่เลือกจากผล OCR",
+        remove: "ลบ",
+        confidence: "ความมั่นใจ"
+    },
+    summaryList: {
+        totalFiles: "จำนวนไฟล์",
+        readyOcr: "ผล OCR พร้อมใช้งาน",
+        selectedItems: "รายการที่เลือก",
+        expectedDocs: "เอกสารคาดการณ์"
+    },
+    actions: {
+        save: "บันทึกข้อมูล",
+        reset: "เริ่มใหม่"
+    },
+    stats: {
+        uploadedFiles: "Uploaded Files",
+        uploadedFilesHint: "จำนวนไฟล์ที่แนบใน mock session",
+        ocrReady: "OCR Ready",
+        ocrReadyHint: "รายการที่พร้อมบันทึกโดยไม่ต้องแก้เพิ่ม",
+        selectedItems: "Selected Items",
+        selectedItemsHint: "รายการที่ถูกเลือกเพื่อบันทึกเข้าระบบ"
+    },
+    status: {
+        ready: "พร้อมบันทึก",
+        review: "ตรวจสอบ"
+    },
+    messages: {
+        filesAdded: "เพิ่มไฟล์จำลองแล้ว {count} รายการ",
+        filesCleared: "ล้างรายการไฟล์ที่อัปโหลดแล้ว",
+        alreadySelected: "รายการนี้ถูกเลือกไว้แล้ว",
+        fillRequired: "กรุณากรอกข้อมูลเอกสารให้ครบก่อนบันทึก",
+        selectOcrRequired: "กรุณาเลือกรายการจากผล OCR อย่างน้อย 1 รายการ",
+        saveSuccess: "บันทึกข้อมูล mock สำเร็จ {count} รายการ"
+    },
+    documentTypes: {
+        incoming: "หนังสือรับเข้า",
+        memo: "บันทึกข้อความ",
+        project: "เอกสารโครงการ"
+    },
+    destinations: {
+        saraban: "งานสารบรรณกลาง",
+        secretary: "สำนักงานเลขานุการ",
+        academic: "ฝ่ายวิชาการ"
+    },
+    priorities: {
+        normal: "ปกติ",
+        urgent: "ด่วน",
+        veryUrgent: "ด่วนที่สุด"
+    },
+    headerAccount: {
+        avatarAlt: "รูปบัญชีผู้ใช้",
+        checkProfile: "ข้อมูลโปรไฟล์",
+        logout: "ออกจากระบบ",
+        accountFallback: "บัญชีผู้ใช้",
+        noOrganizationData: "ไม่พบข้อมูลหน่วยงาน",
+        unit: "หน่วยงาน",
+        affiliation: "สังกัด",
+        accountCode: "Account Code",
+        role: "Role",
+        email: "อีเมล",
+        position: "ตำแหน่ง",
+        personnelType: "ประเภทบุคลากร",
+        changeProfilePhoto: "เปลี่ยนรูปโปรไฟล์",
+        imageTypeError: "กรุณาเลือกรูปภาพเท่านั้น",
+        imageSizeError: "รูปต้องมีขนาดไม่เกิน 3 MB",
+        imageReadError: "ไม่สามารถอ่านรูปที่เลือกได้",
+        imageSaveError: "ไม่สามารถอัปเดตรูปโปรไฟล์ได้"
+    },
+    countup: {
+        elapsed: "ผ่านไปแล้ว:",
+        hours: "ชั่วโมง",
+        minutes: "นาที",
+        seconds: "วินาที"
+    },
+    dialog: {
+        disasterAlert: "แจ้งเหตุฉุกเฉิน"
+    },
+    asset: {
+        food: "อาหาร",
+        item: "รายการ",
+        license: "หมายเลข",
+        distance: "ระยะทาง",
+        amount: "จำนวน"
+    },
+    dashboard: {
+        cctvAlert: "จะนำไปหน้าดูกล้องวงจรปิด:",
+        eventAlert: "ตรวจสอบเหตุการณ์:"
+    }
+}
 
 export default th

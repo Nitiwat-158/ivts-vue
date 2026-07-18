@@ -1,22 +1,12 @@
 <template>
   <div class="ivts-registry-page">
-    <div class="ivts-header">
-      <div>
-        <div class="ivts-header__eyebrow">IVTS Management</div>
-        <h1>IVTS Registry</h1>
-        <p>Track agreements, ownership, review state, and renewal timing in one IAM-protected workspace.</p>
-      </div>
-      <div class="ivts-header__actions">
-        <CButton color="primary" variant="outline" :disabled="loading" @click="fetchAll">
-          <CIcon name="cil-reload" class="mr-2" />
-          Refresh
-        </CButton>
-        <CButton color="success" variant="outline" :disabled="saving" @click="seedDemo">
-          <CIcon name="cil-plus" class="mr-2" />
-          Seed Demo
-        </CButton>
-      </div>
-    </div>
+    <AppSectionHero
+      :title="$t('ivtsRegistry.title')"
+      :subtitle="$t('ivtsRegistry.subtitle')"
+      meta-label="LAST UPDATED"
+      :meta-value="lastUpdatedLabel"
+      @refresh="refreshData"
+    />
 
     <CRow>
       <CCol v-for="item in statCards" :key="item.key" xl="3" md="6" class="mb-3">
@@ -63,9 +53,13 @@
         <CCard class="ivts-card h-100">
           <CCardBody>
             <div class="ivts-toolbar">
-              <CInput v-model.trim="filters.q" placeholder="Search IVTS no., title, partner, owner" class="ivts-search" @keyup.enter="fetchDocuments" />
+              <CInput v-model.trim="filters.q" :placeholder="$t('ivtsRegistry.searchPlaceholder')" class="ivts-search" @keyup.enter="fetchDocuments" />
               <CSelect v-model="filters.status" :options="filterStatusOptions" class="ivts-status" />
               <CButton color="primary" @click="fetchDocuments">Search</CButton>
+              <CButton color="success" variant="outline" :disabled="saving" @click="seedDemo">
+                <CIcon name="cil-plus" class="mr-2" />
+                Seed Demo
+              </CButton>
             </div>
 
             <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
@@ -73,12 +67,12 @@
               <table class="ivts-table">
                 <thead>
                   <tr>
-                    <th>IVTS</th>
-                    <th>Partner</th>
-                    <th>Owner</th>
-                    <th>Period</th>
-                    <th>Status</th>
-                    <th></th>
+                    <th>{{ $t('ivtsRegistry.table.agreementNo') }}</th>
+                    <th>{{ $t('ivtsRegistry.table.partner') }}</th>
+                    <th>{{ $t('ivtsRegistry.table.owner') }}</th>
+                    <th>{{ $t('ivtsRegistry.table.period') }}</th>
+                    <th>{{ $t('ivtsRegistry.table.status') }}</th>
+                    <th>{{ $t('ivtsRegistry.table.actions') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -125,6 +119,7 @@
 </template>
 
 <script>
+import AppSectionHero from '@/projects/components/layout/AppSectionHero.vue'
 import api from '@/service/api'
 
 const EMPTY_FORM = {
@@ -157,8 +152,12 @@ function toInputDate(value) {
 
 export default {
   name: 'IVTSRegistry',
+  components: {
+    AppSectionHero
+  },
   data () {
     return {
+      lastUpdated: new Date(),
       loading: false,
       saving: false,
       errorMessage: '',
@@ -195,12 +194,22 @@ export default {
     }
   },
   computed: {
+    lastUpdatedLabel() {
+      if (!this.lastUpdated) return ''
+      const d = this.lastUpdated.getDate().toString().padStart(2, '0')
+      const m = (this.lastUpdated.getMonth() + 1).toString().padStart(2, '0')
+      const y = this.lastUpdated.getFullYear() + 543
+      const hh = this.lastUpdated.getHours().toString().padStart(2, '0')
+      const mm = this.lastUpdated.getMinutes().toString().padStart(2, '0')
+      const ss = this.lastUpdated.getSeconds().toString().padStart(2, '0')
+      return `${d}/${m}/${y} ${hh}:${mm}:${ss}`
+    },
     statCards () {
       return [
-        { key: 'total', label: 'Total IVTSs', value: this.stats.total, hint: 'All registry records' },
-        { key: 'active', label: 'Active', value: this.stats.active, hint: 'Valid agreements' },
-        { key: 'review', label: 'In Review', value: this.stats.review, hint: 'Waiting for approval' },
-        { key: 'expiring', label: 'Expiring', value: this.stats.expiring, hint: 'Renewal within 90 days' }
+        { key: 'total', label: this.$t('ivtsRegistry.stats.totalRegistry'), value: this.stats.total, hint: 'All registry records' },
+        { key: 'active', label: this.$t('ivtsRegistry.stats.activeRegistry'), value: this.stats.active, hint: 'Valid agreements' },
+        { key: 'review', label: this.$t('ivtsRegistry.stats.pendingReview'), value: this.stats.review, hint: 'Waiting for approval' },
+        { key: 'expiring', label: this.$t('ivtsRegistry.stats.expiringSoon'), value: this.stats.expiring, hint: 'Renewal within 90 days' }
       ]
     }
   },
@@ -208,6 +217,10 @@ export default {
     this.fetchAll()
   },
   methods: {
+    refreshData () {
+      this.lastUpdated = new Date()
+      this.fetchAll()
+    },
     async fetchAll () {
       await Promise.all([this.fetchStats(), this.fetchDocuments()])
     },

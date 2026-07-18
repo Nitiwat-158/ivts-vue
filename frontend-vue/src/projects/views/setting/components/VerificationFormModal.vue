@@ -5,7 +5,7 @@
     <div class="message-modal__header mb-4">
       <div class="message-modal__hero">
         <label class="h4 mb-1">{{ title }}</label>
-        <div class="text-muted">{{ isEditMode ? 'Update verification setting with multilingual content.' : 'Configure verification setting with multilingual content.' }}</div>
+        <div class="text-muted">{{ isEditMode ? $t('settingModals.verification.updateDesc') : $t('settingModals.verification.createDesc') }}</div>
       </div>
     </div>
 
@@ -15,21 +15,21 @@
       <CCol md="7" col="12">
         <CCard class="bg-style2 h-100 panel-card content-panel-card">
           <CCardBody class="content-panel-body">
-            <h5 class="mb-3 panel-title">Content</h5>
-            <CPInput v-model.trim="activeTitle" :label="'Title'" :required="true" placeholder="" />
-            <CPQuillEditor v-model="activeDescription" :label="'Description'" placeholder="" />
+            <h5 class="mb-3 panel-title">{{ $t('settingModals.common.content') }}</h5>
+            <CPInput v-model.trim="activeTitle" :label="$t('settingModals.common.title')" :required="true" placeholder="" />
+            <CPQuillEditor v-model="activeDescription" :label="$t('settingModals.common.description')" placeholder="" />
           </CCardBody>
         </CCard>
       </CCol>
       <CCol md="5" col="12">
         <CCard class="bg-style2 h-100 panel-card">
           <CCardBody>
-            <h5 class="mb-3 panel-title">Settings</h5>
+            <h5 class="mb-3 panel-title">{{ $t('settingModals.common.settings') }}</h5>
             <div class="setting-field mb-3">
               <CPSelect
                 v-model="groupSelected"
                 :options="groupOptions"
-                label="Group"
+                :label="$t('settingModals.verification.group')"
                 :required="true"
                 label-key="label"
                 track-by="value"
@@ -45,7 +45,7 @@
               <CPSelect
                 v-model="statusSelected"
                 :options="statusOptions"
-                label="Status"
+                :label="$t('settingModals.verification.status')"
                 :required="true"
                 label-key="label"
                 track-by="value"
@@ -59,14 +59,14 @@
             </div>
             <AuditInfoCard
               v-if="isEditMode"
-              title="Created"
+              :title="$t('settingModals.common.created')"
               icon="cil-user-follow"
               :by="createdByLabel"
               :at="createdAtLabel"
             />
             <AuditInfoCard
               v-if="isEditMode"
-              title="Updated"
+              :title="$t('settingModals.common.updated')"
               icon="cil-history"
               :by="updatedByLabel"
               :at="updatedAtLabel"
@@ -79,7 +79,7 @@
     <div class="modal-footer-wrap d-flex w-100 justify-content-end mt-3">
       <CButton class="mr-2 footer-btn-cancel footer-action-btn" color="danger" variant="outline" shape="pill" @click="onCancel">
         <CIcon name="cil-ban" class="mr-1 action-icon" />
-        <span class="font-weight-bold pr-1 pl-1"> Cancel </span>
+        <span class="font-weight-bold pr-1 pl-1"> {{ $t('common.actions.cancel') || 'Cancel' }} </span>
       </CButton>
       <CButton color="success" shape="pill" class="footer-btn-save footer-action-btn" :disabled="!canSubmit" @click="submit">
         <CIcon :name="submitIcon" class="mr-1 action-icon" />
@@ -118,7 +118,7 @@ export default {
   mixins: [RequiredValidation],
   props: {
     show: { type: Boolean, default: false },
-    title: { type: String, default: 'Create Verification' },
+    title: { type: String, default: function() { return this.$t('settingModals.verification.createVerification') || 'Create Verification' } },
     value: { type: Object, default: () => emptyDraft() },
     groups: { type: Array, default: () => [] },
     statuses: { type: Array, default: () => [] }
@@ -134,7 +134,7 @@ export default {
       return !!(this.local && this.local._id)
     },
     submitLabel () {
-      return this.isEditMode ? 'Update' : 'Save'
+      return this.isEditMode ? (this.$t('common.actions.update') || 'Update') : (this.$t('common.actions.save') || 'Save')
     },
     submitIcon () {
       return this.isEditMode ? 'cil-pencil' : 'cil-save'
