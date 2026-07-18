@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
+import 'theme/app_theme.dart';
 
 class UserMobileApp extends StatelessWidget {
   const UserMobileApp({super.key});
@@ -9,10 +10,7 @@ class UserMobileApp extends StatelessWidget {
     return MaterialApp(
       title: 'IVTS User Mobile',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorSchemeSeed: Colors.blue,
-        useMaterial3: true,
-      ),
+      theme: AppTheme.theme,
       home: const HomeScreen(),
     );
   }

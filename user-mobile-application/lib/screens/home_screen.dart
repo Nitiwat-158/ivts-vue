@@ -5,6 +5,7 @@ import '../theme/app_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/top_bar_actions.dart';
 import '../widgets/vehicle_card.dart';
+import 'vehicles_list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,6 +24,23 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _tabIndex = index);
   }
 
+  String _tabTitle(int index) {
+    switch (index) {
+      case 0:
+        return 'Home';
+      case 1:
+        return 'My Vehicles';
+      case 2:
+        return 'Location';
+      case 3:
+        return 'History';
+      case 4:
+        return 'Profile';
+      default:
+        return 'Home';
+    }
+  }
+
   Vehicle? get _expiringVehicle {
     try {
       return MockData.vehicles.firstWhere((v) => v.status == VehicleStatus.expiringSoon);
@@ -31,17 +49,37 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final expiring = _expiringVehicle;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        actions: const [TopBarActions(), SizedBox(width: 8)],
-      ),
-      body: SafeArea(
-        child: ListView(
+  Widget _buildTabBody() {
+    switch (_tabIndex) {
+      case 1:
+        return VehiclesListScreen(
+          onBack: () => setState(() => _tabIndex = 0),
+        );
+      case 2:
+        return _PlaceholderSection(
+          icon: Icons.location_on_rounded,
+          title: 'Location',
+          subtitle: 'ตำแหน่งรถและเส้นทางจะถูกแสดงที่นี่',
+          accent: AppColors.success,
+        );
+      case 3:
+        return _PlaceholderSection(
+          icon: Icons.access_time_rounded,
+          title: 'History',
+          subtitle: 'ประวัติการใช้งานจะแสดงไว้ที่นี่',
+          accent: AppColors.warningAmber,
+        );
+      case 4:
+        return _PlaceholderSection(
+          icon: Icons.person_rounded,
+          title: 'Profile',
+          subtitle: 'ข้อมูลบัญชีและการตั้งค่าของคุณ',
+          accent: AppColors.accentRed,
+        );
+      case 0:
+      default:
+        final expiring = _expiringVehicle;
+        return ListView(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           children: [
             const Text(
@@ -70,9 +108,66 @@ class _HomeScreenState extends State<HomeScreen> {
             if (!_hasNoVehicles)
               ...MockData.vehicles.map((v) => VehicleCard(vehicle: v)),
           ],
+        );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: _tabIndex == 1
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                onPressed: () => setState(() => _tabIndex = 0),
+              )
+            : null,
+        title: Text(_tabTitle(_tabIndex)),
+        actions: const [TopBarActions(), SizedBox(width: 8)],
+      ),
+      body: SafeArea(child: _buildTabBody()),
+      bottomNavigationBar: AppBottomNavBar(currentIndex: _tabIndex, onTap: _onNavTap),
+    );
+  }
+}
+
+class _PlaceholderSection extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color accent;
+
+  const _PlaceholderSection({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.accent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: accent.withOpacity(0.3), width: 1),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 44, color: accent),
+              const SizedBox(height: 12),
+              Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary)),
+            ],
+          ),
         ),
       ),
-      bottomNavigationBar: AppBottomNavBar(currentIndex: _tabIndex, onTap: _onNavTap),
     );
   }
 }
