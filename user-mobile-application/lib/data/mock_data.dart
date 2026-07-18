@@ -69,4 +69,21 @@ class MockData {
     const TripWaypoint(time: '04:24 PM', description: 'ออกจากอาคารเรียนรวม 5'),
     const TripWaypoint(time: '04:26 PM', description: 'ถึงที่จอดรถหอพักนักศึกษา'),
   ];
+
+  static final List<RequestHistoryItem> requestHistory = [
+    const RequestHistoryItem(
+      title: 'Renewal',
+      vehicleCode: 'สน 1669',
+      vehicleId: 'CR0001',
+      date: '10/03/2026',
+      dateGroup: 'Today',
+    ),
+    const RequestHistoryItem(
+      title: 'Vehicle registration',
+      vehicleCode: 'สน 1669',
+      vehicleId: 'CR0001',
+      date: '10/03/2026',
+      dateGroup: '11 month ago',
+    ),
+  ];
 }

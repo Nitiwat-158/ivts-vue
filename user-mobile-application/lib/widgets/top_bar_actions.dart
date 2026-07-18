@@ -11,10 +11,6 @@ class TopBarActions extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          icon: const Icon(Icons.chat_bubble_outline, color: AppColors.primary),
-          onPressed: () {},
-        ),
-        IconButton(
           icon: const Icon(Icons.notifications_none_rounded, color: AppColors.primary),
           onPressed: () {
             Navigator.push(
