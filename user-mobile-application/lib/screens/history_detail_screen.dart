@@ -21,9 +21,9 @@ class HistoryDetailScreen extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: const MapPlaceholder(height: 220),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: MapPlaceholder(height: 220),
             ),
             Expanded(
               child: ListView(
@@ -36,14 +36,14 @@ class HistoryDetailScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.divider.withOpacity(0.3),
+                          color: AppColors.divider.withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
                       ],
                     ),
-                    child: Row(
-                      children: const [
+                    child: const Row(
+                      children: [
                         Icon(Icons.directions_car_filled_rounded, color: AppColors.primary),
                         SizedBox(width: 10),
                         Expanded(

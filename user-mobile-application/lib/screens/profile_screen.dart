@@ -30,17 +30,17 @@ class ProfileScreen extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       child: ListView(
         children: [
-          Row(
+          const Row(
             children: [
-              const CircleAvatar(
+              CircleAvatar(
                 radius: 30,
                 backgroundColor: AppColors.cardGrey,
                 child: Icon(Icons.person, size: 30, color: AppColors.primary),
               ),
-              const SizedBox(width: 14),
+              SizedBox(width: 14),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   Text('Sodsroi Mala', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primary)),
                   SizedBox(height: 2),
                   Text('6631501148', style: TextStyle(color: AppColors.textSecondary)),
@@ -56,21 +56,21 @@ class ProfileScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.divider.withOpacity(0.3),
+                  color: AppColors.divider.withValues(alpha: 0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
-            child: Column(
+            child: const Column(
               children: [
-                const Align(
+                Align(
                   alignment: Alignment.centerLeft,
                   child: Text('User Information', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: 10),
                 _InfoRow(icon: Icons.mail_outline, label: 'Email address', value: 'B*****@gmail.com'),
-                const Divider(height: 24),
+                Divider(height: 24),
                 _InfoRow(icon: Icons.phone_iphone, label: 'Phone number', value: '+66*****999'),
               ],
             ),
@@ -107,7 +107,7 @@ class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _InfoRow({required this.icon, required this.label, required this.value, super.key});
+  const _InfoRow({required this.icon, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {

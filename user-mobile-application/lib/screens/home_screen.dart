@@ -20,7 +20,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _tabIndex = 0;
   bool _showRenewalBanner = true;
-  bool _hasNoVehicles = false;
+  final bool _hasNoVehicles = false;
 
   void _onNavTap(int index) {
     if (index == _tabIndex) return;
@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
             if (!_hasNoVehicles && expiring != null && _showRenewalBanner)
               _ActionBanner(
                 color: expiring.daysUntilExpiry <= 7
-                    ? AppColors.accentRed.withOpacity(0.85)
+                    ? AppColors.accentRed.withValues(alpha: 0.85)
                     : AppColors.warningAmber,
                 icon: Icons.warning_amber_rounded,
                 text: 'รถ ${expiring.vehicleCode} ใกล้หมดอายุทะเบียนใน ${expiring.daysUntilExpiry} วัน',
@@ -142,7 +142,7 @@ class _PlaceholderSection extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: accent.withOpacity(0.3), width: 1),
+            border: Border.all(color: accent.withValues(alpha: 0.3), width: 1),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -183,7 +183,7 @@ class _ActionBanner extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
+          color: color.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: color, width: 1),
         ),

@@ -57,7 +57,7 @@ class VehiclesListScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.divider.withOpacity(0.35),
+                                color: AppColors.divider.withValues(alpha: 0.35),
                                 blurRadius: 10,
                                 offset: const Offset(0, 3),
                               ),

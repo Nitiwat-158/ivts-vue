@@ -66,8 +66,18 @@ const th = {
         cameraLocations: "ตำแหน่งกล้องบนแผนที่",
         cameraActive: "กล้องปกติ (Active)",
         cameraInactive: "ขัดข้อง (Inactive)",
-        alerts: "แจ้งเตือน",
-        cameraOffline: "กล้อง offline",
+        alerts: "การแจ้งเตือน",
+        allSources: "ทุกแหล่งที่มา",
+        systemSource: "ระบบอัตโนมัติ",
+        humanSource: "แจ้งจากบุคคล",
+        allSeverities: "ทุกระดับความรุนแรง",
+        highSeverity: "ระดับสูง",
+        mediumSeverity: "ระดับกลาง",
+        lowSeverity: "ระดับต่ำ",
+        emergencyReport: "รายงานเหตุฉุกเฉิน",
+        humanGuest: "บุคคล (guest)",
+        humanStaff: "บุคคล (staff)",
+        cameraOffline: "กล้องออฟไลน์",
         noSignalFor: "ไม่มีสัญญาณมา {min} นาที",
         unregisteredVehicle: "พบรถไม่มีทะเบียนในระบบ",
         summary: "สถิติสรุป",
@@ -174,6 +184,7 @@ const th = {
         userManagement: "จัดการสิทธิ์ผู้ใช้",
         reports: "รายงาน",
         businessOperations: "งานปฏิบัติการ IVTS",
+        emergencyReportManagement: "จัดการรายงานเหตุฉุกเฉิน",
         banks: "ธนาคาร",
         template: "ต้นแบบ",
         accessControl: "การควบคุมสิทธิ์",
@@ -1247,6 +1258,201 @@ th.receiveForm = {
     },
     asset: {
         food: "อาหาร",
+        verification: {
+            createDesc: "Configure verification setting with multilingual content.",
+            updateDesc: "Update verification setting with multilingual content.",
+            group: "Group",
+            status: "Status",
+            createVerification: "Create Verification"
+        },
+        messageAuthen: {
+            createDesc: "Configure login announcement that supports multiple languages.",
+            updateDesc: "Update login announcement that supports multiple languages.",
+            recommendedMax: "Recommended 80 characters max",
+            startDate: "Start date",
+            endDate: "End date",
+            dateError: "End date must be the same or later than start date.",
+            createTitle: "Create Setting Message Authen",
+            saveDraft: "Save as Draft",
+            updateDraft: "Update as Draft"
+        }
+    },
+    table: {
+        agreementNo: "Agreement No",
+        partner: "Partner",
+        owner: "Owner",
+        period: "Period",
+        status: "Status",
+        expires: "Expires",
+        actions: "Actions"
+    }
+}
+
+th.assignmentManagement = {
+    title: "Assignment Management",
+    subtitle: "Bind accounts to groups, define data scope, and control delegated access boundaries.",
+    tableTitle: "Assignment Management",
+    stats: {
+        assignments: "Assignments",
+        active: "Active",
+        scoped: "Scoped"
+    },
+    fields: {
+        account: "Account",
+        group: "Group",
+        dataScope: "Data Scope",
+        scopeUnits: "Scope Units",
+        active: "Status",
+        actions: "#"
+    },
+    form: {
+        account: "Account",
+        group: "Group",
+        dataScope: "Data Scope",
+        active: "Active",
+        scopeUnits: "Scope Units",
+        scopeUnitsHint: "Comma-separated org unit codes/names"
+    },
+    actions: {
+        add: "Add Assignment",
+        edit: "Edit",
+        delete: "Delete"
+    },
+    messages: {
+        loadError: "Cannot load assignments.",
+        created: "Assignment created.",
+        updated: "Assignment updated.",
+        saveError: "Cannot save assignment.",
+        removed: "Assignment removed.",
+        removeError: "Cannot remove assignment."
+    },
+    scopes: {
+        self: "Self",
+        unit: "Unit",
+        org: "Org"
+    }
+}
+
+th.receiveForm = {
+    title: "แบบฟอร์มรับ / สืบมา",
+    subtitle: "หน้าจอ mockup สำหรับบันทึกข้อมูลเอกสาร, แนบไฟล์, และตรวจผลลัพธ์ OCR ก่อนบันทึกเข้าระบบ",
+    metaLabel: "โหมดข้อมูล",
+    metaValue: "Mock data",
+    sections: {
+        documentInfo: "ข้อมูลเอกสาร",
+        uploadFiles: "อัปโหลดไฟล์",
+        ocrResults: "ผลลัพธ์ OCR",
+        selectedItems: "รายการที่เตรียมบันทึก",
+        summary: "สรุปการบันทึก"
+    },
+    fields: {
+        documentNo: "เลขที่เอกสาร",
+        receivedDate: "วันที่รับเอกสาร",
+        documentType: "ประเภทเอกสาร",
+        senderName: "หน่วยงาน/ผู้ส่ง",
+        destination: "หน่วยงานผู้รับผิดชอบ",
+        priority: "ระดับความเร่งด่วน",
+        contactName: "ผู้ประสานงาน",
+        contactPhone: "เบอร์ติดต่อ",
+        expectedDocuments: "จำนวนรายการคาดการณ์",
+        note: "หมายเหตุ"
+    },
+    upload: {
+        selectFile: "เลือกไฟล์",
+        clearUploads: "ล้างรายการ",
+        caption: "อัปโหลดเอกสารไฟล์ PDF / JPG / JPEG / PNG เพื่อจำลองขั้นตอน OCR",
+        dropzoneHint: "ประเภทที่รองรับ: PDF, JPG, JPEG, PNG",
+        sizeHint: "ขนาดไฟล์ไม่เกิน 10MB",
+        empty: "ยังไม่มีไฟล์ที่อัปโหลด"
+    },
+    ocrTable: {
+        documentName: "ชื่อเอกสาร",
+        referenceNo: "เลขอ้างอิง",
+        category: "ประเภท",
+        confidence: "ความมั่นใจ",
+        status: "สถานะ",
+        actions: "การดำเนินการ"
+    },
+    selectedList: {
+        empty: "ยังไม่มีรายการที่เลือกจากผล OCR",
+        remove: "ลบ",
+        confidence: "ความมั่นใจ"
+    },
+    summaryList: {
+        totalFiles: "จำนวนไฟล์",
+        readyOcr: "ผล OCR พร้อมใช้งาน",
+        selectedItems: "รายการที่เลือก",
+        expectedDocs: "เอกสารคาดการณ์"
+    },
+    actions: {
+        save: "บันทึกข้อมูล",
+        reset: "เริ่มใหม่"
+    },
+    stats: {
+        uploadedFiles: "Uploaded Files",
+        uploadedFilesHint: "จำนวนไฟล์ที่แนบใน mock session",
+        ocrReady: "OCR Ready",
+        ocrReadyHint: "รายการที่พร้อมบันทึกโดยไม่ต้องแก้เพิ่ม",
+        selectedItems: "Selected Items",
+        selectedItemsHint: "รายการที่ถูกเลือกเพื่อบันทึกเข้าระบบ"
+    },
+    status: {
+        ready: "พร้อมบันทึก",
+        review: "ตรวจสอบ"
+    },
+    messages: {
+        filesAdded: "เพิ่มไฟล์จำลองแล้ว {count} รายการ",
+        filesCleared: "ล้างรายการไฟล์ที่อัปโหลดแล้ว",
+        alreadySelected: "รายการนี้ถูกเลือกไว้แล้ว",
+        fillRequired: "กรุณากรอกข้อมูลเอกสารให้ครบก่อนบันทึก",
+        selectOcrRequired: "กรุณาเลือกรายการจากผล OCR อย่างน้อย 1 รายการ",
+        saveSuccess: "บันทึกข้อมูล mock สำเร็จ {count} รายการ"
+    },
+    documentTypes: {
+        incoming: "หนังสือรับเข้า",
+        memo: "บันทึกข้อความ",
+        project: "เอกสารโครงการ"
+    },
+    destinations: {
+        saraban: "งานสารบรรณกลาง",
+        secretary: "สำนักงานเลขานุการ",
+        academic: "ฝ่ายวิชาการ"
+    },
+    priorities: {
+        normal: "ปกติ",
+        urgent: "ด่วน",
+        veryUrgent: "ด่วนที่สุด"
+    },
+    headerAccount: {
+        avatarAlt: "รูปบัญชีผู้ใช้",
+        checkProfile: "ข้อมูลโปรไฟล์",
+        logout: "ออกจากระบบ",
+        accountFallback: "บัญชีผู้ใช้",
+        noOrganizationData: "ไม่พบข้อมูลหน่วยงาน",
+        unit: "หน่วยงาน",
+        affiliation: "สังกัด",
+        accountCode: "Account Code",
+        role: "Role",
+        email: "อีเมล",
+        position: "ตำแหน่ง",
+        personnelType: "ประเภทบุคลากร",
+        changeProfilePhoto: "เปลี่ยนรูปโปรไฟล์",
+        imageTypeError: "กรุณาเลือกรูปภาพเท่านั้น",
+        imageSizeError: "รูปต้องมีขนาดไม่เกิน 3 MB",
+        imageReadError: "ไม่สามารถอ่านรูปที่เลือกได้",
+        imageSaveError: "ไม่สามารถอัปเดตรูปโปรไฟล์ได้"
+    },
+    countup: {
+        elapsed: "ผ่านไปแล้ว:",
+        hours: "ชั่วโมง",
+        minutes: "นาที",
+        seconds: "วินาที"
+    },
+    dialog: {
+        disasterAlert: "แจ้งเหตุฉุกเฉิน"
+    },
+    asset: {
+        food: "อาหาร",
         item: "รายการ",
         license: "หมายเลข",
         distance: "ระยะทาง",
@@ -1255,6 +1461,69 @@ th.receiveForm = {
     dashboard: {
         cctvAlert: "จะนำไปหน้าดูกล้องวงจรปิด:",
         eventAlert: "ตรวจสอบเหตุการณ์:"
+    }
+}
+
+th.emergencyReportManagement = {
+    title: "จัดการรายงานเหตุฉุกเฉิน",
+    subtitle: "ติดตามและจัดการรายงานเหตุฉุกเฉินจากเจ้าของยานพาหนะแบบเรียลไทม์",
+    stats: {
+        new: "ใหม่",
+        newHint: "รอรับเรื่อง",
+        inProgress: "กำลังดำเนินการ",
+        inProgressHint: "มีผู้รับผิดชอบแล้ว",
+        resolved: "แก้ไขแล้ว",
+        resolvedHint: "ดำเนินการเสร็จสิ้น",
+        closed: "ปิดเคส",
+        closedHint: "ปิดเคสแล้ว",
+        overSla: "เกิน SLA",
+        overSlaHint: "ยังไม่มีผู้รับเรื่องเกินเวลาที่กำหนด"
+    },
+    filters: {
+        searchPlaceholder: "ค้นหาทะเบียนรถหรือชื่อเจ้าของ...",
+        allStatuses: "ทุกสถานะ",
+        allTypes: "ทุกประเภท"
+    },
+    list: {
+        title: "รายการเคส",
+        time: "เวลา",
+        licensePlate: "ทะเบียน",
+        type: "ประเภท",
+        status: "สถานะ",
+        assignee: "ผู้รับผิดชอบ",
+        unassigned: "— ยังไม่มีคนรับ —",
+        noData: "ไม่พบข้อมูล"
+    },
+    details: {
+        reportedAt: "แจ้งเมื่อ:",
+        vehicle: "รถยนต์",
+        owner: "เจ้าของ",
+        sharedQueueTitle: "Shared Queue",
+        sharedQueueDesc: "ยังไม่มีผู้รับผิดชอบ — เคสนี้แสดงให้ admin ทุกคนเห็นพร้อมกัน",
+        assignee: "ผู้รับผิดชอบเคส:",
+        description: "รายละเอียดจากผู้แจ้ง",
+        noDescription: "ไม่มีรายละเอียดเพิ่มเติมจากผู้แจ้ง",
+        lastLocation: "ตำแหน่งล่าสุดของรถ",
+        passedAt: "ผ่านเมื่อ",
+        noLocation: "ไม่พบข้อมูลตำแหน่งล่าสุด",
+        attachments: "ไฟล์แนบ",
+        noAttachments: "ไม่มีไฟล์แนบ (แอปเวอร์ชันนี้ยังไม่รองรับการอัปโหลดภาพ/วิดีโอ)",
+        relatedCases: "เคสที่เกี่ยวข้อง/ซ้ำกัน",
+        noRelatedCases: "ไม่พบเคสที่เกี่ยวข้อง",
+        activityLog: "ประวัติการดำเนินการ (Activity Log)",
+        sendUpdate: "ส่งอัปเดตกลับเจ้าของรถ",
+        internalNotes: "หมายเหตุภายใน",
+        canChangeStatusAfterAccept: "เปลี่ยนสถานะได้หลัง Accept แล้วเท่านั้น",
+        selectCaseToView: "กรุณาเลือกเคสจากรายการด้านซ้ายเพื่อดูรายละเอียด"
+    },
+    actions: {
+        accept: "✓ Accept",
+        linkCase: "+ เชื่อมเคสอื่น",
+        typeMessage: "พิมพ์ข้อความ...",
+        send: "ส่ง",
+        typeNotes: "บันทึกการตรวจสอบของ admin...",
+        exportPrint: "Export / พิมพ์",
+        changeStatus: "เปลี่ยนสถานะ:"
     }
 }
 

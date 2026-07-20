@@ -25,8 +25,8 @@ class RequestHistoryScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Row(
-              children: const [
+            const Row(
+              children: [
                 Expanded(child: _Chip(label: 'Today')),
                 SizedBox(width: 10),
                 Expanded(child: _Chip(label: 'สน 1669')),
@@ -77,7 +77,7 @@ class RequestHistoryScreen extends StatelessWidget {
 class _Chip extends StatelessWidget {
   final String label;
 
-  const _Chip({required this.label, super.key});
+  const _Chip({required this.label});
 
   @override
   Widget build(BuildContext context) {

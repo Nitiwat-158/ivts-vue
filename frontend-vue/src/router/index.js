@@ -14,6 +14,7 @@ const IVTSRegistry = () => import('@/projects/views/ivts/IVTSRegistry')
 const AccountDirectory = () => import('@/projects/views/accounts/Management')
 const VehicleManagement = () => import('@/projects/views/vehicles/VehicleManagement')
 const BusinessOperations = () => import('@/projects/views/operations/BusinessOperations')
+const EmergencyReportManagement = () => import('@/projects/views/operations/EmergencyReportManagement')
 const CreateMenu = () => import('@/projects/views/security/CreateMenu')
 const CreateGroup = () => import('@/projects/views/security/CreateGroup')
 const PermissionMatrix = () => import('@/projects/views/security/PermissionMatrix')
@@ -66,6 +67,11 @@ const router = new Router({
           name: 'Business Operations',
           meta: { permission: { path: '/operations/business', action: 'view' } },
           component: BusinessOperations
+        },
+        {
+          path: 'operations/emergency-reports',
+          name: 'Emergency Report Management',
+          component: EmergencyReportManagement
         },
         {
           path: 'accounts/directory',
