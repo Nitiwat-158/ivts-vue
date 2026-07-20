@@ -1,4 +1,6 @@
+import '../models/emergency_status.dart';
 import '../models/history_entry.dart';
+import '../models/notification_item.dart';
 import '../models/vehicle.dart';
 
 class MockData {
@@ -86,4 +88,48 @@ class MockData {
       dateGroup: '11 month ago',
     ),
   ];
+
+  static final List<NotificationItem> notifications = [
+    const NotificationItem(
+      type: NotificationType.system,
+      title: 'Your request had been submit',
+      description: 'Your request number TH00001 on 11/04/2026 has been submit',
+      dateGroup: 'Today',
+    ),
+    const NotificationItem(
+      type: NotificationType.system,
+      title: 'Traffic Update: Road closure for Lamduan Games 26th',
+      description: 'Road closure from Swimming pool building to the Central Stadium on 11 Jun 13 Jun',
+      dateGroup: '7 days ago',
+    ),
+    const NotificationItem(
+      type: NotificationType.renewal,
+      title: 'My Vehicle',
+      description: 'รถหมายเลขทะเบียน รถ 1999 กำลังใกล้หมดอายุ ผ่านอาคาร E4',
+      dateGroup: '7 days ago',
+    ),
+  ];
+
+  static final List<EmergencyStatusUpdate> emergencyTimeline = [
+    const EmergencyStatusUpdate(
+      step: EmergencyStep.submitted,
+      label: 'ส่งคำร้องเรียบร้อย',
+      timestamp: '4:41 PM',
+      completed: true,
+    ),
+    const EmergencyStatusUpdate(
+      step: EmergencyStep.acknowledged,
+      label: 'เจ้าหน้าที่รับคำร้องแล้ว',
+      timestamp: '4:43 PM',
+      completed: true,
+    ),
+    const EmergencyStatusUpdate(
+      step: EmergencyStep.contacting,
+      label: 'กำลังติดต่อกลับ',
+      timestamp: '',
+      completed: false,
+    ),
+  ];
+
+  static const String securityPhoneNumber = '+66531234567';
 }

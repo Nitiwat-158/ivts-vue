@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/vehicle.dart';
+import '../screens/emergency_request_screen.dart';
 import '../theme/app_theme.dart';
 
 class VehicleCard extends StatelessWidget {
@@ -86,7 +87,13 @@ class VehicleCard extends StatelessWidget {
                   minimumSize: const Size(0, 34),
                   padding: const EdgeInsets.symmetric(horizontal: 14),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => EmergencyRequestScreen(vehicle: vehicle),
+                    ),
+                  );
+                },
                 child: const Text('Request'),
               ),
             ],
