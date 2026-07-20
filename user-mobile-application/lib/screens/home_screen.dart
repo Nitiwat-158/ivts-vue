@@ -22,10 +22,16 @@ class _HomeScreenState extends State<HomeScreen> {
   int _tabIndex = 0;
   bool _showRenewalBanner = true;
   bool _hasNoVehicles = false;
+  Vehicle? _selectedVehicleForLocation;
 
   void _onNavTap(int index) {
     if (index == _tabIndex) return;
-    setState(() => _tabIndex = index);
+    setState(() {
+      _tabIndex = index;
+      if (index != 2) {
+        _selectedVehicleForLocation = null;
+      }
+    });
   }
 
   String _tabTitle(int index) {
@@ -58,9 +64,15 @@ class _HomeScreenState extends State<HomeScreen> {
       case 1:
         return VehiclesListScreen(
           onBack: () => setState(() => _tabIndex = 0),
+          onLocationTap: (vehicle) {
+            setState(() {
+              _selectedVehicleForLocation = vehicle;
+              _tabIndex = 2;
+            });
+          },
         );
       case 2:
-        return const LocationScreen();
+        return LocationScreen(initialVehicle: _selectedVehicleForLocation);
       case 3:
         return HistoryScreen(onBack: () => setState(() => _tabIndex = 0));
       case 4:
@@ -83,26 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 text: 'คุณยังไม่ได้ลงทะเบียนรถ — เริ่มต้นลงทะเบียนรถของคุณ',
                 onTap: () {},
               ),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  final vehicle = MockData.vehicles.first;
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => EmergencyRequestScreen(vehicle: vehicle)),
-                  );
-                },
-                icon: const Icon(Icons.emergency_outlined),
-                label: const Text('Request'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-            ),
+
             if (!_hasNoVehicles && expiring != null && _showRenewalBanner)
               _ActionBanner(
                 color: expiring.daysUntilExpiry <= 7
@@ -128,7 +121,13 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: _tabIndex == 1 || _tabIndex == 2 || _tabIndex == 3 || _tabIndex == 4
             ? IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                onPressed: () => setState(() => _tabIndex = 0),
+                onPressed: () {
+                  if (_tabIndex == 2) {
+                    setState(() => _tabIndex = 1);
+                  } else {
+                    setState(() => _tabIndex = 0);
+                  }
+                },
               )
             : null,
         title: Text(_tabTitle(_tabIndex)),

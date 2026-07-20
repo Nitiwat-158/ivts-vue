@@ -5,8 +5,13 @@ import '../theme/app_theme.dart';
 
 class VehiclesListScreen extends StatelessWidget {
   final VoidCallback onBack;
+  final Function(Vehicle) onLocationTap;
 
-  const VehiclesListScreen({super.key, required this.onBack});
+  const VehiclesListScreen({
+    super.key,
+    required this.onBack,
+    required this.onLocationTap,
+  });
 
   String _statusLabel(VehicleStatus s) {
     switch (s) {
@@ -130,7 +135,7 @@ class VehiclesListScreen extends StatelessWidget {
                                 children: [
                                   Expanded(
                                     child: OutlinedButton.icon(
-                                      onPressed: () {},
+                                      onPressed: () => onLocationTap(v),
                                       icon: const Icon(Icons.location_on_outlined, size: 18),
                                       label: const Text('Location'),
                                     ),
