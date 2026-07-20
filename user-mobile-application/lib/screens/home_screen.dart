@@ -5,6 +5,7 @@ import '../theme/app_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/top_bar_actions.dart';
 import '../widgets/vehicle_card.dart';
+import 'emergency_request_screen.dart';
 import 'history_screen.dart';
 import 'location_screen.dart';
 import 'profile_screen.dart';
@@ -82,6 +83,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 text: 'คุณยังไม่ได้ลงทะเบียนรถ — เริ่มต้นลงทะเบียนรถของคุณ',
                 onTap: () {},
               ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  final vehicle = MockData.vehicles.first;
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => EmergencyRequestScreen(vehicle: vehicle)),
+                  );
+                },
+                icon: const Icon(Icons.emergency_outlined),
+                label: const Text('Request'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ),
             if (!_hasNoVehicles && expiring != null && _showRenewalBanner)
               _ActionBanner(
                 color: expiring.daysUntilExpiry <= 7
