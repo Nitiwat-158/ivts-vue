@@ -362,6 +362,29 @@ const th = {
                 groupRequired: "กรุณาเลือกกลุ่ม IVTS อย่างน้อยหนึ่งกลุ่ม"
             }
         },
+        users: {
+            title: "User Management",
+            subtitle: "ตรวจสอบข้อมูลผู้ใช้ภายใน MongoDB ของระบบ",
+            table: {
+                subtitle: "ค้นหาและตรวจสอบผู้ใช้ภายในระบบ",
+                searchPlaceholder: "ค้นหาผู้ใช้",
+                fullName: "ชื่อ-สกุล",
+                email: "อีเมล",
+                role: "บทบาท",
+                createdAt: "สร้างเมื่อ"
+            },
+            stats: {
+                total: {
+                    label: "ผู้ใช้ทั้งหมด",
+                    hint: "รายการผู้ใช้ภายในที่เก็บใน MongoDB"
+                }
+            },
+            messages: {
+                loadError: "ไม่สามารถโหลดผู้ใช้ได้",
+                noUsers: "ไม่พบผู้ใช้",
+                pageSummary: "แสดง {start}-{end} จาก {total} ผู้ใช้"
+            }
+        },
         permissions: {
             title: "สิทธิ์ที่มีผลจริง",
             subtitle: "ตรวจสอบกลุ่มที่ได้รับมอบหมายและตารางสิทธิ์สุดท้ายที่ delegated มาจาก IAM",

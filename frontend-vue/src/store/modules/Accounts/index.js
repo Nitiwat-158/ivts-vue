@@ -86,14 +86,20 @@ async function fetchAccountPage(options) {
     params.search = options.search
   }
   const response = await Service.accounts('list', params)
-  return {
-    rows: response && response.data && Array.isArray(response.data.data)
-      ? response.data.data
-      : [],
-    pagination: response && response.data && response.data.pagination
-      ? response.data.pagination
-      : {}
+  const payload = response && response.data ? response.data : null
+  let rows = []
+  let pagination = {}
+  if (Array.isArray(payload)) {
+    rows = payload
+  } else if (payload && Array.isArray(payload.data)) {
+    rows = payload.data
+    pagination = payload.pagination || {}
+  } else if (payload && payload.data && Array.isArray(payload.data.data)) {
+    // handle double-wrapped payloads
+    rows = payload.data.data
+    pagination = payload.data.pagination || {}
   }
+  return { rows, pagination }
 }
 
 function normalizePagination(raw, fallback) {

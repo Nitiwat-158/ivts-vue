@@ -321,10 +321,10 @@ const en = {
     },
     accounts: {
         directory: {
-            title: "User Management",
-            subtitle: "Review user records and effective access from IAM without storing identity master data in IVTS.",
+            title: "Account Directory",
+            subtitle: "Review IAM-managed accounts and IVTS access without storing identity master data locally.",
             table: {
-                subtitle: "Search and inspect user records delegated from IAM.",
+                subtitle: "Search and inspect IAM user accounts.",
                 searchPlaceholder: "Search accounts",
                 resultSummary: "Showing {start}-{end} of {total} accounts"
             },
@@ -378,6 +378,29 @@ const en = {
                 groups: "IVTS groups",
                 groupPlaceholder: "Select one or more IVTS groups",
                 groupRequired: "Select at least one IVTS group."
+            }
+        },
+        users: {
+            title: "User Management",
+            subtitle: "Review local user records stored in MongoDB.",
+            table: {
+                subtitle: "Search and inspect local users.",
+                searchPlaceholder: "Search users",
+                fullName: "Full name",
+                email: "Email",
+                role: "Role",
+                createdAt: "Created"
+            },
+            stats: {
+                total: {
+                    label: "Total Users",
+                    hint: "Local user records stored in MongoDB"
+                }
+            },
+            messages: {
+                loadError: "Failed to load users.",
+                noUsers: "No users found.",
+                pageSummary: "Showing {start}-{end} of {total} users"
             }
         },
         permissions: {

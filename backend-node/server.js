@@ -1,3 +1,5 @@
+'use strict';
+
 var express = require('./config/express');
 var app = express();
 var http = require('http');
@@ -7,44 +9,21 @@ var cfg = require('./config/config');
 var mongoose = require('mongoose');
 var runtimeAccessSettings = require('./helpers/runtime-access-settings');
 var runtimeAccessMonitor = require('./helpers/runtime-access-monitor');
+
 /**
  * Get port from environment and store in Express.
  */
-
-
 var port = cfg.host.port;
-
-// var options = {
-//     key : fs.readFileSync('/etc/letsencrypt/live/finnext.io/privkey.pem'),
-//     cert : fs.readFileSync('/etc/letsencrypt/live/finnext.io/fullchain.pem'),
-    // passphrase : cfg.passphrase
-// };
 
 /**
  * Create HTTP server.
  */
-
 var server = http.createServer(app);
-// var server = https.createServer(options, app);
 
-/* Maintain a hash of all connected sockets */
-// var sockets = {}, nextSocketId = 0;
-// server.on('connection', function (socket) {
-//     /* Add a newly connected socket */
-//     var socketId = nextSocketId++;
-//     //sockets[socketId] = socket;
-//     //console.log('socket', socketId, 'opened');
-//     /* Remove the socket when it closes */
-//     socket.on('close', function () {
-//         //console.log('socket', socketId, 'closed');
-//         delete sockets[socketId];
-//     });
-//
-//     /* Extend socket lifetime for demo purposes */
-//     socket.setTimeout(cfg.timeout);
-// });
-
-var io = require('socket.io')(server,{
+/**
+ * Socket.IO setup
+ */
+var io = require('socket.io')(server, {
     cors: {
         origin: function (origin, callback) {
             if (runtimeAccessSettings.isSocketOriginAllowed(origin)) {
@@ -62,19 +41,19 @@ var io = require('socket.io')(server,{
             }
         },
         credentials: true
-    }})
+    }
+});
 require('./server/routes/socket.js')(io);
-
-
 
 /**
  * Listen on provided port, on all network interfaces.
  */
-//server.listen(port,hostip);
-server.listen(port);
+server.listen(port, function() {
+    console.log(`🚀 Server running on port ${port}`);
+});
+
 server.on('error', onError);
 server.on('listening', onListening);
-
 
 // Graceful shutdown function
 let isShuttingDown = false;
@@ -83,7 +62,6 @@ const shutdown = () => {
     isShuttingDown = true;
     console.log('Gracefully shutting down...');
 
-    // Stop accepting new requests
     server.close(async () => {
         console.log('Closed all HTTP connections');
 
@@ -92,23 +70,17 @@ const shutdown = () => {
             console.log('Closed MongoDB connection');
         }
 
-        process.exit(0); // Exit process
+        process.exit(0);
     });
 
-    // Force shutdown after 10 seconds if not finished
     setTimeout(() => {
         console.error('Forcing shutdown');
-        process.exit(1); // Non-zero exit code for forced shutdown
+        process.exit(1);
     }, 10000).unref();
 };
 
-// Listen for termination signals (e.g., from Docker, Kubernetes, or Ctrl+C)
 process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);
-
-/**
- * Event listener for HTTP server "error" event.
- */
 
 function onError(error) {
     if (error.syscall !== 'listen') {
@@ -119,7 +91,6 @@ function onError(error) {
         ? 'Pipe ' + port
         : 'Port ' + port;
 
-    // handle specific listen errors with friendly messages
     switch (error.code) {
         case 'EACCES':
             console.error(bind + ' requires elevated privileges');
@@ -133,10 +104,6 @@ function onError(error) {
             throw error;
     }
 }
-
-/**
- * Event listener for HTTP server "listening" event.
- */
 
 function onListening() {
     var addr = server.address();

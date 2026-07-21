@@ -1,7 +1,8 @@
 import axios from 'axios';
-import store from '@/store/store'
+import store from '@/store/store';
 import { removeItem } from '@/utils/db';
-import router from '@/router/index'
+import router from '@/router/index';
+
 const instance = axios.create();
 let handlingUnauthorized = false;
 const X_ACCESS_TOKEN_STORAGE_KEY = 'x-access-token';
@@ -15,78 +16,78 @@ instance.defaults.withCredentials = true;
 
 instance.defaults.headers = {
   "Content-Type": "application/json",
-}
+};
 
 function getStoredAccessToken () {
-      if (typeof window === 'undefined' || !window.localStorage) return '';
-      const token = window.localStorage.getItem(X_ACCESS_TOKEN_STORAGE_KEY);
-      return token && String(token).trim() ? String(token).trim() : '';
+  if (typeof window === 'undefined' || !window.localStorage) return '';
+  const token = window.localStorage.getItem(X_ACCESS_TOKEN_STORAGE_KEY);
+  return token && String(token).trim() ? String(token).trim() : '';
 }
 
 function clearStoredSession () {
-      removeItem('objs').catch(function () {});
-      if (typeof window !== 'undefined' && window.localStorage) {
-        window.localStorage.removeItem(X_ACCESS_TOKEN_STORAGE_KEY);
-      }
-      store.commit('set', ['XAccessToken', '']);
-      store.commit('auth/authenticated', { isAuthen: false, isOAuth: false });
-      store.commit('auth/profile', null);
-      store.commit('auth/isSignIn', true);
-      store.commit('auth/is2FA', false);
-      store.commit('auth/pendingToken', '');
-      store.commit('security/reset');
+  removeItem('objs').catch(function () {});
+  if (typeof window !== 'undefined' && window.localStorage) {
+    window.localStorage.removeItem(X_ACCESS_TOKEN_STORAGE_KEY);
+  }
+  store.commit('set', ['XAccessToken', '']);
+  store.commit('auth/authenticated', { isAuthen: false, isOAuth: false });
+  store.commit('auth/profile', null);
+  store.commit('auth/isSignIn', true);
+  store.commit('auth/is2FA', false);
+  store.commit('auth/pendingToken', '');
+  store.commit('security/reset');
 }
 
 instance.interceptors.request.use(
-    (config) => {
-      const token = store.state.XAccessToken
-        ? String(store.state.XAccessToken).trim()
-        : getStoredAccessToken();
-      if (token) {
-        if (!store.state.XAccessToken) {
-          store.commit('set', ['XAccessToken', token]);
-        }
-        config.headers.Authorization = `Bearer ${token}`;
-        config.headers['x-access-token'] = token;
+  (config) => {
+    const token = store.state.XAccessToken
+      ? String(store.state.XAccessToken).trim()
+      : getStoredAccessToken();
+    if (token) {
+      if (!store.state.XAccessToken) {
+        store.commit('set', ['XAccessToken', token]);
       }
-
-      config.headers.lang  = `${store.getters['setting/lang']}`;
-      return config;
-    },
-    (error) => {
-      return Promise.reject(error);
+      config.headers.Authorization = `Bearer ${token}`;
+      config.headers['x-access-token'] = token;
     }
+
+    config.headers.lang = `${store.getters['setting/lang']}`;
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
 );
 
 instance.interceptors.response.use(
-    (response) => {
-      return response;
-    },
-    (error) => {
-      if (error.response && error.response.status === 401) {
-        const config = error.config || {};
-        if (config.__skipAuthFailureCleanup) {
-          return Promise.reject(error);
-        }
-
-        clearStoredSession();
-        if (config.__skipAuthFailureRedirect) {
-          return Promise.reject(error);
-        }
-
-        const currentPath = router && router.currentRoute && router.currentRoute.path
-          ? String(router.currentRoute.path)
-          : '';
-        const isPublicPage = currentPath.startsWith('/pages');
-        if (!handlingUnauthorized && !isPublicPage && currentPath !== '/pages/login') {
-          handlingUnauthorized = true;
-          router.push('/pages/login').catch(function () {}).finally(function () {
-            handlingUnauthorized = false;
-          });
-        }
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      const config = error.config || {};
+      if (config.__skipAuthFailureCleanup) {
+        return Promise.reject(error);
       }
-      return Promise.reject(error);
+
+      clearStoredSession();
+      if (config.__skipAuthFailureRedirect) {
+        return Promise.reject(error);
+      }
+
+      const currentPath = router && router.currentRoute && router.currentRoute.path
+        ? String(router.currentRoute.path)
+        : '';
+      const isPublicPage = currentPath.startsWith('/pages');
+      if (!handlingUnauthorized && !isPublicPage && currentPath !== '/pages/login') {
+        handlingUnauthorized = true;
+        router.push('/pages/login').catch(function () {}).finally(function () {
+          handlingUnauthorized = false;
+        });
+      }
     }
+    return Promise.reject(error);
+  }
 );
 
 export default {
@@ -247,6 +248,21 @@ export default {
     }
   },
 
+  // 🟢 ส่วนจัดการ User Management (MongoDB IVTS Users)
+  users(method, data) {
+    switch (method) {
+      case 'list':
+        return instance.get('/api/v1/ivts/users', { params: data || {} });
+      case 'create':
+        return instance.post('/api/v1/ivts/users', data || {});
+      case 'update':
+        return instance.put(`/api/v1/ivts/users/${data && (data.id || data._id)}`, data || {});
+      case 'delete':
+        return instance.delete(`/api/v1/ivts/users/${data && (data.id || data._id)}`);
+      default:
+        break;
+    }
+  },
 
   chat(userId, message) {
     return instance.post('/api/v1/chat/chat', { userId, message });
@@ -581,7 +597,7 @@ export default {
         break;
     }
   },
-
+  
   employment(method, data) {
     switch (method) {
       case 'records':

@@ -12,6 +12,7 @@ const Page500 = () => import('@/views/pages/Page500')
 const Login = () => import('@/views/pages/Login')
 const IVTSRegistry = () => import('@/projects/views/ivts/IVTSRegistry')
 const AccountDirectory = () => import('@/projects/views/accounts/Management')
+const UserManagement = () => import('@/projects/views/accounts/UserManagement')
 const VehicleManagement = () => import('@/projects/views/vehicles/VehicleManagement')
 const BusinessOperations = () => import('@/projects/views/operations/BusinessOperations')
 const CreateMenu = () => import('@/projects/views/security/CreateMenu')
@@ -82,7 +83,7 @@ const router = new Router({
           path: 'users/management',
           name: 'User Management',
           meta: { permission: { path: '/accounts/directory', action: 'view' } },
-          component: AccountDirectory
+          component: UserManagement
         },
         {
           path: 'security/permissions',

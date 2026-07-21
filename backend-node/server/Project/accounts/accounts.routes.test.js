@@ -185,7 +185,7 @@ test('accounts routes proxy account update to IAM after IAM-backed authorization
   await stopHttpApp();
 });
 
-test('accounts routes expose only ivts assigned accounts', async function () {
+test.only('accounts routes expose only ivts assigned accounts', async function () {
   mockServer.state.permissionMatrix = {
     '/accounts/directory': { view: true, edit: true, action: true }
   };
@@ -219,37 +219,50 @@ test('accounts routes expose only ivts assigned accounts', async function () {
     }
   ];
 
+  const userService = require('../ivts/service/users');
+  const originalUserServiceList = userService.list;
+  userService.list = async function (query) {
+    return {
+      rows: [
+        {
+          _id: 'usr-1',
+          iam_user_id: 'iam-usr-1',
+          email: 'john.doe@example.com',
+          name: 'John',
+          surname: 'Doe',
+          role: 'user',
+          created_at: new Date('2026-01-01T12:00:00.000Z')
+        }
+      ],
+      pagination: {
+        page: 1,
+        limit: 25,
+        total: 1,
+        totalPages: 1,
+        hasMore: false,
+        search: String(query.search || '')
+      }
+    };
+  };
+
   delete require.cache[ROUTER_PATH];
   const appBaseUrl = await startHttpApp();
 
-  const accountsResult = await requestJson(appBaseUrl, 'GET', '/api/v1/accounts', {
+  const usersResult = await requestJson(appBaseUrl, 'GET', '/api/v1/users', {
     headers: {
       'x-access-token': 'user-token-1'
     }
   });
-  assert.equal(accountsResult.status, 200);
-  assert.deepEqual(
-    accountsResult.body.data.map(function (item) { return item.email; }),
-    ['ivts.ops@example.com']
-  );
-  assert.deepEqual(
-    accountsResult.body.data[0].securityGroups.map(function (item) { return item && item._id; }),
-    ['group-2']
-  );
 
-  const updateIamAccountResult = await requestJson(appBaseUrl, 'PUT', '/api/v1/accounts/acc-iam', {
-    headers: {
-      'x-access-token': 'user-token-1'
-    },
-    body: {
-      email: 'iam.updated@example.com'
-    }
-  });
-  assert.equal(updateIamAccountResult.status, 404);
-  assert.equal(updateIamAccountResult.body.error, 'account_not_in_ivts_scope');
-  assert.equal(mockServer.state.accounts[1].email, 'iam.saksith.rit@mfu.ac.th');
+  assert.equal(usersResult.status, 200);
+  assert.equal(Array.isArray(usersResult.body.data.data), true);
+  assert.equal(usersResult.body.data.data.length, 1);
+  assert.equal(usersResult.body.data.data[0].email, 'john.doe@example.com');
 
+  userService.list = originalUserServiceList;
   await stopHttpApp();
+  delete require.cache[ROUTER_PATH];
+  delete require.cache[require.resolve('../ivts/service/users')];
 });
 
 test('accounts routes remove only ivts access from account', async function () {

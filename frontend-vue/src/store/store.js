@@ -7,8 +7,8 @@ import Setting from './modules/Setting/index'
 import Auth from "./modules/Authen/index";
 import Security from "./modules/Security/index";
 import Accounts from './modules/Accounts/index'
+import Users from './modules/Users/index'
 import Training from './modules/Training/index'
-
 
 const state = {
   XAccessToken: '',
@@ -46,6 +46,7 @@ export default new Vuex.Store({
     auth : Auth,
     security: Security,
     accounts: Accounts,
+    users: Users,
     training: Training,
     
 

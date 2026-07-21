@@ -6,6 +6,7 @@ const router = express.Router();
 const Account = require("./service/account");
 const authorization = require("../security/service/authorization");
 const iamAdminClient = require("../security/service/iam-admin-client");
+const userService = require('../ivts/service/users');
 
 // const google = require("../../../helpers/google/oAuth2");
 
@@ -95,6 +96,34 @@ router.delete("/auth/trusted-devices/:id", Account.onCheckAuthorization, functio
     path: `/auth/trusted-devices/${String(request.params && request.params.id ? request.params.id : '')}`
   });
 });
+function ok(response, data, status) {
+  return response.status(status || 200).json({
+    code: 20000,
+    message: 'Success',
+    data: data
+  });
+}
+
+function fail(response, error) {
+  const status = error && error.status ? error.status : 500;
+  return response.status(status).json({
+    code: status === 400 ? 40000 : 50000,
+    message: error && error.message ? error.message : 'Request failed'
+  });
+}
+
+router.get("/users", Account.onCheckAuthorization, canViewAccounts, async function (request, response) {
+  try {
+    const result = await userService.list(request.query || {});
+    return ok(response, {
+      data: Array.isArray(result.rows) ? result.rows : [],
+      pagination: result.pagination || {}
+    });
+  } catch (error) {
+    return fail(response, error);
+  }
+});
+
 router.get("/accounts", Account.onCheckAuthorization, canViewAccounts, function (request, response) {
   return iamAdminClient.forwardAccountsList(request, response);
 });

@@ -116,6 +116,42 @@ router.post('/documents/seed-demo', canEditRegistry, async function (request, re
 // Mount: /api/v1/ivts/requests/*
 // ═════════════════════════════════════════════════════════════════════════════
 
+// Import User Service (ไฟล์ service/user.js ที่มีฟังก์ชั่น list)
+const userService = require('./service/users');
+// Permission guard สำหรับ User Management
+const canViewUsers = authorization.requirePermission('/security/users', 'view'); // หรือตาม permission path ของคุณ
+
+// ═════════════════════════════════════════════════════════════════════════════
+// NEW: User Management (GET /users)
+// ═════════════════════════════════════════════════════════════════════════════
+
+/**
+ * GET /api/v1/ivts/users  (หรือ /api/v1/users)
+ * List local users from MongoDB
+ */
+router.get(['/users', '/account/users'], canViewUsers, async function (request, response) {
+  try {
+    const result = await userService.list(request.query || {});
+    
+    // ดึง user array จาก result.data
+    const userList = result.data || result.items || [];
+    const paginationInfo = result.pagination || {};
+
+    return response.status(200).json({
+      code: 20000,
+      message: 'Success',
+      data: userList,
+      items: userList,
+      rows: userList,
+      users: userList,
+      pagination: paginationInfo
+    });
+  } catch (error) {
+    return fail(response, error);
+  }
+});
+
+
 /**
  * GET /api/v1/ivts/requests
  * List all requests (admin view, or filtered by user_id query param for self-service).
