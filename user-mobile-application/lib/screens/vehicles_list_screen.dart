@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
 import '../models/vehicle.dart';
 import '../theme/app_theme.dart';
+import 'vehicle_details_screen.dart';
 
 class VehiclesListScreen extends StatelessWidget {
   final VoidCallback onBack;
@@ -143,7 +144,13 @@ class VehiclesListScreen extends StatelessWidget {
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: ElevatedButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (_) => VehicleDetailsScreen(vehicle: v),
+                                          ),
+                                        );
+                                      },
                                       child: const Text('More'),
                                     ),
                                   ),
