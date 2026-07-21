@@ -21,12 +21,33 @@ exports.getAll = async function(req, res) {
       ];
     }
 
-    const reports = await EmergencyReport.find(filters)
-      .populate('vehicle_id')
-      .populate('assigned_admin_id', 'username name email')
-      .sort({ incident_time: -1 });
+    const reports = await EmergencyReport.find(filters).sort({ incident_time: -1 }).lean();
 
-    res.json(reports);
+    const vehicleIds = [...new Set(reports.map(r => r.vehicle_id).filter(Boolean))];
+    const adminIds = [...new Set(reports.map(r => r.assigned_admin_id).filter(Boolean))];
+
+    // Using let variables to safely query without crashing if no IDs exist
+    let vehicles = [];
+    let admins = [];
+    
+    if (vehicleIds.length > 0) {
+      vehicles = await Vehicle.find({ _id: { $in: vehicleIds } }).lean();
+    }
+    
+    if (adminIds.length > 0) {
+      admins = await User.find({ _id: { $in: adminIds } }, 'username name email').lean();
+    }
+
+    const vehicleMap = Object.fromEntries(vehicles.map(v => [v._id, v]));
+    const adminMap = Object.fromEntries(admins.map(a => [a._id, a]));
+
+    const enrichedReports = reports.map(r => ({
+      ...r,
+      vehicle_id: vehicleMap[r.vehicle_id] || null,
+      assigned_admin_id: adminMap[r.assigned_admin_id] || null,
+    }));
+
+    res.json(enrichedReports);
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch emergency reports', error: error.message });
   }
@@ -47,11 +68,22 @@ exports.updateStatus = async function(req, res) {
 
     await report.save();
 
-    // Populate for response
-    await report.populate('vehicle_id');
-    await report.populate('assigned_admin_id', 'username name email');
+    // Manual join for response
+    let enrichedVehicle = null;
+    let enrichedAdmin = null;
 
-    res.json(report);
+    if (report.vehicle_id) {
+      enrichedVehicle = await Vehicle.findById(report.vehicle_id).lean();
+    }
+    if (report.assigned_admin_id) {
+      enrichedAdmin = await User.findById(report.assigned_admin_id, 'username name email').lean();
+    }
+
+    const reportObj = report.toObject();
+    reportObj.vehicle_id = enrichedVehicle || null;
+    reportObj.assigned_admin_id = enrichedAdmin || null;
+
+    res.json(reportObj);
   } catch (error) {
     res.status(500).json({ message: 'Failed to update emergency report', error: error.message });
   }
