@@ -30,31 +30,6 @@ class LocationScreen extends StatelessWidget {
           ),
         ),
         Positioned(
-          top: 14,
-          left: 14,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.9),
-              borderRadius: BorderRadius.circular(999),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.divider.withValues(alpha: 0.35),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.gps_fixed_rounded, color: AppColors.primary, size: 16),
-                SizedBox(width: 6),
-                Text('Tracking', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700)),
-              ],
-            ),
-          ),
-        ),
-        Positioned(
           top: 90,
           right: 24,
           child: Container(

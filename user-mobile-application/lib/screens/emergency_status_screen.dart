@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
-import '../models/emergency_status.dart';
 import '../theme/app_theme.dart';
 
 class EmergencyStatusScreen extends StatelessWidget {
@@ -8,7 +7,11 @@ class EmergencyStatusScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final steps = MockData.emergencyTimeline;
+    final steps = [
+      const _StatusStep(label: 'ส่งคำร้องเรียบร้อย', timestamp: 'now', completed: true),
+      const _StatusStep(label: 'เจ้าหน้าที่รับคำร้องแล้ว', timestamp: '', completed: false),
+      const _StatusStep(label: 'กำลังติดต่อกลับ', timestamp: '', completed: false),
+    ];
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -18,6 +21,16 @@ class EmergencyStatusScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).maybePop(),
         ),
         title: const Text('Emergency Request'),
+        actions: [
+          TextButton(
+            onPressed: () {},
+            child: const Text(
+              'Mark resolved',
+              style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SafeArea(
         child: ListView(
@@ -26,35 +39,47 @@ class EmergencyStatusScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.warningAmber.withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.divider.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                border: Border.all(color: AppColors.warningAmber.withValues(alpha: 0.4)),
               ),
               child: const Row(
                 children: [
-                  Icon(Icons.directions_car_filled_rounded, color: AppColors.primary),
-                  SizedBox(width: 10),
+                  Icon(Icons.warning_amber_rounded, color: AppColors.warningAmber, size: 28),
+                  SizedBox(width: 12),
                   Expanded(
-                    child: Text('สน 1669   ID: CR0001\nApril 11th, 2026  4:41 PM'),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Theft / Stolen · สน 1669',
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'ID: CR0001',
+                          style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             for (int i = 0; i < steps.length; i++)
-              _TimelineTile(update: steps[i], isLast: i == steps.length - 1),
-            const SizedBox(height: 20),
+              _TimelineTile(step: steps[i], isLast: i == steps.length - 1),
+            const SizedBox(height: 24),
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.accentRed,
                 side: const BorderSide(color: AppColors.accentRed),
                 minimumSize: const Size.fromHeight(48),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
               ),
               onPressed: () {},
               icon: const Icon(Icons.call),
@@ -67,15 +92,22 @@ class EmergencyStatusScreen extends StatelessWidget {
   }
 }
 
+class _StatusStep {
+  final String label;
+  final String timestamp;
+  final bool completed;
+
+  const _StatusStep({required this.label, required this.timestamp, required this.completed});
+}
+
 class _TimelineTile extends StatelessWidget {
-  final EmergencyStatusUpdate update;
+  final _StatusStep step;
   final bool isLast;
 
-  const _TimelineTile({required this.update, required this.isLast, super.key});
+  const _TimelineTile({required this.step, required this.isLast});
 
   @override
   Widget build(BuildContext context) {
-    final color = update.completed ? AppColors.success : AppColors.textSecondary;
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,8 +115,9 @@ class _TimelineTile extends StatelessWidget {
           Column(
             children: [
               Icon(
-                update.completed ? Icons.check_circle : Icons.radio_button_unchecked,
-                color: color,
+                step.completed ? Icons.check_circle : Icons.panorama_fish_eye_rounded,
+                color: step.completed ? AppColors.success : AppColors.textSecondary,
+                size: 22,
               ),
               if (!isLast)
                 Expanded(
@@ -100,14 +133,14 @@ class _TimelineTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    update.label,
+                    step.label,
                     style: TextStyle(
-                      fontWeight: update.completed ? FontWeight.bold : FontWeight.normal,
-                      color: update.completed ? AppColors.textPrimary : AppColors.textSecondary,
+                      fontWeight: step.completed ? FontWeight.bold : FontWeight.normal,
+                      color: step.completed ? AppColors.textPrimary : AppColors.textSecondary,
                     ),
                   ),
-                  if (update.timestamp.isNotEmpty)
-                    Text(update.timestamp, style: const TextStyle(color: AppColors.textSecondary)),
+                  if (step.timestamp.isNotEmpty)
+                    Text(step.timestamp, style: const TextStyle(color: AppColors.textSecondary)),
                 ],
               ),
             ),

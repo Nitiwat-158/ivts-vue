@@ -49,6 +49,7 @@ Do not add these unless the project has a real need and source evidence:
 | `tasks/tasklist-progress.md` | active | Canonical system readiness/progress tasklist updated in place. |
 | `tasks/tasklist-progress.html` | active | Generated HTML view of the canonical progress tasklist. |
 | `tasks/2026-07-10-cctv-viewer.md` | active | Active tasklist for CCTV Viewer integration. |
+| `tasks/2026-07-21-mobile-emergency-banner.md` | active | Active tasklist for mobile emergency request banner UI. |
 | `tasks/2026-06-18-<topic>.md` | active as needed | One focused tasklist per work item. |
 
 ## Change Records
@@ -56,6 +57,7 @@ Do not add these unless the project has a real need and source evidence:
 | Document | Status | Notes |
 |---|---|---|
 | `changes/2026-07-10-cctv-viewer.md` | active | T1-T20 change record and final handoff for CCTV Viewer integration. |
+| `changes/2026-07-21-mobile-emergency-banner.md` | active | T1-T20 change record for mobile emergency request banner UI. |
 | `changes/2026-06-18-<topic>.md` | active as needed | T1-T20 handoff for each completed or handed-off work item. |
 
 ## Rule

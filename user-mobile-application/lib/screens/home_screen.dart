@@ -5,6 +5,8 @@ import '../theme/app_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/top_bar_actions.dart';
 import '../widgets/vehicle_card.dart';
+import 'emergency_request_screen.dart';
+import 'emergency_status_screen.dart';
 import 'history_screen.dart';
 import 'location_screen.dart';
 import 'profile_screen.dart';
@@ -57,6 +59,9 @@ class _HomeScreenState extends State<HomeScreen> {
       case 1:
         return VehiclesListScreen(
           onBack: () => setState(() => _tabIndex = 0),
+          onLocationTap: (vehicle) {
+            setState(() => _tabIndex = 2);
+          },
         );
       case 2:
         return const LocationScreen();
@@ -81,6 +86,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icons.directions_car_outlined,
                 text: 'คุณยังไม่ได้ลงทะเบียนรถ — เริ่มต้นลงทะเบียนรถของคุณ',
                 onTap: () {},
+              ),
+            if (!_hasNoVehicles)
+              _ActionBanner(
+                color: AppColors.accentRed,
+                icon: Icons.fmd_bad_rounded,
+                text: 'มีคำร้องฉุกเฉิน (Theft / Stolen) กำลังดำเนินการ — แตะเพื่อดู',
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const EmergencyStatusScreen(),
+                    ),
+                  );
+                },
               ),
             if (!_hasNoVehicles && expiring != null && _showRenewalBanner)
               _ActionBanner(
