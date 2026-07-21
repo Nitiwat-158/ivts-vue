@@ -14,6 +14,7 @@ const vehicleRequest = require('./service/vehicle_request');
 const cctvService = require('./service/cctv');
 const vehicleService = require('./service/vehicle');
 const trackingService = require('./service/tracking');
+const emergencyReportService = require('./service/emergency_report');
 
 // ─── Permission guards ────────────────────────────────────────────────────────
 
@@ -22,6 +23,7 @@ const canViewRegistry = authorization.requirePermission('/ivts/registry', 'view'
 const canEditRegistry = authorization.requirePermission('/ivts/registry', 'edit');
 const canDeleteRegistry = authorization.requirePermission('/ivts/registry', 'delete');
 const canViewReports = authorization.requirePermission(['/ivts/registry', '/ivts/reports'], 'view');
+const canManageReports = authorization.requirePermission(['/ivts/registry', '/ivts/reports'], 'edit');
 
 // Vehicle request guards
 const canViewRequests = authorization.requirePermission('/ivts/requests', 'view');
@@ -269,5 +271,9 @@ router.get('/tracking/history', canViewTracking, async function (request, respon
     return fail(response, error);
   }
 });
+
+// ─── Emergency Reports ──────────────────────────────────────────────────────
+router.get('/emergency-reports', canViewReports, emergencyReportService.getAll);
+router.put('/emergency-reports/:id/status', canManageReports, emergencyReportService.updateStatus);
 
 module.exports = router;

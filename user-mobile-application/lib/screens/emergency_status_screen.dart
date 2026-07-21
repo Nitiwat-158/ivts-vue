@@ -8,8 +8,8 @@ class EmergencyStatusScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final steps = [
-      const _StatusStep(label: 'ส่งคำร้องเรียบร้อย', timestamp: 'now', completed: true),
-      const _StatusStep(label: 'เจ้าหน้าที่รับคำร้องแล้ว', timestamp: '', completed: false),
+      const _StatusStep(label: 'ส่งคำร้องเรียบร้อย', timestamp: '4:41 PM', completed: true),
+      const _StatusStep(label: 'เจ้าหน้าที่รับคำร้องแล้ว', timestamp: '4:43 PM', completed: true),
       const _StatusStep(label: 'กำลังติดต่อกลับ', timestamp: '', completed: false),
     ];
 
@@ -83,7 +83,7 @@ class EmergencyStatusScreen extends StatelessWidget {
               ),
               onPressed: () {},
               icon: const Icon(Icons.call),
-              label: Text('โทรหาเจ้าหน้าที่ (${MockData.securityPhoneNumber})'),
+              label: const Text('โทรหาเจ้าหน้าที่ (${MockData.securityPhoneNumber})'),
             ),
           ],
         ),
@@ -97,7 +97,11 @@ class _StatusStep {
   final String timestamp;
   final bool completed;
 
-  const _StatusStep({required this.label, required this.timestamp, required this.completed});
+  const _StatusStep({
+    required this.label,
+    required this.timestamp,
+    required this.completed,
+  });
 }
 
 class _TimelineTile extends StatelessWidget {
@@ -140,7 +144,10 @@ class _TimelineTile extends StatelessWidget {
                     ),
                   ),
                   if (step.timestamp.isNotEmpty)
-                    Text(step.timestamp, style: const TextStyle(color: AppColors.textSecondary)),
+                    Text(
+                      step.timestamp,
+                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                    ),
                 ],
               ),
             ),

@@ -16,7 +16,7 @@
             v-model="searchQuery"
             :placeholder="$t('emergencyReportManagement.filters.searchPlaceholder')"
             class="mb-0"
-            style="width: 300px;"
+            style="width: 630px;"
           />
           <CSelect
             v-model="filterStatus"
@@ -275,63 +275,8 @@
 </template>
 
 <script>
-const mockCases = [
-  {
-    id: "EM-1001",
-    vehicle: { license_plate: "สน 1669", vehicle_ref_id: "CR0001" },
-    owner: { name: "สมชาย ใจดี", phone: "081-234-5678" },
-    request_type: "accident",
-    severity: "high",
-    incident_time: "2026-07-20T08:30:00Z",
-    submitted_at: "2026-07-20T08:32:00Z",
-    description: "ชนท้ายกับรถกระบะ",
-    last_known_location: { camera_id: "CAM-N-01", seen_at: "2026-07-20T08:25:00Z" },
-    status: "NEW",
-    assigned_admin_id: null,
-    related_case_ids: [],
-    activity_log: [
-      { time: "2026-07-20T08:32:00Z", message: "ผู้ใช้ส่งรายงานแจ้งเหตุ" }
-    ]
-  },
-  {
-    id: "EM-1002",
-    vehicle: { license_plate: "กท 9999", vehicle_ref_id: "CR0002" },
-    owner: { name: "สมศรี มีสุข", phone: "089-876-5432" },
-    request_type: "breakdown",
-    severity: "medium",
-    incident_time: "2026-07-20T07:15:00Z",
-    submitted_at: "2026-07-20T07:20:00Z",
-    description: "ยางแตกอยู่ริมถนน",
-    last_known_location: null,
-    status: "IN_PROGRESS",
-    assigned_admin_id: "Admin_A",
-    related_case_ids: ["EM-1000"],
-    activity_log: [
-      { time: "2026-07-20T07:20:00Z", message: "ผู้ใช้ส่งรายงานแจ้งเหตุ" },
-      { time: "2026-07-20T07:25:00Z", message: "จนท. Admin_A รับเคสนี้แล้ว" }
-    ]
-  },
-  {
-    id: "EM-1003",
-    vehicle: { license_plate: "ขข 1234", vehicle_ref_id: "CR0003" },
-    owner: { name: "มานะ อดทน", phone: "082-333-4444" },
-    request_type: "theft_stolen",
-    severity: "high",
-    incident_time: "2026-07-20T05:00:00Z",
-    submitted_at: "2026-07-20T05:10:00Z",
-    description: "จอดรถไว้ที่ปั๊มแล้วหายไป",
-    last_known_location: { camera_id: "CAM-S-05", seen_at: "2026-07-20T04:55:00Z" },
-    status: "NEW",
-    assigned_admin_id: null,
-    related_case_ids: [],
-    activity_log: [
-      { time: "2026-07-20T05:10:00Z", message: "ผู้ใช้ส่งรายงานแจ้งเหตุ" },
-      { time: "2026-07-20T05:30:00Z", message: "แจ้งเตือน: เคสร้ายแรงเกิน SLA (15 นาที) ยังไม่มีผู้รับผิดชอบ", isWarning: true }
-    ]
-  }
-];
-
 import AppSectionHero from '@/projects/components/layout/AppSectionHero.vue';
+import api from '@/service/api';
 
 export default {
   name: 'EmergencyReportManagement',
@@ -347,7 +292,8 @@ export default {
       filterType: '',
       selectedCase: null,
       editStatus: '',
-      currentAdminName: 'Admin_Mock'
+      currentAdminName: 'Admin_Mock',
+      currentAdminId: 'usr_mfu_001'
     };
   },
   computed: {
@@ -399,10 +345,41 @@ export default {
     }
   },
   created() {
-    this.cases = JSON.parse(JSON.stringify(mockCases));
+    this.fetchData();
   },
   methods: {
-    refreshData() {
+    async fetchData() {
+      try {
+        const response = await api.ivtsEmergencyReports('get');
+        this.cases = response.data.map(c => ({
+          id: c._id,
+          vehicle: {
+            license_plate: c.vehicle_id ? (c.vehicle_id.plateNumber || c.vehicle_id.license_plate || 'Unknown') : 'Unknown',
+            vehicle_ref_id: c.vehicle_id ? (c.vehicle_id.vehicleCode || c.vehicle_id.vehicle_ref_id || 'Unknown') : 'Unknown'
+          },
+          owner: {
+            name: c.vehicle_id ? (c.vehicle_id.ownerName || c.vehicle_id.owner_name || 'Unknown') : 'Unknown',
+            phone: 'Unknown'
+          },
+          request_type: c.request_type,
+          severity: c.severity,
+          incident_time: c.incident_time,
+          submitted_at: c.submitted_at,
+          description: c.description,
+          last_known_location: c.location,
+          status: c.status,
+          assigned_admin_id: c.assigned_admin_id ? (c.assigned_admin_id.name || c.assigned_admin_id.username || c.assigned_admin_id) : null,
+          related_case_ids: [],
+          activity_log: [
+            { time: c.submitted_at, message: "ผู้ใช้ส่งรายงานแจ้งเหตุ" }
+          ]
+        }));
+      } catch (error) {
+        console.error('Failed to fetch emergency reports:', error);
+      }
+    },
+    async refreshData() {
+      await this.fetchData();
       this.lastUpdated = new Date().toLocaleTimeString();
     },
     formatTime(isoString) {
@@ -422,27 +399,28 @@ export default {
       this.selectedCase = item;
       this.editStatus = item.status;
     },
-    acceptCase(caseId) {
-      const idx = this.cases.findIndex(c => c.id === caseId);
-      if (idx !== -1 && !this.cases[idx].assigned_admin_id) {
-        this.cases[idx].assigned_admin_id = this.currentAdminName;
-        this.cases[idx].status = 'IN_PROGRESS';
-        this.cases[idx].activity_log.push({
-          time: new Date().toISOString(),
-          message: `จนท. ${this.currentAdminName} รับเคสนี้แล้ว`
-        });
+    async acceptCase(caseId) {
+      try {
+        await api.ivtsEmergencyReports('update-status', { id: caseId, payload: { status: 'IN_PROGRESS', adminId: this.currentAdminId } });
+        await this.fetchData();
         if (this.selectedCase && this.selectedCase.id === caseId) {
-          this.editStatus = 'IN_PROGRESS';
+          const updatedCase = this.cases.find(c => c.id === caseId);
+          if (updatedCase) this.selectCase(updatedCase);
         }
+      } catch (error) {
+        console.error('Failed to accept case', error);
       }
     },
-    saveStatus() {
+    async saveStatus() {
       if (this.selectedCase && this.editStatus) {
-        this.selectedCase.status = this.editStatus;
-        this.selectedCase.activity_log.push({
-          time: new Date().toISOString(),
-          message: `จนท. เปลี่ยนสถานะเป็น ${this.editStatus}`
-        });
+        try {
+          await api.ivtsEmergencyReports('update-status', { id: this.selectedCase.id, payload: { status: this.editStatus } });
+          await this.fetchData();
+          const updatedCase = this.cases.find(c => c.id === this.selectedCase.id);
+          if (updatedCase) this.selectCase(updatedCase);
+        } catch (error) {
+          console.error('Failed to save status', error);
+        }
       }
     }
   }

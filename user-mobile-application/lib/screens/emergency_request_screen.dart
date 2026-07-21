@@ -68,7 +68,7 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.divider.withOpacity(0.3),
+                    color: AppColors.divider.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -146,7 +146,7 @@ class _CallButton extends StatelessWidget {
         HapticFeedback.mediumImpact();
       },
       icon: const Icon(Icons.call),
-      label: Text('โทรแจ้งเจ้าหน้าที่ทันที (${MockData.securityPhoneNumber})'),
+      label: const Text('โทรแจ้งเจ้าหน้าที่ทันที (${MockData.securityPhoneNumber})'),
     );
   }
 }

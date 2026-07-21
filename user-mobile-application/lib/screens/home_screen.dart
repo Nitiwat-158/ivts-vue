@@ -5,7 +5,6 @@ import '../theme/app_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/top_bar_actions.dart';
 import '../widgets/vehicle_card.dart';
-import 'emergency_request_screen.dart';
 import 'emergency_status_screen.dart';
 import 'history_screen.dart';
 import 'location_screen.dart';
@@ -23,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _tabIndex = 0;
   bool _showRenewalBanner = true;
   final bool _hasNoVehicles = false;
+  Vehicle? _selectedLocationVehicle;
 
   void _onNavTap(int index) {
     if (index == _tabIndex) return;
@@ -60,11 +60,17 @@ class _HomeScreenState extends State<HomeScreen> {
         return VehiclesListScreen(
           onBack: () => setState(() => _tabIndex = 0),
           onLocationTap: (vehicle) {
+
             setState(() => _tabIndex = 2);
+
+            setState(() {
+              _selectedLocationVehicle = vehicle;
+              _tabIndex = 2;
+            });
           },
         );
       case 2:
-        return const LocationScreen();
+        return LocationScreen(initialVehicle: _selectedLocationVehicle);
       case 3:
         return HistoryScreen(onBack: () => setState(() => _tabIndex = 0));
       case 4:

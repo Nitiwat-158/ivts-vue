@@ -62,7 +62,7 @@ class NotificationScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: _colorFor(n.type).withOpacity(0.4)),
+                      border: Border.all(color: _colorFor(n.type).withValues(alpha: 0.4)),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
