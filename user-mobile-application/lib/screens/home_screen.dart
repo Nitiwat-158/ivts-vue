@@ -21,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _tabIndex = 0;
   bool _showRenewalBanner = true;
   final bool _hasNoVehicles = false;
+  Vehicle? _selectedLocationVehicle;
 
   void _onNavTap(int index) {
     if (index == _tabIndex) return;
@@ -57,9 +58,15 @@ class _HomeScreenState extends State<HomeScreen> {
       case 1:
         return VehiclesListScreen(
           onBack: () => setState(() => _tabIndex = 0),
+          onLocationTap: (vehicle) {
+            setState(() {
+              _selectedLocationVehicle = vehicle;
+              _tabIndex = 2;
+            });
+          },
         );
       case 2:
-        return const LocationScreen();
+        return LocationScreen(initialVehicle: _selectedLocationVehicle);
       case 3:
         return HistoryScreen(onBack: () => setState(() => _tabIndex = 0));
       case 4:

@@ -697,5 +697,16 @@ export default {
       default:
         break;
     }
+  },
+
+  ivtsEmergencyReports(method, data) {
+    switch (method) {
+      case 'get':
+        return instance.get('/api/v1/ivts/emergency-reports', { params: data || {} });
+      case 'update-status':
+        return instance.put(`/api/v1/ivts/emergency-reports/${data.id}/status`, data.payload);
+      default:
+        break;
+    }
   }
 }

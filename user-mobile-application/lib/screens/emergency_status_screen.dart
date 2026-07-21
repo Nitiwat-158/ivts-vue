@@ -30,7 +30,7 @@ class EmergencyStatusScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.divider.withOpacity(0.3),
+                    color: AppColors.divider.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -58,7 +58,7 @@ class EmergencyStatusScreen extends StatelessWidget {
               ),
               onPressed: () {},
               icon: const Icon(Icons.call),
-              label: Text('โทรหาเจ้าหน้าที่ (${MockData.securityPhoneNumber})'),
+              label: const Text('โทรหาเจ้าหน้าที่ (${MockData.securityPhoneNumber})'),
             ),
           ],
         ),
@@ -71,7 +71,7 @@ class _TimelineTile extends StatelessWidget {
   final EmergencyStatusUpdate update;
   final bool isLast;
 
-  const _TimelineTile({required this.update, required this.isLast, super.key});
+  const _TimelineTile({required this.update, required this.isLast});
 
   @override
   Widget build(BuildContext context) {
