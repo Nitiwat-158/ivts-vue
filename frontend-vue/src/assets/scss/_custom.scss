@@ -1,1 +1,50 @@
 // Here you can add other styles
+
+.ops-card {
+  border: 1px solid #dfe7f2;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(34, 45, 70, 0.055);
+}
+
+.ops-metric {
+  min-height: 142px;
+  border-left-width: 5px;
+}
+
+.ops-metric--blue { border-left-color: #2563eb; }
+.ops-metric--green { border-left-color: #16a34a; }
+.ops-metric--amber { border-left-color: #d97706; }
+.ops-metric--red { border-left-color: #dc2626; }
+.ops-metric--secondary { border-left-color: #64748b; }
+
+.ops-metric__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.ops-metric__top .c-icon {
+  color: #5b6b82;
+  font-size: 1.15rem;
+}
+
+.ops-metric__label {
+  color: #6b778c;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.ops-metric__value {
+  margin-top: 0.8rem;
+  color: #111827;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.ops-metric__hint {
+  color: #667085;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}

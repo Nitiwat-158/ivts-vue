@@ -46,6 +46,13 @@ export default function buildNav (t) {
           permission: { path: '/operations/business', action: 'view' }
         },
         {
+          _name: 'CSidebarNavItem',
+          name: t('nav.emergencyReportManagement'),
+          to: '/operations/emergency-reports',
+          icon: 'cil-warning',
+          public: true
+        },
+        {
           _name: 'CSidebarNavTitle',
           _children: [t('nav.accessControl')]
         },

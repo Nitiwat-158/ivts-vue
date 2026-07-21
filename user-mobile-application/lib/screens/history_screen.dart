@@ -21,12 +21,12 @@ class HistoryScreen extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       child: ListView(
         children: [
-          Row(
+          const Row(
             children: [
               Expanded(
                 child: _FilterChip(label: 'Today'),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: 10),
               Expanded(
                 child: _FilterChip(label: 'สน 1669'),
               ),
@@ -51,7 +51,7 @@ class HistoryScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.divider.withOpacity(0.3),
+                          color: AppColors.divider.withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -91,7 +91,7 @@ class HistoryScreen extends StatelessWidget {
 class _FilterChip extends StatelessWidget {
   final String label;
 
-  const _FilterChip({required this.label, super.key});
+  const _FilterChip({required this.label});
 
   @override
   Widget build(BuildContext context) {

@@ -56,33 +56,54 @@
       <!-- Alerts Column -->
       <CCol lg="5">
         <CCard class="h-100 mb-0">
-          <CCardHeader>
+          <CCardHeader class="d-flex justify-content-between align-items-center">
             <strong style="font-size: 1.1rem;">{{ $t('ivts.alerts') }}</strong>
+            <div class="d-flex" style="gap: 8px;">
+              <select v-model="filterSource" class="form-control form-control-sm" style="width: auto;">
+                <option value="all">{{ $t('ivts.allSources') }}</option>
+                <option value="system">{{ $t('ivts.systemSource') }}</option>
+                <option value="human">{{ $t('ivts.humanSource') }}</option>
+              </select>
+              <select v-model="filterSeverity" class="form-control form-control-sm" style="width: auto;">
+                <option value="all">{{ $t('ivts.allSeverities') }}</option>
+                <option value="high">{{ $t('ivts.highSeverity') }}</option>
+                <option value="medium">{{ $t('ivts.mediumSeverity') }}</option>
+                <option value="low">{{ $t('ivts.lowSeverity') }}</option>
+              </select>
+            </div>
           </CCardHeader>
           <CCardBody class="p-0 overflow-auto" style="max-height: 480px;">
             <CListGroup flush>
               <CListGroupItem 
-                v-for="(alert, index) in alerts" 
+                v-for="(alert, index) in filteredAlerts" 
                 :key="index"
                 action
                 class="d-flex justify-content-between align-items-start alert-item border-bottom"
                 @click="onAlertClick(alert)"
               >
-                <div class="d-flex w-100 py-1">
+                <div class="d-flex w-100 py-1 position-relative">
                   <div class="alert-icon mr-3 mt-1">
-                    <div class="alert-circle" :class="alert.type === 'offline' ? 'bg-danger' : 'bg-warning'"></div>
+                    <div class="alert-circle" :class="getAlertColorClass(alert, true)"></div>
                   </div>
-                  <div>
-                    <h6 class="mb-1 font-weight-bold" :class="alert.type === 'offline' ? 'text-danger' : 'text-warning'">
-                      {{ alert.type === 'offline' ? $t('ivts.cameraOffline') : $t('ivts.unregisteredVehicle') }}
+                  <div class="flex-grow-1">
+                    <h6 class="mb-1 font-weight-bold" :class="getAlertColorClass(alert, false)">
+                      {{ getAlertTitle(alert) }}
                     </h6>
                     <p class="mb-1 text-dark" style="font-size: 0.9rem;">
-                      <span class="font-weight-bold">{{ alert.cameraId }}</span>
+                      <span class="font-weight-bold">{{ alert.cameraId || alert.location }}</span>
                       <template v-if="alert.type === 'offline'">
                         <span class="text-muted ml-1">— {{ $t('ivts.noSignalFor', { min: alert.duration }) }}</span>
                       </template>
+                      <template v-if="alert.description">
+                        <span class="text-muted ml-1">— {{ alert.description }}</span>
+                      </template>
                     </p>
                     <small class="text-muted">{{ alert.time }}</small>
+                  </div>
+                  <div class="position-absolute" style="top: 0; right: 0;">
+                    <CBadge :color="alert.type === 'emergency_report' ? 'info' : 'secondary'" shape="pill">
+                      {{ getAlertTag(alert) }}
+                    </CBadge>
                   </div>
                 </div>
               </CListGroupItem>
@@ -198,6 +219,8 @@ export default {
   },
   data() {
     return {
+      filterSource: 'all',
+      filterSeverity: 'all',
       lastUpdated: new Date(),
       map: null,
       cameras: [
@@ -214,11 +237,28 @@ export default {
         { type: 'offline', cameraId: 'CAM07_E3_Parking', duration: 120, time: '14:00' },
         { type: 'unregistered', cameraId: 'CAM05_MainRoad', time: '13:45' },
         { type: 'unregistered', cameraId: 'CAM02_ParkingA', time: '12:10' },
-        { type: 'offline', cameraId: 'CAM06_E1_Parking', duration: 300, time: '11:00' }
+        { type: 'offline', cameraId: 'CAM06_E1_Parking', duration: 300, time: '11:00' },
+        { id: 'ER01', type: 'emergency_report', source: 'guest', severity: 'high', location: 'ลานจอด C', time: '09:12' },
+        { id: 'ER02', type: 'emergency_report', source: 'staff', severity: 'medium', location: 'ประตูทางเข้าหลัก', time: '07:50' }
       ]
     }
   },
   computed: {
+    filteredAlerts() {
+      return this.alerts.filter(alert => {
+        const isSystem = alert.type === 'offline' || alert.type === 'unregistered';
+        const isEmergency = alert.type === 'emergency_report';
+        
+        if (this.filterSource === 'system' && !isSystem) return false;
+        if (this.filterSource === 'human' && !isEmergency) return false;
+        
+        if (this.filterSeverity !== 'all') {
+          if (isEmergency && alert.severity !== this.filterSeverity) return false;
+        }
+        
+        return true;
+      });
+    },
     lastUpdatedLabel() {
       if (!this.lastUpdated) return ''
       const d = this.lastUpdated.getDate().toString().padStart(2, '0')
@@ -273,7 +313,32 @@ export default {
     },
     onAlertClick(alert) {
       console.log('Clicked alert:', alert);
-      window.alert(`${this.$t('dashboard.eventAlert')} ${alert.cameraId}`);
+      window.alert(`${this.$t('dashboard.eventAlert')} ${alert.cameraId || alert.id}`);
+    },
+    getAlertColorClass(alert, isBackground) {
+      if (alert.type === 'offline') return isBackground ? 'bg-danger' : 'text-danger';
+      if (alert.type === 'unregistered') return isBackground ? 'bg-warning' : 'text-warning';
+      if (alert.type === 'emergency_report') {
+        if (alert.severity === 'high') return isBackground ? 'bg-danger' : 'text-danger';
+        if (alert.severity === 'medium') return isBackground ? 'bg-warning' : 'text-warning';
+        if (alert.severity === 'low') return isBackground ? 'bg-success' : 'text-success';
+      }
+      return isBackground ? 'bg-secondary' : 'text-secondary';
+    },
+    getAlertTitle(alert) {
+      if (alert.type === 'offline') return this.$t('ivts.cameraOffline');
+      if (alert.type === 'unregistered') return this.$t('ivts.unregisteredVehicle');
+      if (alert.type === 'emergency_report') {
+        const severityStr = alert.severity === 'high' ? this.$t('ivts.highSeverity') : alert.severity === 'medium' ? this.$t('ivts.mediumSeverity') : this.$t('ivts.lowSeverity');
+        return `${this.$t('ivts.emergencyReport')} · ${severityStr}`;
+      }
+      return '';
+    },
+    getAlertTag(alert) {
+      if (alert.type === 'emergency_report') {
+        return alert.source === 'guest' ? this.$t('ivts.humanGuest') : this.$t('ivts.humanStaff');
+      }
+      return this.$t('ivts.systemSource');
     }
   }
 }

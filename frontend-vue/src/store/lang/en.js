@@ -65,6 +65,16 @@ const en = {
         cameraActive: "Active",
         cameraInactive: "Inactive",
         alerts: "Alerts",
+        allSources: "All sources",
+        systemSource: "System",
+        humanSource: "Human",
+        allSeverities: "All severities",
+        highSeverity: "High",
+        mediumSeverity: "Medium",
+        lowSeverity: "Low",
+        emergencyReport: "Emergency report",
+        humanGuest: "Human (guest)",
+        humanStaff: "Human (staff)",
         cameraOffline: "Camera offline",
         noSignalFor: "No signal for {min} min",
         unregisteredVehicle: "Unregistered vehicle detected",
@@ -172,6 +182,7 @@ const en = {
         userManagement: "User Management",
         reports: "Reports",
         businessOperations: "IVTS Operations",
+        emergencyReportManagement: "Emergency Reports",
         banks: "Banks",
         template: "Template",
         accessControl: "Access Control",
@@ -1296,6 +1307,69 @@ en.receiveForm = {
     dashboard: {
         cctvAlert: "Will navigate to CCTV view:",
         eventAlert: "Check event:"
+    }
+}
+
+en.emergencyReportManagement = {
+    title: "Emergency Report Management",
+    subtitle: "Track and manage emergency reports submitted by vehicle owners in real time",
+    stats: {
+        new: "New",
+        newHint: "Awaiting assignment",
+        inProgress: "In Progress",
+        inProgressHint: "Currently being handled",
+        resolved: "Resolved",
+        resolvedHint: "Issue addressed",
+        closed: "Closed",
+        closedHint: "Case closed",
+        overSla: "Overdue SLA",
+        overSlaHint: "Unassigned beyond SLA threshold"
+    },
+    filters: {
+        searchPlaceholder: "Search license plate or owner name...",
+        allStatuses: "All statuses",
+        allTypes: "All types"
+    },
+    list: {
+        title: "Case List",
+        time: "Time",
+        licensePlate: "License Plate",
+        type: "Type",
+        status: "Status",
+        assignee: "Assignee",
+        unassigned: "— Unassigned —",
+        noData: "No data found"
+    },
+    details: {
+        reportedAt: "Reported at:",
+        vehicle: "Vehicle",
+        owner: "Owner",
+        sharedQueueTitle: "Shared Queue",
+        sharedQueueDesc: "No assignee yet — this case is visible to all admins simultaneously",
+        assignee: "Case Assignee:",
+        description: "Description from reporter",
+        noDescription: "No additional details from reporter",
+        lastLocation: "Last Known Location",
+        passedAt: "Passed at",
+        noLocation: "No last location data found",
+        attachments: "Attachments",
+        noAttachments: "No attachments (This app version does not support image/video upload yet)",
+        relatedCases: "Related / Duplicate Cases",
+        noRelatedCases: "No related cases found",
+        activityLog: "Activity Log",
+        sendUpdate: "Send update to vehicle owner",
+        internalNotes: "Internal Notes",
+        canChangeStatusAfterAccept: "Status can be changed only after accepting",
+        selectCaseToView: "Please select a case from the list on the left to view details"
+    },
+    actions: {
+        accept: "✓ Accept",
+        linkCase: "+ Link another case",
+        typeMessage: "Type message...",
+        send: "Send",
+        typeNotes: "Admin investigation notes...",
+        exportPrint: "Export / Print",
+        changeStatus: "Change Status:"
     }
 }
 

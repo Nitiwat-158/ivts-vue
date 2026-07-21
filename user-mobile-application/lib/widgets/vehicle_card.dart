@@ -82,10 +82,15 @@ class VehicleCard extends StatelessWidget {
                   ],
                 ),
               ),
-              ElevatedButton(
+              ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accentRed,
+                  foregroundColor: Colors.white,
                   minimumSize: const Size(0, 34),
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
                 onPressed: () {
                   Navigator.of(context).push(
@@ -94,7 +99,8 @@ class VehicleCard extends StatelessWidget {
                     ),
                   );
                 },
-                child: const Text('Request'),
+                icon: const Icon(Icons.warning_amber_rounded, size: 16),
+                label: const Text('Emergency'),
               ),
             ],
           ),

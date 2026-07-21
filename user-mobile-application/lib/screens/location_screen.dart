@@ -30,31 +30,6 @@ class LocationScreen extends StatelessWidget {
           ),
         ),
         Positioned(
-          top: 14,
-          left: 14,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.9),
-              borderRadius: BorderRadius.circular(999),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.divider.withOpacity(0.35),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: const [
-                Icon(Icons.gps_fixed_rounded, color: AppColors.primary, size: 16),
-                SizedBox(width: 6),
-                Text('Tracking', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700)),
-              ],
-            ),
-          ),
-        ),
-        Positioned(
           top: 90,
           right: 24,
           child: Container(
@@ -65,7 +40,7 @@ class LocationScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.divider.withOpacity(0.35),
+                  color: AppColors.divider.withValues(alpha: 0.35),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -85,7 +60,7 @@ class LocationScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.divider.withOpacity(0.4),
+                  color: AppColors.divider.withValues(alpha: 0.4),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -131,7 +106,7 @@ class LocationScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.14),
+                    color: AppColors.success.withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: const Text(
