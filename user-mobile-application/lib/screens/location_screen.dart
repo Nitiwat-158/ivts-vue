@@ -29,6 +29,34 @@ class LocationScreen extends StatelessWidget {
             child: const SizedBox.expand(),
           ),
         ),
+        if (Navigator.of(context).canPop())
+          Positioned(
+            top: 0,
+            left: 0,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.divider.withValues(alpha: 0.5),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primary, size: 20),
+                  ),
+                ),
+              ),
+            ),
+          ),
         Positioned(
           top: 90,
           right: 24,

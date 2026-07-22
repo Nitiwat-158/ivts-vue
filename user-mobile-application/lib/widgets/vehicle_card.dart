@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/vehicle.dart';
 import '../screens/emergency_request_screen.dart';
+import '../screens/location_screen.dart';
 import '../theme/app_theme.dart';
 
 class VehicleCard extends StatelessWidget {
@@ -105,24 +106,33 @@ class VehicleCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          Container(
-            height: 110,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: const Color(0xFFDDEEDD),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            alignment: Alignment.center,
-            child: const Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.map_rounded, color: AppColors.textSecondary, size: 28),
-                SizedBox(height: 4),
-                Text(
-                  'แตะเพื่อดูเส้นทางแบบเต็มจอ',
-                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => LocationScreen(initialVehicle: vehicle),
                 ),
-              ],
+              );
+            },
+            child: Container(
+              height: 110,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: const Color(0xFFDDEEDD),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              alignment: Alignment.center,
+              child: const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.map_rounded, color: AppColors.textSecondary, size: 28),
+                  SizedBox(height: 4),
+                  Text(
+                    'แตะเพื่อดูเส้นทางแบบเต็มจอ',
+                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

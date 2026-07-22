@@ -72,12 +72,6 @@ class VehicleDetailsScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
-                        onPressed: () {},
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 16),

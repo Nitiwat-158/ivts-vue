@@ -54,6 +54,8 @@ Do not add these unless the project has a real need and source evidence:
 | `tasks/2026-07-22-add-vehicle-screen.md` | active | Active tasklist for Add Vehicle form screen UI and FAB navigation. |
 | `tasks/2026-07-22-renewal-request-screen.md` | active | Active tasklist for Renewal Request screen UI. |
 | `tasks/2026-07-22-home-renewal-banner.md` | active | Active tasklist for wiring Home renewal banner. |
+| `tasks/2026-07-22-home-location-map.md` | active | Active tasklist for wiring map button on VehicleCard. |
+| `tasks/2026-07-22-remove-edit-icon.md` | active | Active tasklist for removing edit icon from Vehicle Details. |
 | `tasks/2026-06-18-<topic>.md` | active as needed | One focused tasklist per work item. |
 
 ## Change Records
@@ -66,6 +68,8 @@ Do not add these unless the project has a real need and source evidence:
 | `changes/2026-07-22-add-vehicle-screen.md` | active | T1-T20 change record for Add Vehicle form screen UI and FAB navigation. |
 | `changes/2026-07-22-renewal-request-screen.md` | active | T1-T20 change record for Renewal Request screen UI. |
 | `changes/2026-07-22-home-renewal-banner.md` | active | T1-T20 change record for wiring Home renewal banner. |
+| `changes/2026-07-22-home-location-map.md` | active | T1-T20 change record for wiring map button on VehicleCard. |
+| `changes/2026-07-22-remove-edit-icon.md` | active | T1-T20 change record for removing edit icon from Vehicle Details. |
 | `changes/2026-06-18-<topic>.md` | active as needed | T1-T20 handoff for each completed or handed-off work item. |
 
 ## Rule
