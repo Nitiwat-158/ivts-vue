@@ -351,7 +351,11 @@ export default {
     async fetchData() {
       try {
         const response = await api.ivtsEmergencyReports('get');
-        this.cases = response.data.map(c => ({
+        const reports = response && response.data && Array.isArray(response.data.data)
+          ? response.data.data
+          : (response && response.data ? response.data : []);
+
+        this.cases = reports.map(c => ({
           id: c._id,
           vehicle: {
             license_plate: c.vehicle_id ? (c.vehicle_id.plateNumber || c.vehicle_id.license_plate || 'Unknown') : 'Unknown',

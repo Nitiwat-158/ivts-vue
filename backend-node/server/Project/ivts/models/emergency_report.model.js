@@ -23,7 +23,7 @@ const emergencyReportSchema = new Schema({
   },
   assigned_admin_id: { type: String, ref: 'User', default: null } // The admin user ID
 }, {
-  collection: 'emergency reports'
+  collection: 'emergency_report'
 });
 
-module.exports = mongoose.model('EmergencyReport', emergencyReportSchema, 'emergency reports');
+module.exports = mongoose.model('EmergencyReport', emergencyReportSchema, 'emergency_report');
