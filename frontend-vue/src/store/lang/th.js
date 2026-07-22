@@ -126,7 +126,9 @@ const th = {
             approveDocSuccess: "อนุมัติเอกสารเรียบร้อย",
             approveDocFailed: "อนุมัติเอกสารไม่สำเร็จ",
             rejectDocSuccess: "ปฏิเสธเอกสารเรียบร้อย",
-            rejectDocFailed: "ปฏิเสธเอกสารไม่สำเร็จ"
+            rejectDocFailed: "ปฏิเสธเอกสารไม่สำเร็จ",
+            exportSuccess: "ส่งออกข้อมูลเรียบร้อย",
+            exportFailed: "ส่งออกข้อมูลไม่สำเร็จ"
         }
     },
     auth: {

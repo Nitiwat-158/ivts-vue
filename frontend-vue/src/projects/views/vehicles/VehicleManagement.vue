@@ -78,7 +78,8 @@ import {
   fetchVehicles,
   approveVehicle,
   rejectVehicle,
-  deleteVehicle
+  deleteVehicle,
+  exportVehicles
 } from '@/projects/views/vehicles/useVehicleApi'
 
 export default {
@@ -164,8 +165,15 @@ export default {
         this.loading = true
         this.lastUpdated = new Date()
         const response = await fetchVehicles(this.searchQuery, this.statusFilter)
-        this.vehicles = response
-        this.calculateStats(response)
+        this.vehicles = (response.vehicles || []).map(v => ({
+          id: v._id,
+          plate: v.vehicle ? v.vehicle.license_plate : '-',
+          owner: v.user ? `${v.user.name || ''} ${v.user.surname || ''}`.trim() : '-',
+          docStatus: v.document_status,
+          accountStatus: v.account_status,
+          docImageUrl: v.certificate_image_url || ''
+        }))
+        this.stats = response.stats || { total: 0, pending: 0, approved: 0, rejected: 0 }
       } catch (error) {
         this.notifyToast(this.$t('ivts.toast.loadVehicleFailed'), 'danger')
       } finally {
@@ -173,12 +181,7 @@ export default {
       }
     },
     calculateStats (items) {
-      this.stats = {
-        total: items.length,
-        pending: items.filter(item => item.docStatus === 'Pending').length,
-        approved: items.filter(item => item.docStatus === 'Approved').length,
-        rejected: items.filter(item => item.docStatus === 'Rejected').length
-      }
+      // Kept for compatibility but stats are now handled via backend response.
     },
     debounceLoadVehicles () {
       if (this.searchTimeout) {
@@ -192,8 +195,20 @@ export default {
     onFilterStatus (value) {
       this.statusFilter = value
     },
-    onExport () {
-      this.notifyToast('Export triggered', 'info')
+    async onExport () {
+      try {
+        const blob = await exportVehicles(this.searchQuery, this.statusFilter)
+        const url = window.URL.createObjectURL(new Blob([blob]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'owner_vehicles.csv')
+        document.body.appendChild(link)
+        link.click()
+        link.parentNode.removeChild(link)
+        this.notifyToast(this.$t('ivts.toast.exportSuccess') || 'Export successful', 'success')
+      } catch (error) {
+        this.notifyToast(this.$t('ivts.toast.exportFailed') || 'Export failed', 'danger')
+      }
     },
     async handleApprove (id) {
       try {

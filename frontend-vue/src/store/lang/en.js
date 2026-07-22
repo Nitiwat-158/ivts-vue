@@ -124,7 +124,9 @@ const en = {
             approveDocSuccess: "Document approved successfully",
             approveDocFailed: "Failed to approve document",
             rejectDocSuccess: "Document rejected successfully",
-            rejectDocFailed: "Failed to reject document"
+            rejectDocFailed: "Failed to reject document",
+            exportSuccess: "Export successful",
+            exportFailed: "Export failed"
         }
     },
     auth: {
