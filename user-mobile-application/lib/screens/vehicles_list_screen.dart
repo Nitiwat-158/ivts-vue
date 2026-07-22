@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
 import '../models/vehicle.dart';
 import '../theme/app_theme.dart';
+import 'add_vehicle_screen.dart';
 import 'vehicle_details_screen.dart';
 
 class VehiclesListScreen extends StatelessWidget {
@@ -166,7 +167,13 @@ class VehiclesListScreen extends StatelessWidget {
           right: 20,
           bottom: 20,
           child: FloatingActionButton.extended(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const AddVehicleScreen(),
+                ),
+              );
+            },
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add),
