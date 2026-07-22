@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/vehicle.dart';
 import '../theme/app_theme.dart';
+import 'renewal_request_screen.dart';
 
 class VehicleDetailsScreen extends StatelessWidget {
   final Vehicle vehicle;
@@ -117,7 +118,13 @@ class VehicleDetailsScreen extends StatelessWidget {
             const SizedBox(height: 12),
 
             // ── Renewal Request ────────────────────────────────────────
-            _RenewalButton(onTap: () {}),
+            _RenewalButton(onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => RenewalRequestScreen(vehicle: vehicle),
+                ),
+              );
+            }),
           ],
         ),
       ),

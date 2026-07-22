@@ -9,6 +9,7 @@ import 'emergency_status_screen.dart';
 import 'history_screen.dart';
 import 'location_screen.dart';
 import 'profile_screen.dart';
+import 'renewal_request_screen.dart';
 import 'vehicles_list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -113,7 +114,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     : AppColors.warningAmber,
                 icon: Icons.warning_amber_rounded,
                 text: 'รถ ${expiring.vehicleCode} ใกล้หมดอายุทะเบียนใน ${expiring.daysUntilExpiry} วัน',
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => RenewalRequestScreen(vehicle: expiring),
+                    ),
+                  );
+                },
                 onDismiss: () => setState(() => _showRenewalBanner = false),
               ),
             const SizedBox(height: 8),
