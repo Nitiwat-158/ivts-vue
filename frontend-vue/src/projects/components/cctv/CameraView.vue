@@ -107,7 +107,8 @@ export default {
       timestamp: Date.now(),
       currentTime: '',
       clockInterval: null,
-      hlsInstance: null
+      hlsInstance: null,
+      hlsTimeout: null
     }
   },
   computed: {
@@ -116,7 +117,7 @@ export default {
       if (fromEnv) {
         return fromEnv.replace(/\/$/, '')
       }
-      return 'http://127.0.0.1:8203'
+      return 'http://127.0.0.1:8082'
     },
     statusColor() {
       if (!this.camera) return 'secondary'
@@ -133,7 +134,13 @@ export default {
       // Use HLS proxy endpoint to avoid CORS issues.
       // The backend /api/v1/ivts/cctvs/:id/stream/hls endpoint
       // proxies requests to MediaMTX without CORS restrictions.
-      return this.camera.stream_urls.hls_proxy || this.camera.stream_urls.hls || null
+      const url = this.camera.stream_urls.hls_proxy || this.camera.stream_urls.hls || null
+      if (url) {
+        console.debug('[CameraView] streamSourceUrl', url)
+      } else {
+        console.warn('[CameraView] no HLS source URL for camera', this.camera && this.camera.id)
+      }
+      return url
     },
     streamSourceType() {
       if (!this.streamSourceUrl) {
@@ -200,9 +207,13 @@ export default {
       this.$nextTick(() => {
         const video = this.$refs.videoPlayer
         const streamUrl = this.buildStreamUrl(this.streamSourceUrl)
-        
+
+        console.debug('[CameraView] initHls streamUrl:', streamUrl)
+
+        if (!video) return
+
         // Fallback manual timeout just in case hls.js hangs without firing events
-        const manualTimeout = setTimeout(() => {
+        this.hlsTimeout = setTimeout(() => {
           if (this.loading) {
             this.destroyHls()
             this.onError()
@@ -210,8 +221,13 @@ export default {
           }
         }, 10000)
 
-        if (!video) return
-        
+        const clearHlsTimeout = () => {
+          if (this.hlsTimeout) {
+            clearTimeout(this.hlsTimeout)
+            this.hlsTimeout = null
+          }
+        }
+
         if (Hls.isSupported()) {
           this.hlsInstance = new Hls({
             debug: false,
@@ -223,16 +239,10 @@ export default {
             levelLoadingMaxRetry: 1
           })
           
-          this.hlsInstance.loadSource(streamUrl)
-          this.hlsInstance.attachMedia(video)
-          
-          this.hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-            video.play().catch(e => console.warn('Auto-play blocked:', e))
-            this.loading = false
-          })
-          
           this.hlsInstance.on(Hls.Events.ERROR, (event, data) => {
-            if (data.fatal) {
+            console.error('[CameraView] hls error', event, data)
+            if (data && data.fatal) {
+              clearHlsTimeout()
               switch(data.type) {
                 case Hls.ErrorTypes.NETWORK_ERROR:
                   console.error('Fatal network error encountered:', data)
@@ -250,15 +260,45 @@ export default {
               }
             }
           })
-        }
-        else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-          video.src = streamUrl
-          video.addEventListener('loadedmetadata', () => {
+
+          this.hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+            console.debug('[CameraView] manifest parsed')
+            clearHlsTimeout()
             video.play().catch(e => console.warn('Auto-play blocked:', e))
             this.loading = false
           })
-          video.addEventListener('error', this.onError)
+
+          this.hlsInstance.on(Hls.Events.MANIFEST_LOADED, (event, data) => {
+            console.debug('[CameraView] manifest loaded', data)
+          })
+
+          this.hlsInstance.on(Hls.Events.LEVEL_LOADED, (event, data) => {
+            console.debug('[CameraView] level loaded', data)
+          })
+
+          this.hlsInstance.on(Hls.Events.MEDIA_ATTACHED, () => {
+            console.debug('[CameraView] media attached')
+          })
+
+          this.hlsInstance.loadSource(streamUrl)
+          this.hlsInstance.attachMedia(video)
+        }
+        else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          console.debug('[CameraView] native HLS fallback')
+          this.hlsInstance = null
+          video.src = streamUrl
+          video.addEventListener('loadedmetadata', () => {
+            clearHlsTimeout()
+            video.play().catch(e => console.warn('Auto-play blocked:', e))
+            this.loading = false
+          })
+          video.addEventListener('error', (event) => {
+            clearHlsTimeout()
+            console.error('[CameraView] native video element error', event)
+            this.onError()
+          })
         } else {
+          clearHlsTimeout()
           this.onError()
         }
       })

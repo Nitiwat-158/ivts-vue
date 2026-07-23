@@ -271,9 +271,9 @@ router.get('/cctvs/:id', canViewCctvs, async function (request, response) {
   }
 });
 
-router.get('/cctvs/:id/stream/hls', canViewCctvs, async function (request, response) {
+router.get('/cctvs/:id/stream/:file(*)', canViewCctvs, async function (request, response) {
   try {
-    await cctvService.proxyHlsStream(request.params.id, request, response);
+    await cctvService.proxyHlsStream(request.params.id, request.params.file, request, response);
   } catch (error) {
     return fail(response, error);
   }

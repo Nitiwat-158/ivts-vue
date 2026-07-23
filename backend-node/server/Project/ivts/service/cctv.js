@@ -16,6 +16,9 @@
 
 const fs = require('fs');
 const path = require('path');
+const mongoose = require('mongoose');
+const ffmpeg = require('fluent-ffmpeg');
+const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
 const Cctv = require('../models/cctv.model');
 
 const DEFAULT_LIMIT = 50;
@@ -24,6 +27,11 @@ const STREAM_HOST = process.env.STREAM_HOST || 'http://localhost/' || 'iam.mfu.a
 const WEBRTC_PORT = process.env.STREAM_WEBRTC_PORT || '8554';
 const HLS_PORT = process.env.STREAM_HLS_PORT || '8888';
 const RTSP_PORT = process.env.STREAM_RTSP_PORT || '8554';
+const HLS_CACHE_DIR = path.resolve(__dirname, '../../../../hls-streams');
+const HLS_PLAYLIST_NAME = 'hls.m3u8';
+const HLS_TASKS = new Map();
+
+ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 const MEDIAMTX_BASE_URL = process.env.MEDIAMTX_BASE_URL ? String(process.env.MEDIAMTX_BASE_URL).trim() : null;
 const BASE_SERVER_URL = process.env.BASE_SERVER_URL ? String(process.env.BASE_SERVER_URL).trim().replace(/\/$/, '') : '';
 
@@ -105,6 +113,90 @@ function loadMediamtxPaths() {
     console.warn('Unable to load mediamtx.yml mapping:', error && error.message ? error.message : error);
     return {};
   }
+}
+
+function ensureHlsCacheDir() {
+  fs.mkdirSync(HLS_CACHE_DIR, { recursive: true });
+}
+
+function getHlsOutputDir(id) {
+  return path.join(HLS_CACHE_DIR, String(id));
+}
+
+function getHlsPlaylistPath(id) {
+  return path.join(getHlsOutputDir(id), HLS_PLAYLIST_NAME);
+}
+
+function getHlsFilePath(id, fileName) {
+  return path.join(getHlsOutputDir(id), sanitizeHlsFileName(fileName));
+}
+
+function sanitizeHlsFileName(fileName) {
+  return path.basename(String(fileName || ''));
+}
+
+async function waitForFile(filePath, timeoutMs = 6000) {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    if (fs.existsSync(filePath)) {
+      return true;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+  return fs.existsSync(filePath);
+}
+
+function startHlsConversion(id, rtspUrl) {
+  const cameraId = String(id);
+  if (!cameraId || !rtspUrl) return null;
+
+  const existing = HLS_TASKS.get(cameraId);
+  if (existing && !existing.stopped) {
+    return existing;
+  }
+
+  ensureHlsCacheDir();
+  const outputDir = getHlsOutputDir(cameraId);
+  fs.mkdirSync(outputDir, { recursive: true });
+  const playlistPath = getHlsPlaylistPath(cameraId);
+  const segmentPattern = `${outputDir.replace(/\\/g, '/')}/segment_%03d.ts`;
+
+  const task = {
+    stopped: false,
+    error: null,
+    startedAt: Date.now()
+  };
+
+  const command = ffmpeg(rtspUrl)
+    .inputOptions(['-rtsp_transport tcp', '-stimeout 3000000'])
+    .outputOptions([
+      '-c:v copy',
+      '-c:a aac',
+      '-f hls',
+      '-hls_time 2',
+      '-hls_list_size 5',
+      '-hls_flags delete_segments+independent_segments',
+      `-hls_segment_filename`, segmentPattern,
+      '-hls_allow_cache 0'
+    ])
+    .output(playlistPath)
+    .on('start', (commandLine) => {
+      console.info(`HLS conversion start [${cameraId}]: ${commandLine}`);
+    })
+    .on('error', (error) => {
+      task.error = error;
+      task.stopped = true;
+      console.error(`HLS conversion failed [${cameraId}]: ${error && error.message ? error.message : error}`);
+    })
+    .on('end', () => {
+      task.stopped = true;
+      console.info(`HLS conversion ended [${cameraId}]`);
+    })
+    .run();
+
+  task.command = command;
+  HLS_TASKS.set(cameraId, task);
+  return task;
 }
 
 // ─── Utility helpers ──────────────────────────────────────────────────────────
@@ -247,11 +339,38 @@ exports.list = async function list(query) {
 /**
  * Get a single CCTV by ID, with dynamically generated stream URLs.
  */
-exports.getById = async function getById(id) {
-  const parsed = Number(id);
-  const queryId = Number.isFinite(parsed) ? parsed : id;
+async function findCctvByIdentifier(id) {
+  if (id === undefined || id === null) {
+    return null;
+  }
 
-  const doc = await Cctv.findById(queryId).lean();
+  const rawId = String(id).trim();
+  if (!rawId) {
+    return null;
+  }
+
+  if (mongoose.Types.ObjectId.isValid(rawId)) {
+    const doc = await Cctv.collection.findOne({ _id: new mongoose.Types.ObjectId(rawId) });
+    if (doc) return doc;
+  }
+
+  const numeric = Number(rawId);
+  if (Number.isFinite(numeric) && String(numeric) === rawId) {
+    const doc = await Cctv.collection.findOne({ _id: numeric });
+    if (doc) return doc;
+  }
+
+  let doc = await Cctv.findOne({ mediamtx_path: rawId }).lean();
+  if (doc) return doc;
+
+  doc = await Cctv.findOne({ camera_name: rawId }).lean();
+  if (doc) return doc;
+
+  return null;
+}
+
+exports.getById = async function getById(id) {
+  const doc = await findCctvByIdentifier(id);
   if (!doc) {
     const error = new Error('CCTV not found');
     error.status = 404;
@@ -260,13 +379,69 @@ exports.getById = async function getById(id) {
   return enrichWithStreamUrls(doc);
 };
 
-exports.proxyHlsStream = async function proxyHlsStream(id, request, response) {
-  const parsed = Number(id);
-  const queryId = Number.isFinite(parsed) ? parsed : id;
-  const doc = await Cctv.findById(queryId).lean();
-  if (!doc || !doc.mediamtx_path) {
+exports.proxyHlsStream = async function proxyHlsStream(id, fileName, request, response) {
+  const doc = await findCctvByIdentifier(id);
+  if (!doc) {
     const error = new Error('CCTV not found');
     error.status = 404;
+    throw error;
+  }
+
+  const requestedFile = String(fileName || 'hls').trim();
+  const isPlaylist = requestedFile === 'hls' || requestedFile === HLS_PLAYLIST_NAME || requestedFile.endsWith('.m3u8');
+  const sourceRtspUrl = cleanText(doc.source_rtsp_url);
+
+  console.info(`[HLS proxy] request: id=${id}, file=${requestedFile}, playlist=${isPlaylist}, rtsp=${!!sourceRtspUrl}`);
+
+  if (sourceRtspUrl) {
+    const cameraId = String(id).trim();
+    const requestedName = isPlaylist ? HLS_PLAYLIST_NAME : sanitizeHlsFileName(requestedFile);
+    const targetPath = getHlsFilePath(cameraId, requestedName);
+
+    startHlsConversion(cameraId, sourceRtspUrl);
+
+    const waitTimeout = 8000;
+    const ready = await waitForFile(targetPath, waitTimeout);
+    if (!ready) {
+      const errorMessage = isPlaylist
+        ? 'HLS playlist is not ready yet'
+        : 'HLS segment is not ready yet';
+      console.warn(`[HLS proxy] missing file after wait ${waitTimeout}ms: ${targetPath}`);
+      response.statusCode = 503;
+      response.setHeader('content-type', 'application/json');
+      return response.end(JSON.stringify({ message: errorMessage, file: requestedName }));
+    }
+
+    if (!fs.existsSync(targetPath)) {
+      console.warn(`[HLS proxy] file does not exist after wait: ${targetPath}`);
+      response.statusCode = 404;
+      response.setHeader('content-type', 'application/json');
+      return response.end(JSON.stringify({ message: 'HLS file not found', file: requestedName }));
+    }
+
+    const contentType = isPlaylist ? 'application/vnd.apple.mpegurl' : 'video/MP2T';
+    response.status(200);
+    response.setHeader('Content-Type', contentType);
+    response.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+
+    return new Promise((resolve, reject) => {
+      const stream = fs.createReadStream(targetPath);
+      stream.on('error', (err) => {
+        if (!response.headersSent) {
+          response.status(500).json({ message: 'Failed to stream HLS file', error: String(err) });
+        } else {
+          response.end();
+        }
+        reject(err);
+      });
+      stream.on('end', resolve);
+      stream.pipe(response);
+    });
+  }
+
+  if (!doc.mediamtx_path) {
+    const error = new Error('HLS upstream URL unavailable');
+    error.status = 502;
     throw error;
   }
 
