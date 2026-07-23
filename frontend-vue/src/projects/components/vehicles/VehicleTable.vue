@@ -26,66 +26,67 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="vehicle in vehicles" :key="vehicle.id">
+          <tr v-for="vehicle in vehicles" :key="vehicle._id">
             <td class="text-center">
               <CInputCheckbox
-                :checked="isSelected(vehicle.id)"
+                :checked="isSelected(vehicle._id)"
                 custom
-                @update:checked="toggleSelect(vehicle.id)"
+                @update:checked="toggleSelect(vehicle._id)"
               />
             </td>
-            <td>{{ vehicle.plate }}</td>
-            <td>{{ vehicle.owner }}</td>
+            <td>{{ vehicle.vehicle ? vehicle.vehicle.license_plate : '-' }}</td>
+            <td>{{ vehicle.user ? `${vehicle.user.name || ''} ${vehicle.user.surname || ''}`.trim() : '-' }}</td>
             <td>
               <CBadge
-                :color="docStatusColor(vehicle.docStatus)"
+                :color="docStatusColor(vehicle.document_status)"
                 class="vehicle-badge vehicle-badge--doc"
                 :class="{
-                  'vehicle-badge--pending': vehicle.docStatus === 'Pending',
-                  'vehicle-badge--approved': vehicle.docStatus === 'Approved',
-                  'vehicle-badge--rejected': vehicle.docStatus === 'Rejected'
+                  'vehicle-badge--pending': vehicle.document_status === 'Pending',
+                  'vehicle-badge--approved': vehicle.document_status === 'Approved',
+                  'vehicle-badge--rejected': vehicle.document_status === 'Rejected'
                 }"
                 shape="rounded-pill"
               >
-                {{ vehicle.docStatus }}
+                {{ vehicle.document_status }}
               </CBadge>
             </td>
             <td>
               <CBadge
-                :color="accountStatusColor(vehicle.accountStatus)"
+                :color="accountStatusColor(vehicle.account_status)"
                 class="vehicle-badge vehicle-badge--account"
                 :class="{
-                  'vehicle-badge--active': vehicle.accountStatus === 'Active',
-                  'vehicle-badge--suspended': vehicle.accountStatus === 'Suspended'
+                  'vehicle-badge--active': vehicle.account_status === 'Active',
+                  'vehicle-badge--suspended': vehicle.account_status === 'Suspended',
+                  'vehicle-badge--inactive': vehicle.account_status === 'Inactive'
                 }"
                 shape="rounded-pill"
               >
-                {{ vehicle.accountStatus }}
+                {{ vehicle.account_status }}
               </CBadge>
             </td>
             <td class="text-end">
               <div class="vehicle-table-actions">
                 <CButton
-                  v-if="vehicle.docStatus === 'Pending'"
+                  v-if="vehicle.document_status === 'Pending'"
                   size="sm"
                   color="success"
                   variant="outline"
                   shape="pill"
                   class="vehicle-action-btn"
                   v-c-tooltip="{ content: $t('vehicleManagement.tooltipApprove'), placement: 'top' }"
-                  @click="emitEvent('approve', vehicle.id)"
+                  @click="emitEvent('approve', vehicle._id)"
                 >
                   <CIcon name="cil-check" />
                 </CButton>
                 <CButton
-                  v-if="vehicle.docStatus === 'Pending'"
+                  v-if="vehicle.document_status === 'Pending'"
                   size="sm"
                   color="danger"
                   variant="outline"
                   shape="pill"
                   class="vehicle-action-btn"
                   v-c-tooltip="{ content: $t('vehicleManagement.tooltipReject'), placement: 'top' }"
-                  @click="emitEvent('reject', vehicle.id)"
+                  @click="emitEvent('reject', vehicle._id)"
                 >
                   <CIcon name="cil-x" />
                 </CButton>
@@ -96,7 +97,7 @@
                   shape="pill"
                   class="vehicle-action-btn"
                   v-c-tooltip="{ content: $t('vehicleManagement.tooltipView'), placement: 'top' }"
-                  @click="emitEvent('view', vehicle.id)"
+                  @click="emitEvent('view', vehicle._id)"
                 >
                   <CIcon name="cil-magnifying-glass" />
                 </CButton>
@@ -107,7 +108,7 @@
                   shape="pill"
                   class="vehicle-action-btn"
                   v-c-tooltip="{ content: $t('vehicleManagement.tooltipDelete'), placement: 'top' }"
-                  @click="emitEvent('delete', vehicle.id)"
+                  @click="emitEvent('delete', vehicle._id)"
                 >
                   <CIcon name="cil-trash" />
                 </CButton>

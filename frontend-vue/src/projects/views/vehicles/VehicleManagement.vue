@@ -51,19 +51,18 @@
 
     <ConfirmDeleteModal
       :visible="showDeleteModal"
-      :vehiclePlate="(currentVehicle && currentVehicle.plate) || ''"
+      :vehiclePlate="(currentVehicle && currentVehicle.vehicle && currentVehicle.vehicle.license_plate) || '-'"
       @confirm="confirmDelete"
       @cancel="showDeleteModal = false"
       @update:visible="val => (showDeleteModal = val)"
     />
 
-    <VerifyDocumentModal
+    <VehicleVerificationModal
       :visible="showVerifyModal"
-      :vehicle="currentVehicle"
-      :mode="verifyModalMode"
+      :vehicleData="currentVehicle"
+      @close="showVerifyModal = false"
       @approve="confirmVerify"
       @reject="confirmReject"
-      @update:visible="val => (showVerifyModal = val)"
     />
   </div>
 </template>
@@ -73,7 +72,7 @@ import AppSectionHero from '@/projects/components/layout/AppSectionHero.vue'
 import VehicleFilterBar from '@/projects/components/vehicles/VehicleFilterBar.vue'
 import VehicleTable from '@/projects/components/vehicles/VehicleTable.vue'
 import ConfirmDeleteModal from '@/projects/components/vehicles/ConfirmDeleteModal.vue'
-import VerifyDocumentModal from '@/projects/components/vehicles/VerifyDocumentModal.vue'
+import VehicleVerificationModal from '@/projects/components/vehicles/VehicleVerificationModal.vue'
 import {
   fetchVehicles,
   approveVehicle,
@@ -89,7 +88,7 @@ export default {
     VehicleFilterBar,
     VehicleTable,
     ConfirmDeleteModal,
-    VerifyDocumentModal
+    VehicleVerificationModal
   },
   data () {
     return {
@@ -165,14 +164,7 @@ export default {
         this.loading = true
         this.lastUpdated = new Date()
         const response = await fetchVehicles(this.searchQuery, this.statusFilter)
-        this.vehicles = (response.vehicles || []).map(v => ({
-          id: v._id,
-          plate: v.vehicle ? v.vehicle.license_plate : '-',
-          owner: v.user ? `${v.user.name || ''} ${v.user.surname || ''}`.trim() : '-',
-          docStatus: v.document_status,
-          accountStatus: v.account_status,
-          docImageUrl: v.certificate_image_url || ''
-        }))
+        this.vehicles = response.vehicles || []
         this.stats = response.stats || { total: 0, pending: 0, approved: 0, rejected: 0 }
       } catch (error) {
         this.notifyToast(this.$t('ivts.toast.loadVehicleFailed'), 'danger')
@@ -220,7 +212,7 @@ export default {
       }
     },
     handleReject (id) {
-      const vehicle = this.vehicles.find(item => item.id === id)
+      const vehicle = this.vehicles.find(item => item._id === id)
       if (vehicle) {
         this.currentVehicle = vehicle
         this.verifyModalMode = 'verify'
@@ -228,14 +220,14 @@ export default {
       }
     },
     handleDelete (id) {
-      const vehicle = this.vehicles.find(item => item.id === id)
+      const vehicle = this.vehicles.find(item => item._id === id)
       if (vehicle) {
         this.currentVehicle = vehicle
         this.showDeleteModal = true
       }
     },
     handleView (id) {
-      const vehicle = this.vehicles.find(item => item.id === id)
+      const vehicle = this.vehicles.find(item => item._id === id)
       if (vehicle) {
         this.currentVehicle = vehicle
         this.verifyModalMode = 'view'
@@ -247,7 +239,7 @@ export default {
         if (this.selectedIds.size === this.vehicles.length) {
           this.selectedIds = new Set()
         } else {
-          this.selectedIds = new Set(this.vehicles.map(v => v.id))
+          this.selectedIds = new Set(this.vehicles.map(v => v._id))
         }
       } else if (id === null) {
         this.selectedIds = new Set()
@@ -264,7 +256,7 @@ export default {
     async confirmDelete () {
       if (!this.currentVehicle) return
       try {
-        await deleteVehicle(this.currentVehicle.id)
+        await deleteVehicle(this.currentVehicle._id)
         this.showDeleteModal = false
         this.notifyToast(this.$t('ivts.toast.deleteSuccess'), 'success')
         await this.loadVehicles()
@@ -275,7 +267,7 @@ export default {
     async confirmVerify () {
       if (!this.currentVehicle) return
       try {
-        await approveVehicle(this.currentVehicle.id)
+        await approveVehicle(this.currentVehicle._id)
         this.showVerifyModal = false
         this.notifyToast(this.$t('ivts.toast.approveDocSuccess'), 'success')
         await this.loadVehicles()
@@ -283,10 +275,12 @@ export default {
         this.notifyToast(this.$t('ivts.toast.approveDocFailed'), 'danger')
       }
     },
-    async confirmReject ({ vehicle, reason }) {
-      if (!vehicle) return
+    async confirmReject (id, reasons, note) {
+      if (!id) return
       try {
-        await rejectVehicle(vehicle.id, reason)
+        // Need to pass the reasons and note to the backend
+        // Update this line according to your rejectVehicle API signature
+        await rejectVehicle(id, { reasons, note })
         this.showVerifyModal = false
         this.notifyToast(this.$t('ivts.toast.rejectDocSuccess'), 'success')
         await this.loadVehicles()

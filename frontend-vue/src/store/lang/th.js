@@ -1511,6 +1511,7 @@ th.emergencyReportManagement = {
     },
     list: {
         title: "รายการเคส",
+        caseId: "รหัสเคส",
         time: "เวลา",
         licensePlate: "ทะเบียน",
         type: "ประเภท",
@@ -1539,7 +1540,12 @@ th.emergencyReportManagement = {
         sendUpdate: "ส่งอัปเดตกลับเจ้าของรถ",
         internalNotes: "หมายเหตุภายใน",
         canChangeStatusAfterAccept: "เปลี่ยนสถานะได้หลัง Accept แล้วเท่านั้น",
-        selectCaseToView: "กรุณาเลือกเคสจากรายการด้านซ้ายเพื่อดูรายละเอียด"
+        selectCaseToView: "กรุณาเลือกเคสจากรายการด้านซ้ายเพื่อดูรายละเอียด",
+        logSubmitted: "ผู้ใช้ส่งรายงานแจ้งเหตุ",
+        logAccepted: "แอดมิน {admin} รับเรื่องแล้ว",
+        logResolved: "ดำเนินการแก้ไขสถานะเป็น RESOLVED",
+        logClosed: "เคสถูกปิดแล้ว",
+        promptLinkCase: "กรุณาระบุ Case ID ที่ต้องการเชื่อมโยง:"
     },
     actions: {
         accept: "✓ Accept",
@@ -1549,6 +1555,37 @@ th.emergencyReportManagement = {
         typeNotes: "บันทึกการตรวจสอบของ admin...",
         exportPrint: "Export / พิมพ์",
         changeStatus: "เปลี่ยนสถานะ:"
+    }
+}
+
+th.vehicleVerification = {
+    title: "ตรวจสอบและอนุมัติยานพาหนะ",
+    imageLoadError: "ไม่สามารถโหลดรูปภาพเอกสารหลักฐานได้",
+    verificationDataTitle: "ข้อมูลสำหรับการตรวจสอบ",
+    vehicleInfo: "ข้อมูลยานพาหนะ",
+    licensePlate: "ทะเบียนรถ",
+    licensePlateTooltip: "โปรดตรวจสอบทะเบียนรถให้ตรงกับเอกสารอย่างละเอียด",
+    province: "จังหวัด",
+    color: "สีรถ",
+    brandModel: "ยี่ห้อ / รุ่น",
+    ownerInfo: "ข้อมูลเจ้าของบัญชี",
+    fullName: "ชื่อ-นามสกุล",
+    ownerTooltip: "โปรดตรวจสอบชื่อเจ้าของให้ตรงกับเอกสารอย่างละเอียด",
+    phone: "เบอร์โทรศัพท์ติดต่อ",
+    rejectReasonTitle: "สาเหตุการปฏิเสธคำขอ",
+    rejectReasonDesc: "กรุณาระบุสาเหตุที่ปฏิเสธ เพื่อแจ้งให้ผู้ใช้งานทราบและทำการแก้ไขเอกสารใหม่ให้ถูกต้อง",
+    selectRejectReason: "สาเหตุที่พบ (เลือกได้มากกว่า 1 ข้อ)",
+    additionalNote: "ข้อความเพิ่มเติมถึงผู้ใช้งาน (ถ้ามี)",
+    additionalNotePlaceholder: "พิมพ์ข้อความแนะนำ หรือเหตุผลเพิ่มเติม...",
+    closeWindow: "ปิดหน้าต่าง",
+    rejectDoc: "ปฏิเสธเอกสาร",
+    approveDoc: "อนุมัติข้อมูลถูกต้อง",
+    back: "ย้อนกลับ",
+    confirmReject: "ยืนยันการปฏิเสธ",
+    reasons: {
+        unclear: "ภาพหลักฐานไม่ชัดเจน หรืออ่านข้อมูลไม่ได้",
+        mismatchPlate: "ข้อมูลทะเบียนรถในเอกสารไม่ตรงกับที่ระบุ",
+        incorrectImage: "รูปภาพไม่ถูกต้อง"
     }
 }
 

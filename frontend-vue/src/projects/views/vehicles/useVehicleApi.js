@@ -24,8 +24,8 @@ export async function approveVehicle(id) {
   return response.data
 }
 
-export async function rejectVehicle(id, reason) {
-  const response = await api.ivtsOwnerVehicles('reject', { id, payload: { reason } })
+export async function rejectVehicle(id, payload) {
+  const response = await api.ivtsOwnerVehicles('reject', { id, payload })
   return response.data
 }
 

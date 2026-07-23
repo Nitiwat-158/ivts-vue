@@ -25,7 +25,9 @@ const ownerVehicleSchema = new Schema({
   reviewed_by_name: { type: String, default: null },
   reviewed_at: { type: Date, default: null },
   activity_log: { type: [activityLogSchema], default: [] },
-  certificate_image_url: { type: String, trim: true, default: null } // Optional, for UI rendering if needed
+  certificate_image_url: { type: String, trim: true, default: null },
+  reject_reasons: { type: [String], default: [] },
+  reject_note: { type: String, default: '' }
 }, {
   collection: 'owner_vehicles'
 });

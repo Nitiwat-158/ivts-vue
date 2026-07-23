@@ -116,17 +116,17 @@ class _RenewalRequestScreenState extends State<RenewalRequestScreen> {
             ),
             const SizedBox(height: 12),
 
-            _FieldLabel(label: 'Name'),
+            const _FieldLabel(label: 'Name'),
             const SizedBox(height: 6),
             _InputField(controller: _nameController),
             const SizedBox(height: 14),
 
-            _FieldLabel(label: 'Surname'),
+            const _FieldLabel(label: 'Surname'),
             const SizedBox(height: 6),
             _InputField(controller: _surnameController),
             const SizedBox(height: 14),
 
-            _FieldLabel(label: 'Citizen ID'),
+            const _FieldLabel(label: 'Citizen ID'),
             const SizedBox(height: 6),
             _InputField(
               controller: _citizenIdController,

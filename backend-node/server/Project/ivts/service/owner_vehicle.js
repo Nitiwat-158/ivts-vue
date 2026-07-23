@@ -193,11 +193,15 @@ class OwnerVehicleService {
   async reject(req, res) {
     try {
       const admin = await getAdminDetails(req);
-      const reason = req.body && req.body.reason ? req.body.reason : '';
+      const reasons = req.body && req.body.reasons ? req.body.reasons : [];
+      const note = req.body && req.body.note ? req.body.note : '';
+      
+      const reasonText = reasons.length > 0 ? reasons.join(', ') : 'No specific reason';
+      const logMessage = note ? `Document status changed to Rejected. Reasons: ${reasonText}. Note: ${note}` : `Document status changed to Rejected. Reasons: ${reasonText}`;
 
       const logEntry = {
         time: new Date(),
-        message: `Document status changed to Rejected. Reason: ${reason}`,
+        message: logMessage,
         actor: admin.name
       };
 
@@ -208,7 +212,9 @@ class OwnerVehicleService {
             document_status: 'Rejected',
             reviewed_by_id: admin.id,
             reviewed_by_name: admin.name,
-            reviewed_at: new Date()
+            reviewed_at: new Date(),
+            reject_reasons: reasons,
+            reject_note: note
           },
           $push: { activity_log: logEntry }
         },
