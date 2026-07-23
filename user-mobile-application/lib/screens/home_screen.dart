@@ -125,7 +125,15 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             const SizedBox(height: 8),
             if (!_hasNoVehicles)
-              ...MockData.vehicles.map((v) => VehicleCard(vehicle: v)),
+              ...MockData.vehicles.map((v) => VehicleCard(
+                    vehicle: v,
+                    onLocationTap: (vehicle) {
+                      setState(() {
+                        _selectedLocationVehicle = vehicle;
+                        _tabIndex = 2;
+                      });
+                    },
+                  )),
           ],
         );
     }
@@ -150,46 +158,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _PlaceholderSection extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color accent;
-
-  const _PlaceholderSection({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.accent,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: accent.withValues(alpha: 0.3), width: 1),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 44, color: accent),
-              const SizedBox(height: 12),
-              Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class _ActionBanner extends StatelessWidget {
   final Color color;
