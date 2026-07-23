@@ -36,7 +36,7 @@
           <video
             v-if="showVideoPlayer"
             ref="videoPlayer"
-            :key="timestamp"
+            :key="`${timestamp}-video`"
             class="w-100 h-100 stream-video"
             controls
             autoplay
@@ -48,7 +48,7 @@
 
           <img
             v-else-if="showImagePlayer"
-            :key="timestamp"
+            :key="`${timestamp}-image`"
             :src="buildStreamUrl(this.streamSourceUrl)"
             class="img-fluid stream-image"
             alt="CCTV Stream"
@@ -111,6 +111,13 @@ export default {
     }
   },
   computed: {
+    apiBaseUrl() {
+      const fromEnv = process.env.VUE_APP_API_BASE_URL ? String(process.env.VUE_APP_API_BASE_URL).trim() : ''
+      if (fromEnv) {
+        return fromEnv.replace(/\/$/, '')
+      }
+      return 'http://127.0.0.1:8203'
+    },
     statusColor() {
       if (!this.camera) return 'secondary'
       return {
@@ -123,6 +130,9 @@ export default {
     },
     streamSourceUrl() {
       if (!this.camera || !this.camera.stream_urls) return null
+      // Use HLS proxy endpoint to avoid CORS issues.
+      // The backend /api/v1/ivts/cctvs/:id/stream/hls endpoint
+      // proxies requests to MediaMTX without CORS restrictions.
       return this.camera.stream_urls.hls_proxy || this.camera.stream_urls.hls || null
     },
     streamSourceType() {
@@ -204,7 +214,7 @@ export default {
         
         if (Hls.isSupported()) {
           this.hlsInstance = new Hls({
-            debug: true,
+            debug: false,
             enableWorker: true,
             lowLatencyMode: true,
             manifestLoadingTimeOut: 10000,
@@ -269,7 +279,9 @@ export default {
     },
     buildStreamUrl(url) {
       if (!url) return ''
-      return `${url}${url.includes('?') ? '&' : '?'}t=${this.timestamp}`
+      const raw = String(url).trim()
+      const absolute = /^https?:\/\//i.test(raw) ? raw : `${this.apiBaseUrl}${raw.startsWith('/') ? raw : `/${raw}`}`
+      return `${absolute}${absolute.includes('?') ? '&' : '?'}t=${this.timestamp}`
     },
     updateClock() {
       const now = new Date();

@@ -20,18 +20,20 @@ const Cctv = require('../models/cctv.model');
 
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 200;
-const STREAM_HOST = process.env.STREAM_HOST || 'iam.mfu.ac.th';
+const STREAM_HOST = process.env.STREAM_HOST || 'http://localhost/' || 'iam.mfu.ac.th';
 const WEBRTC_PORT = process.env.STREAM_WEBRTC_PORT || '8554';
 const HLS_PORT = process.env.STREAM_HLS_PORT || '8888';
 const RTSP_PORT = process.env.STREAM_RTSP_PORT || '8554';
 const MEDIAMTX_BASE_URL = process.env.MEDIAMTX_BASE_URL ? String(process.env.MEDIAMTX_BASE_URL).trim() : null;
+const BASE_SERVER_URL = process.env.BASE_SERVER_URL ? String(process.env.BASE_SERVER_URL).trim().replace(/\/$/, '') : '';
 
 const MEDIAMTX_CONFIG_PATH = path.resolve(__dirname, '../../../../../mediamtx.yml');
 const MEDIAMTX_SOURCE_TO_PATH_MAP = loadMediamtxPaths();
 
 function buildHlsProxyPath(id) {
   if (!id) return null;
-  return `/api/v1/ivts/cctvs/${encodeURIComponent(String(id))}/stream/hls`;
+  const path = `/api/v1/ivts/cctvs/${encodeURIComponent(String(id))}/stream/hls`;
+  return BASE_SERVER_URL ? `${BASE_SERVER_URL}${path}` : path;
 }
 
 function normalizeRtspUrl(value) {
@@ -167,9 +169,11 @@ function generateStreamUrls(mediamtxPath) {
 
   const cleanPath = String(mediamtxPath).trim().toLowerCase().replace(/_/g, '-');
 
+  // Fix: MediaMTX serves HLS over http:// (not https://) on port 8888 by default.
+  // Set STREAM_HOST in .env to the actual MediaMTX server IP/hostname.
   return {
     webrtc: `ws://${STREAM_HOST}:${WEBRTC_PORT}/${cleanPath}/ws`,
-    hls: `https://${STREAM_HOST}:${HLS_PORT}/${cleanPath}/index.m3u8`,
+    hls: `http://${STREAM_HOST}:${HLS_PORT}/${cleanPath}/index.m3u8`,
     rtsp_out: `rtsp://${STREAM_HOST}:${RTSP_PORT}/${cleanPath}`
   };
 }
@@ -181,13 +185,17 @@ function enrichWithStreamUrls(doc) {
   if (!doc) return doc;
 
   const existingUrls = doc.stream_urls || {};
-  const path = resolveMediamtxPath(doc);
-  const generatedUrls = generateStreamUrls(path);
+  const mediamtxPath = resolveMediamtxPath(doc);
+  const generatedUrls = generateStreamUrls(mediamtxPath);
 
+  // Fix: ENV-generated URLs take priority over stored DB values.
+  // This prevents stale or incorrectly-seeded DB stream_urls from overriding
+  // the correct ENV-driven URLs. Stored values are used only as fallback
+  // when ENV variables are not configured (generatedUrls fields are null).
   const urls = {
-    webrtc: existingUrls.webrtc || generatedUrls.webrtc,
-    hls: existingUrls.hls || generatedUrls.hls,
-    rtsp_out: existingUrls.rtsp_out || generatedUrls.rtsp_out
+    webrtc: generatedUrls.webrtc || existingUrls.webrtc || null,
+    hls: generatedUrls.hls || existingUrls.hls || null,
+    rtsp_out: generatedUrls.rtsp_out || existingUrls.rtsp_out || null
   };
 
   if (doc._id) {
@@ -263,7 +271,8 @@ exports.proxyHlsStream = async function proxyHlsStream(id, request, response) {
   }
 
   const mediamtxPath = resolveMediamtxPath(doc);
-  const upstreamUrl = existingStreamUrl(doc.stream_urls, 'hls') || generateStreamUrls(mediamtxPath).hls;
+  // Fix: Use ENV-generated URL first. DB-stored stream_urls may be stale.
+  const upstreamUrl = generateStreamUrls(mediamtxPath).hls || existingStreamUrl(doc.stream_urls, 'hls');
   if (!upstreamUrl) {
     const error = new Error('HLS upstream URL unavailable');
     error.status = 502;
