@@ -724,5 +724,26 @@ export default {
       default:
         break;
     }
+  },
+
+  ivtsOwnerVehicles(method, data) {
+    switch (method) {
+      case 'get-all':
+        return instance.get('/api/v1/ivts/owner-vehicles', { params: data || {} });
+      case 'get-by-id':
+        return instance.get(`/api/v1/ivts/owner-vehicles/${data.id}`);
+      case 'approve':
+        return instance.patch(`/api/v1/ivts/owner-vehicles/${data.id}/approve`);
+      case 'reject':
+        return instance.patch(`/api/v1/ivts/owner-vehicles/${data.id}/reject`, data.payload || {});
+      case 'account-status':
+        return instance.patch(`/api/v1/ivts/owner-vehicles/${data.id}/account-status`, data.payload || {});
+      case 'delete':
+        return instance.delete(`/api/v1/ivts/owner-vehicles/${data.id}`);
+      case 'export':
+        return instance.get('/api/v1/ivts/owner-vehicles/export', { params: data || {}, responseType: 'blob' });
+      default:
+        break;
+    }
   }
 }

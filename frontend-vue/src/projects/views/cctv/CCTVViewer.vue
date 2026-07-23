@@ -16,7 +16,11 @@
         <CCard class="cctv-card h-100">
           <CCardHeader class="d-flex justify-content-between align-items-center bg-white border-bottom-0 pt-3 pb-0">
             <h5 class="mb-0 text-dark font-weight-bold">{{ $t('cctvViewer.cameraNodes') }}</h5>
-            <CBadge color="dark">{{ cameras.length }} {{ $t('cctvViewer.nodes') }}</CBadge>
+            <div>
+              <CBadge color="success" class="mr-1">{{ activeCamerasCount }} Active</CBadge>
+              <CBadge color="danger" class="mr-2">{{ inactiveCamerasCount }} Inactive</CBadge>
+              <CBadge color="dark">{{ cameras.length }} {{ $t('cctvViewer.nodes') }}</CBadge>
+            </div>
           </CCardHeader>
           <CCardBody>
             <CameraList
@@ -59,6 +63,12 @@ export default {
     }
   },
   computed: {
+    activeCamerasCount() {
+      return this.cameras.filter(c => c.status === 'online').length
+    },
+    inactiveCamerasCount() {
+      return this.cameras.filter(c => c.status === 'offline').length
+    },
     lastUpdatedLabel() {
       if (!this.lastUpdated) return ''
       const d = this.lastUpdated.getDate().toString().padStart(2, '0')

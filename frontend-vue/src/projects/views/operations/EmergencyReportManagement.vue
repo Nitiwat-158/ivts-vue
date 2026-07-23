@@ -19,13 +19,13 @@
             style="width: 630px;"
           />
           <CSelect
-            v-model="filterStatus"
+            :value.sync="filterStatus"
             :options="statusOptions"
             class="mb-0"
             style="width: 150px;"
           />
           <CSelect
-            v-model="filterType"
+            :value.sync="filterType"
             :options="typeOptions"
             class="mb-0"
             style="width: 180px;"
@@ -101,6 +101,7 @@
               <table class="table table-hover table-striped mb-0">
                 <thead>
                   <tr>
+                    <th class="text-nowrap">{{ $t('emergencyReportManagement.list.caseId') }}</th>
                     <th class="text-nowrap">{{ $t('emergencyReportManagement.list.time') }}</th>
                     <th class="text-nowrap">{{ $t('emergencyReportManagement.list.licensePlate') }}</th>
                     <th class="text-nowrap">{{ $t('emergencyReportManagement.list.type') }}</th>
@@ -116,6 +117,7 @@
                     style="cursor: pointer;"
                     :class="{'table-active': selectedCase && selectedCase.id === item.id}"
                   >
+                    <td class="text-nowrap font-weight-bold">{{ item.id }}</td>
                     <td class="text-nowrap">{{ formatTime(item.incident_time) }}</td>
                     <td class="text-nowrap">{{ item.vehicle.license_plate }}</td>
                     <td class="text-nowrap"><CBadge :color="getTypeColor(item.request_type)">{{ item.request_type }}</CBadge></td>
@@ -123,7 +125,7 @@
                     <td class="text-nowrap text-truncate" style="max-width: 150px;" :title="item.assigned_admin_id || $t('emergencyReportManagement.list.unassigned')">{{ item.assigned_admin_id || $t('emergencyReportManagement.list.unassigned') }}</td>
                   </tr>
                   <tr v-if="filteredCases.length === 0">
-                    <td colspan="5" class="text-center text-muted py-4">{{ $t('emergencyReportManagement.list.noData') }}</td>
+                    <td colspan="6" class="text-center text-muted py-4">{{ $t('emergencyReportManagement.list.noData') }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -204,10 +206,10 @@
               <h6 class="text-muted mb-1">{{ $t('emergencyReportManagement.details.relatedCases') }}</h6>
               <div v-if="selectedCase.related_case_ids && selectedCase.related_case_ids.length > 0">
                 <CBadge color="secondary" class="mr-1" v-for="cid in selectedCase.related_case_ids" :key="cid">{{ cid }}</CBadge>
-                <CButton size="sm" color="link" class="p-0 ml-2">{{ $t('emergencyReportManagement.actions.linkCase') }}</CButton>
+                <CButton size="sm" color="link" class="p-0 ml-2" @click="linkCasePrompt">{{ $t('emergencyReportManagement.actions.linkCase') }}</CButton>
               </div>
               <div v-else class="text-muted">
-                {{ $t('emergencyReportManagement.details.noRelatedCases') }} <CButton size="sm" color="link" class="p-0 ml-2">{{ $t('emergencyReportManagement.actions.linkCase') }}</CButton>
+                {{ $t('emergencyReportManagement.details.noRelatedCases') }} <CButton size="sm" color="link" class="p-0 ml-2" @click="linkCasePrompt">{{ $t('emergencyReportManagement.actions.linkCase') }}</CButton>
               </div>
             </div>
 
@@ -251,8 +253,8 @@
             <div class="d-flex align-items-center" v-if="selectedCase.assigned_admin_id">
               <span class="mr-2">{{ $t('emergencyReportManagement.actions.changeStatus') }}</span>
               <CSelect
-                v-model="editStatus"
-                :options="[{value: 'IN_PROGRESS', label: 'IN_PROGRESS'}, {value: 'RESOLVED', label: 'RESOLVED'}, {value: 'CLOSED', label: 'CLOSED'}]"
+                :value.sync="editStatus"
+                :options="[{value: 'NEW', label: 'NEW', disabled: true}, {value: 'IN_PROGRESS', label: 'IN_PROGRESS'}, {value: 'RESOLVED', label: 'RESOLVED'}, {value: 'CLOSED', label: 'CLOSED'}]"
                 class="mb-0 mr-2"
                 style="width: 150px;"
               />
@@ -309,7 +311,7 @@ export default {
     typeOptions() {
       return [
         { value: '', label: this.$t('emergencyReportManagement.filters.allTypes') },
-        { value: 'theft_stolen', label: 'Theft / Stolen' },
+        { value: 'theft', label: 'Theft / Stolen' },
         { value: 'accident', label: 'Accident' },
         { value: 'breakdown', label: 'Breakdown' },
         { value: 'other', label: 'Other' }
@@ -355,29 +357,58 @@ export default {
           ? response.data.data
           : (response && response.data ? response.data : []);
 
-        this.cases = reports.map(c => ({
-          id: c._id,
-          vehicle: {
-            license_plate: c.vehicle_id ? (c.vehicle_id.plateNumber || c.vehicle_id.license_plate || 'Unknown') : 'Unknown',
-            vehicle_ref_id: c.vehicle_id ? (c.vehicle_id.vehicleCode || c.vehicle_id.vehicle_ref_id || 'Unknown') : 'Unknown'
-          },
-          owner: {
-            name: c.vehicle_id ? (c.vehicle_id.ownerName || c.vehicle_id.owner_name || 'Unknown') : 'Unknown',
-            phone: 'Unknown'
-          },
-          request_type: c.request_type,
-          severity: c.severity,
-          incident_time: c.incident_time,
-          submitted_at: c.submitted_at,
-          description: c.description,
-          last_known_location: c.location,
-          status: c.status,
-          assigned_admin_id: c.assigned_admin_id ? (c.assigned_admin_id.name || c.assigned_admin_id.username || c.assigned_admin_id) : null,
-          related_case_ids: [],
-          activity_log: [
-            { time: c.submitted_at, message: "ผู้ใช้ส่งรายงานแจ้งเหตุ" }
-          ]
-        }));
+        this.cases = reports.map(c => {
+          const adminId = c.assigned_admin_id ? (c.assigned_admin_id.name || c.assigned_admin_id.username || c.assigned_admin_id) : null;
+          let activity_log = [
+            { time: c.submitted_at, message: this.$t('emergencyReportManagement.details.logSubmitted') || "ผู้ใช้ส่งรายงานแจ้งเหตุ" }
+          ];
+          if (adminId) {
+            activity_log.push({
+              time: c.submitted_at,
+              message: (this.$t('emergencyReportManagement.details.logAccepted') || "แอดมิน {admin} รับเรื่องแล้ว").replace('{admin}', adminId)
+            });
+          }
+          if (c.status === 'RESOLVED') {
+            activity_log.push({
+              time: c.submitted_at,
+              message: this.$t('emergencyReportManagement.details.logResolved') || "ดำเนินการแก้ไขสถานะเป็น RESOLVED"
+            });
+          } else if (c.status === 'CLOSED') {
+            activity_log.push({
+              time: c.submitted_at,
+              message: this.$t('emergencyReportManagement.details.logClosed') || "เคสถูกปิดแล้ว"
+            });
+          }
+
+          return {
+            id: c._id,
+            vehicle: {
+              license_plate: c.vehicle_id ? (c.vehicle_id.plateNumber || c.vehicle_id.license_plate || 'Unknown') : 'Unknown',
+              vehicle_ref_id: c.vehicle_id ? (c.vehicle_id.vehicleCode || c.vehicle_id.vehicle_ref_id || 'Unknown') : 'Unknown'
+            },
+            owner: {
+              name: c.vehicle_id ? (c.vehicle_id.ownerName || c.vehicle_id.owner_name || 'Unknown') : 'Unknown',
+              phone: 'Unknown'
+            },
+            request_type: c.request_type,
+            severity: c.severity,
+            incident_time: c.incident_time,
+            submitted_at: c.submitted_at,
+            description: c.description,
+            last_known_location: c.location,
+            status: c.status,
+            assigned_admin_id: adminId,
+            related_case_ids: [],
+            activity_log: activity_log
+          };
+        });
+
+        if (this.$route && this.$route.query && this.$route.query.id) {
+          const targetCase = this.cases.find(c => c.id === this.$route.query.id);
+          if (targetCase) {
+            this.selectCase(targetCase);
+          }
+        }
       } catch (error) {
         console.error('Failed to fetch emergency reports:', error);
       }
@@ -392,7 +423,7 @@ export default {
       return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' ' + d.toLocaleDateString();
     },
     getTypeColor(type) {
-      const map = { theft_stolen: 'danger', accident: 'danger', breakdown: 'warning', other: 'secondary' };
+      const map = { theft: 'danger', accident: 'danger', breakdown: 'warning', other: 'secondary' };
       return map[type] || 'primary';
     },
     getStatusColor(status) {
@@ -424,6 +455,17 @@ export default {
           if (updatedCase) this.selectCase(updatedCase);
         } catch (error) {
           console.error('Failed to save status', error);
+        }
+      }
+    },
+    linkCasePrompt() {
+      const caseId = prompt(this.$t('emergencyReportManagement.details.promptLinkCase') || "Enter the Case ID to link:");
+      if (caseId && this.selectedCase) {
+        if (!this.selectedCase.related_case_ids) {
+          this.$set(this.selectedCase, 'related_case_ids', []);
+        }
+        if (!this.selectedCase.related_case_ids.includes(caseId)) {
+          this.selectedCase.related_case_ids.push(caseId);
         }
       }
     }

@@ -53,9 +53,9 @@ export default {
     statusOptions() {
       return [
         { value: 'all', label: this.$t('ivts.filterAll') },
-        { value: 'pending', label: this.$t('ivts.filterPending') },
-        { value: 'approved', label: this.$t('ivts.filterApproved') },
-        { value: 'rejected', label: this.$t('ivts.filterRejected') }
+        { value: 'Pending', label: this.$t('ivts.filterPending') },
+        { value: 'Approved', label: this.$t('ivts.filterApproved') },
+        { value: 'Rejected', label: this.$t('ivts.filterRejected') }
       ]
     }
   },

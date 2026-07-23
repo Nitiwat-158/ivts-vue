@@ -9,75 +9,78 @@
       @refresh="loadData"
     />
 
-    <div class="account-table-card__header account-page__toolbar">
-      <div class="account-table-card__copy">
-        <div class="account-table-card__mode">{{ $t('accounts.users.table.subtitle') }}</div>
-      </div>
-      <div class="account-table-card__tools">
-        <CInput
-          v-model.trim="localSearch"
-          class="account-search-input"
-          :placeholder="$t('accounts.users.table.searchPlaceholder')"
-          @input="onSearchInput"
-        />
-        <select
-          class="custom-select account-page-size"
-          :value="pagination.limit"
-          @change="changeLimit"
+    <CCard class="mb-3">
+      <CCardBody class="d-flex justify-content-between align-items-center flex-wrap">
+        <div class="d-flex align-items-center mb-2 mb-md-0">
+          <span class="text-muted mr-3">{{ $t('accounts.users.table.subtitle') }}</span>
+        </div>
+        <div class="d-flex align-items-center" style="gap: 15px;">
+          <CInput
+            v-model.trim="localSearch"
+            class="mb-0"
+            :placeholder="$t('accounts.users.table.searchPlaceholder')"
+            @input="onSearchInput"
+          />
+          <CSelect
+            class="mb-0"
+            :value.sync="pagination.limit"
+            :options="pageSizeOptions"
+            @update:value="changeLimit"
+            style="width: 80px;"
+          />
+        </div>
+      </CCardBody>
+    </CCard>
+
+    <CCard class="mb-4">
+      <CCardHeader>
+        <strong>{{ $t('accounts.users.title') }}</strong>
+      </CCardHeader>
+      <CCardBody class="p-0">
+        <CDataTable
+          hover
+          striped
+          :items="items"
+          :fields="fields"
+          :items-per-page="pagination.limit"
+          :active-page.sync="pagination.page"
+          :pagination="false"
+          sorter
         >
-          <option v-for="option in pageSizeOptions" :key="option" :value="option">
-            {{ option }}
-          </option>
-        </select>
-      </div>
-    </div>
+          <template #role="{ item }">
+            <td>
+              <CBadge :color="item.role === 'admin' ? 'danger' : 'info'">
+                {{ item.role ? item.role.toUpperCase() : 'USER' }}
+              </CBadge>
+            </td>
+          </template>
 
-    <CDataTable
-      hover
-      striped
-      :items="items"
-      :fields="fields"
-      :items-per-page="pagination.limit"
-      :active-page.sync="pagination.page"
-      :pagination="false"
-      sorter
-      :loading="loading"
-    >
-      <!-- Slot สำหรับ Role -->
-      <template #role="{ item }">
-        <td>
-          <CBadge :color="item.role === 'admin' ? 'danger' : 'info'">
-            {{ item.role ? item.role.toUpperCase() : 'USER' }}
-          </CBadge>
-        </td>
-      </template>
+          <template #createdAt="{ item }">
+            <td>{{ formatThaiDate(item.createdAt || item.created_at) }}</td>
+          </template>
+        </CDataTable>
 
-      <!-- Slot สำหรับ Created At -->
-      <template #createdAt="{ item }">
-        <td>{{ formatThaiDate(item.createdAt || item.created_at) }}</td>
-      </template>
-    </CDataTable>
-
-    <div class="account-table-card__footer" v-if="pagination.total > 0">
-      <div class="account-table-card__page-meta">
-        {{ pageSummary }}
-      </div>
-      <CPagination
-        size="sm"
-        align="end"
-        :active-page.sync="pagination.page"
-        :pages="pagination.totalPages"
-        responsive
-        @input="loadPage"
-      />
-    </div>
-
-    <div v-if="loading" class="account-table-card__loading">
-      <CSpinner size="sm" color="dark" />
-    </div>
-    <div v-else-if="!loading && !items.length" class="empty-state">
-      {{ $t('accounts.users.messages.noUsers') }}
-    </div>
+        <div v-if="loading" class="text-center my-4">
+          <CSpinner size="sm" color="dark" />
+        </div>
+        <div v-else-if="!loading && !items.length" class="text-center my-4 text-muted">
+          {{ $t('accounts.users.messages.noUsers') }}
+        </div>
+      </CCardBody>
+      <CCardFooter class="d-flex justify-content-between align-items-center" v-if="pagination.total > 0">
+        <div class="text-muted small">
+          {{ pageSummary }}
+        </div>
+        <CPagination
+          size="sm"
+          class="mb-0"
+          :active-page.sync="pagination.page"
+          :pages="pagination.totalPages"
+          responsive
+          @update:activePage="loadPage"
+        />
+      </CCardFooter>
+    </CCard>
   </div>
 </template>
 

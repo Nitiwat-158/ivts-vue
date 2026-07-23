@@ -15,6 +15,7 @@ const cctvService = require('./service/cctv');
 const vehicleService = require('./service/vehicle');
 const trackingService = require('./service/tracking');
 const emergencyReportService = require('./service/emergency_report');
+const ownerVehicleService = require('./service/owner_vehicle');
 
 // ─── Permission guards ────────────────────────────────────────────────────────
 
@@ -38,6 +39,10 @@ const canViewCctvs = authorization.requirePermission('/ivts/cctvs', 'view');
 
 // Tracking guards
 const canViewTracking = authorization.requirePermission('/ivts/tracking', 'view');
+
+// ─── Mock Permission guards for Vehicle Management ─────────────────────────
+// TODO: รอ IAM รองรับ permission key นี้ (vehicle_management.view, .approve, .reject, .toggle_account, .delete, .export)
+const mockVehicleMgmtGuard = (req, res, next) => next();
 
 // ─── Response helpers (project-standard envelope) ─────────────────────────────
 
@@ -311,5 +316,14 @@ router.get('/tracking/history', canViewTracking, async function (request, respon
 // ─── Emergency Reports ──────────────────────────────────────────────────────
 router.get('/emergency-reports', canViewReports, emergencyReportService.getAll);
 router.put('/emergency-reports/:id/status', canManageReports, emergencyReportService.updateStatus);
+
+// ─── Owner Vehicles ─────────────────────────────────────────────────────────
+router.get('/owner-vehicles', mockVehicleMgmtGuard, ownerVehicleService.getAll);
+router.get('/owner-vehicles/export', mockVehicleMgmtGuard, ownerVehicleService.exportCsv);
+router.get('/owner-vehicles/:id', mockVehicleMgmtGuard, ownerVehicleService.getById);
+router.patch('/owner-vehicles/:id/approve', mockVehicleMgmtGuard, ownerVehicleService.approve);
+router.patch('/owner-vehicles/:id/reject', mockVehicleMgmtGuard, ownerVehicleService.reject);
+router.patch('/owner-vehicles/:id/account-status', mockVehicleMgmtGuard, ownerVehicleService.toggleAccountStatus);
+router.delete('/owner-vehicles/:id', mockVehicleMgmtGuard, ownerVehicleService.remove);
 
 module.exports = router;

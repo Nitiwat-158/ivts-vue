@@ -123,7 +123,7 @@
         <CCard class="h-100 mb-0 stat-card">
           <CCardBody class="text-center d-flex flex-column justify-content-center">
             <div class="text-muted font-weight-bold small mb-2">{{ $t('ivts.totalCameras') }}</div>
-            <h2 class="mb-0 font-weight-bold text-dark">42</h2>
+            <h2 class="mb-0 font-weight-bold text-dark">{{ cameraStats.total }}</h2>
           </CCardBody>
         </CCard>
       </CCol>
@@ -132,9 +132,9 @@
           <CCardBody class="text-center d-flex flex-column justify-content-center">
             <div class="text-muted font-weight-bold small mb-2">Active / Inactive</div>
             <h2 class="mb-0 font-weight-bold">
-              <span class="text-success">38</span> 
+              <span class="text-success">{{ cameraStats.active }}</span> 
               <span class="text-muted mx-1">/</span> 
-              <span class="text-danger">4</span>
+              <span class="text-danger">{{ cameraStats.inactive }}</span>
             </h2>
           </CCardBody>
         </CCard>
@@ -211,6 +211,7 @@
 import AppSectionHero from '@/projects/components/layout/AppSectionHero.vue';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import api from '@/service/api';
 
 export default {
   name: 'Dashboard',
@@ -223,6 +224,7 @@ export default {
       filterSeverity: 'all',
       lastUpdated: new Date(),
       map: null,
+      cameraStats: { total: 0, active: 0, inactive: 0 },
       cameras: [
         { id: 'CAM01_Gate_in', status: 'active', lat: 20.045121, lng: 99.889515 },
         { id: 'CAM02_Gate_in', status: 'active', lat: 20.045117, lng: 99.889724 },
@@ -237,9 +239,7 @@ export default {
         { type: 'offline', cameraId: 'CAM07_E3_Parking', duration: 120, time: '14:00' },
         { type: 'unregistered', cameraId: 'CAM05_MainRoad', time: '13:45' },
         { type: 'unregistered', cameraId: 'CAM02_ParkingA', time: '12:10' },
-        { type: 'offline', cameraId: 'CAM06_E1_Parking', duration: 300, time: '11:00' },
-        { id: 'ER01', type: 'emergency_report', source: 'guest', severity: 'high', location: 'ลานจอด C', time: '09:12' },
-        { id: 'ER02', type: 'emergency_report', source: 'staff', severity: 'medium', location: 'ประตูทางเข้าหลัก', time: '07:50' }
+        { type: 'offline', cameraId: 'CAM06_E1_Parking', duration: 300, time: '11:00' }
       ]
     }
   },
@@ -272,6 +272,8 @@ export default {
   },
   mounted() {
     this.initMap();
+    this.fetchAlerts();
+    this.fetchCameras();
   },
   beforeDestroy() {
     if (this.map) {
@@ -280,7 +282,48 @@ export default {
   },
   methods: {
     refreshData() {
-      this.lastUpdated = new Date()
+      this.lastUpdated = new Date();
+      this.fetchAlerts();
+      this.fetchCameras();
+    },
+    async fetchCameras() {
+      try {
+        const response = await api.ivtsCctvs('list');
+        const data = response && response.data ? response.data.data : null;
+        const rows = data && Array.isArray(data.rows) ? data.rows : [];
+        
+        const total = rows.length;
+        const active = rows.filter(c => c.status === 'active' || c.status === 'online').length;
+        const inactive = total - active;
+        
+        this.cameraStats = { total, active, inactive };
+      } catch (e) {
+        console.error("Failed to fetch cameras for dashboard stats", e);
+      }
+    },
+    async fetchAlerts() {
+      try {
+        const res = await api.ivtsEmergencyReports('get');
+        const reports = res && res.data && Array.isArray(res.data.data) ? res.data.data : (res && res.data ? res.data : []);
+        
+        const newReports = reports.filter(r => r.status === 'NEW').map(r => {
+          const d = new Date(r.incident_time || r.submitted_at);
+          const timeStr = isNaN(d.getTime()) ? '' : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          return {
+            id: r._id,
+            type: 'emergency_report',
+            source: 'guest',
+            severity: r.severity || 'high',
+            location: r.location && r.location.camera_id ? r.location.camera_id : 'Unknown location',
+            time: timeStr,
+            description: r.request_type || 'Unknown incident'
+          };
+        });
+        
+        this.alerts = [ ...newReports, ...this.alerts.filter(a => a.type !== 'emergency_report') ];
+      } catch (e) {
+        console.error("Failed to fetch emergency reports for dashboard", e);
+      }
     },
     initMap() {
       // ตั้งค่าแผนที่เริ่มต้นที่เชียงราย (Dummy location)
@@ -312,8 +355,11 @@ export default {
       window.alert(`${this.$t('dashboard.cctvAlert')} ${cam.id}`);
     },
     onAlertClick(alert) {
-      console.log('Clicked alert:', alert);
-      window.alert(`${this.$t('dashboard.eventAlert')} ${alert.cameraId || alert.id}`);
+      if (alert.type === 'emergency_report') {
+        this.$router.push({ path: '/operations/emergency-reports', query: { id: alert.id } });
+      } else {
+        window.alert(`${this.$t('dashboard.eventAlert')} ${alert.cameraId || alert.id}`);
+      }
     },
     getAlertColorClass(alert, isBackground) {
       if (alert.type === 'offline') return isBackground ? 'bg-danger' : 'text-danger';

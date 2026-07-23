@@ -124,7 +124,9 @@ const en = {
             approveDocSuccess: "Document approved successfully",
             approveDocFailed: "Failed to approve document",
             rejectDocSuccess: "Document rejected successfully",
-            rejectDocFailed: "Failed to reject document"
+            rejectDocFailed: "Failed to reject document",
+            exportSuccess: "Export successful",
+            exportFailed: "Export failed"
         }
     },
     auth: {
@@ -1332,6 +1334,7 @@ en.emergencyReportManagement = {
     },
     list: {
         title: "Case List",
+        caseId: "Case ID",
         time: "Time",
         licensePlate: "License Plate",
         type: "Type",
@@ -1360,7 +1363,12 @@ en.emergencyReportManagement = {
         sendUpdate: "Send update to vehicle owner",
         internalNotes: "Internal Notes",
         canChangeStatusAfterAccept: "Status can be changed only after accepting",
-        selectCaseToView: "Please select a case from the list on the left to view details"
+        selectCaseToView: "Please select a case from the list on the left to view details",
+        logSubmitted: "User submitted the incident report",
+        logAccepted: "Admin {admin} accepted the case",
+        logResolved: "Case marked as RESOLVED",
+        logClosed: "Case CLOSED",
+        promptLinkCase: "Enter the Case ID to link:"
     },
     actions: {
         accept: "✓ Accept",
@@ -1370,6 +1378,37 @@ en.emergencyReportManagement = {
         typeNotes: "Admin investigation notes...",
         exportPrint: "Export / Print",
         changeStatus: "Change Status:"
+    }
+}
+
+en.vehicleVerification = {
+    title: "Check and Approve Vehicle",
+    imageLoadError: "Unable to load evidence document image",
+    verificationDataTitle: "Data for Verification",
+    vehicleInfo: "Vehicle Information",
+    licensePlate: "License Plate",
+    licensePlateTooltip: "Please verify the license plate matches the document carefully",
+    province: "Province",
+    color: "Color",
+    brandModel: "Brand / Model",
+    ownerInfo: "Account Owner Information",
+    fullName: "Full Name",
+    ownerTooltip: "Please verify the owner's name matches the document carefully",
+    phone: "Contact Phone",
+    rejectReasonTitle: "Reason for Rejection",
+    rejectReasonDesc: "Please specify the reason for rejection to inform the user and request correction.",
+    selectRejectReason: "Reasons found (can select more than 1)",
+    additionalNote: "Additional note to user (if any)",
+    additionalNotePlaceholder: "Type additional advice or reasons...",
+    closeWindow: "Close Window",
+    rejectDoc: "Reject Document",
+    approveDoc: "Approve",
+    back: "Back",
+    confirmReject: "Confirm Rejection",
+    reasons: {
+        unclear: "Evidence image is unclear or unreadable",
+        mismatchPlate: "License plate in document does not match",
+        incorrectImage: "Incorrect image"
     }
 }
 

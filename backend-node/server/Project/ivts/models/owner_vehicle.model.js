@@ -8,24 +8,26 @@ const Schema = mongoose.Schema;
  * Owner identity and document image URLs for a registered vehicle.
  * PDPA: citizen_id is sensitive — access is permission-gated at the route level.
  */
+const activityLogSchema = new Schema({
+  time: { type: Date, default: Date.now },
+  message: { type: String, required: true },
+  actor: { type: String, required: true }
+}, { _id: false });
+
 const ownerVehicleSchema = new Schema({
-  // Changed type from Schema.Types.ObjectId to Number to reference the sequential 'vehicle_numeric_id'
-  vehicle_id: { type: Number, ref: 'Vehicle', required: true, index: true },
-  owner_name: { type: String, trim: true, default: null },
-  owner_surname: { type: String, trim: true, default: null },
-  citizen_id: {
-    type: String,
-    trim: true,
-    default: null,
-    validate: {
-      validator: function (v) {
-        return !v || /^\d{13}$/.test(v);
-      },
-      message: 'citizen_id must be exactly 13 digits'
-    }
-  },
-  vehicle_image_url: { type: String, trim: true, default: null },
-  certificate_image_url: { type: String, trim: true, default: null }
+  _id: { type: String, default: () => new mongoose.Types.ObjectId().toString() },
+  vehicle_id: { type: String, ref: 'Vehicle', required: true, index: true },
+  user_id: { type: String, ref: 'User', required: true, index: true },
+  document_status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
+  account_status: { type: String, enum: ['Active', 'Inactive'], default: 'Active' },
+  registered_at: { type: Date, default: Date.now },
+  reviewed_by_id: { type: String, default: null },
+  reviewed_by_name: { type: String, default: null },
+  reviewed_at: { type: Date, default: null },
+  activity_log: { type: [activityLogSchema], default: [] },
+  certificate_image_url: { type: String, trim: true, default: null },
+  reject_reasons: { type: [String], default: [] },
+  reject_note: { type: String, default: '' }
 }, {
   collection: 'owner_vehicles'
 });

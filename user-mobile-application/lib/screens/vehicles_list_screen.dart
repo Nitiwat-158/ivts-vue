@@ -137,14 +137,30 @@ class VehiclesListScreen extends StatelessWidget {
                                 children: [
                                   Expanded(
                                     child: OutlinedButton.icon(
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: AppColors.primary,
+                                        side: const BorderSide(color: AppColors.primary),
+                                        minimumSize: const Size(0, 44),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                      ),
                                       onPressed: () => onLocationTap(v),
                                       icon: const Icon(Icons.location_on_outlined, size: 18),
-                                      label: const Text('Location'),
+                                      label: const Text('Location', style: TextStyle(fontWeight: FontWeight.w600)),
                                     ),
                                   ),
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.primary,
+                                        foregroundColor: Colors.white,
+                                        minimumSize: const Size(0, 44),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                      ),
                                       onPressed: () {
                                         Navigator.of(context).push(
                                           MaterialPageRoute(
@@ -152,7 +168,7 @@ class VehiclesListScreen extends StatelessWidget {
                                           ),
                                         );
                                       },
-                                      child: const Text('More'),
+                                      child: const Text('More', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                                     ),
                                   ),
                                 ],

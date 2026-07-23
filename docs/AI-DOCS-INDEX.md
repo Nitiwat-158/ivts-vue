@@ -56,6 +56,10 @@ Do not add these unless the project has a real need and source evidence:
 | `tasks/2026-07-22-home-renewal-banner.md` | active | Active tasklist for wiring Home renewal banner. |
 | `tasks/2026-07-22-home-location-map.md` | active | Active tasklist for wiring map button on VehicleCard. |
 | `tasks/2026-07-22-remove-edit-icon.md` | active | Active tasklist for removing edit icon from Vehicle Details. |
+| `tasks/2026-07-23-vehicles-list-buttons.md` | active | Active tasklist for styling Location and More buttons. |
+| `tasks/2026-07-23-renewal-popup.md` | active | Active tasklist for Renewal Request confirmation popup. |
+| `tasks/2026-07-23-add-vehicle-popup.md` | active | Active tasklist for Add Vehicle confirmation popup. |
+| `tasks/2026-07-23-emergency-popup.md` | active | Active tasklist for Emergency Request confirmation popup. |
 | `tasks/2026-06-18-<topic>.md` | active as needed | One focused tasklist per work item. |
 
 ## Change Records
@@ -70,6 +74,10 @@ Do not add these unless the project has a real need and source evidence:
 | `changes/2026-07-22-home-renewal-banner.md` | active | T1-T20 change record for wiring Home renewal banner. |
 | `changes/2026-07-22-home-location-map.md` | active | T1-T20 change record for wiring map button on VehicleCard. |
 | `changes/2026-07-22-remove-edit-icon.md` | active | T1-T20 change record for removing edit icon from Vehicle Details. |
+| `changes/2026-07-23-vehicles-list-buttons.md` | active | T1-T20 change record for styling Location and More buttons. |
+| `changes/2026-07-23-renewal-popup.md` | active | T1-T20 change record for Renewal Request confirmation popup. |
+| `changes/2026-07-23-add-vehicle-popup.md` | active | T1-T20 change record for Add Vehicle confirmation popup. |
+| `changes/2026-07-23-emergency-popup.md` | active | T1-T20 change record for Emergency Request confirmation popup. |
 | `changes/2026-06-18-<topic>.md` | active as needed | T1-T20 handoff for each completed or handed-off work item. |
 
 ## Rule

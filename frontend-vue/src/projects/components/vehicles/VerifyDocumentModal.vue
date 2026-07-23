@@ -13,7 +13,7 @@
         <div class="verify-document-modal__image">
           <CImg
             v-if="hasDocImage && !imageLoadFailed"
-            :src="vehicle.docImageUrl"
+            :src="vehicle.certificate_image_url"
             alt="Document Image"
             fluid
             rounded
@@ -37,8 +37,8 @@
           <div v-if="mode === 'view'" class="verify-document-modal__row mt-2">
             <span class="label">{{ $t('ivts.accountStatus') }}</span>
             <span class="value">
-              <CBadge :color="accountStatusColor(vehicle.accountStatus)">
-                {{ vehicle.accountStatus || '-' }}
+              <CBadge :color="accountStatusColor(vehicle.account_status)">
+                {{ vehicle.account_status || '-' }}
               </CBadge>
             </span>
           </div>
@@ -102,7 +102,7 @@ export default {
     },
     vehicle: {
       type: Object,
-      default: () => ({ plate: '', docImageUrl: '', owner: '', accountStatus: '' })
+      default: () => ({ vehicle: {}, certificate_image_url: '', user: {}, account_status: '' })
     }
   },
   data () {
@@ -114,13 +114,13 @@ export default {
   },
   computed: {
     hasDocImage () {
-      return !!(this.vehicle && this.vehicle.docImageUrl)
+      return !!(this.vehicle && this.vehicle.certificate_image_url)
     },
     vehiclePlateDisplay () {
-      return (this.vehicle && this.vehicle.plate) || '-'
+      return (this.vehicle && this.vehicle.vehicle && this.vehicle.vehicle.license_plate) || '-'
     },
     ownerNameDisplay () {
-      return (this.vehicle && this.vehicle.owner) || '-'
+      return (this.vehicle && this.vehicle.user) ? `${this.vehicle.user.name || ''} ${this.vehicle.user.surname || ''}`.trim() : '-'
     },
     isRejectReasonEmpty () {
       return !this.rejectReason.trim()

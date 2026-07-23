@@ -35,8 +35,81 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
   }
 
   void _onSubmit() {
-    // TODO: handle submit
-    Navigator.of(context).maybePop();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: const Color(0xFFDFDFDF),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Are you sure to\nsubmit your request ?',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFCE8B8A), // Pinkish red
+                          foregroundColor: AppColors.primary,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text(
+                          'CANCLE',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop(); // close dialog
+                          Navigator.of(context).maybePop(); // close screen
+                        },
+                        child: const Text(
+                          'SUBMIT',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -59,7 +132,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
               title: 'Vehicle',
               children: [
                 // Type Dropdown
-                _FieldLabel(label: 'Type'),
+                const _FieldLabel(label: 'Type'),
                 const SizedBox(height: 6),
                 Container(
                   decoration: BoxDecoration(
@@ -85,27 +158,27 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                 ),
                 const SizedBox(height: 14),
 
-                _FieldLabel(label: 'License Plate'),
+                const _FieldLabel(label: 'License Plate'),
                 const SizedBox(height: 6),
                 _InputField(controller: _licensePlateController),
                 const SizedBox(height: 14),
 
-                _FieldLabel(label: 'Province'),
+                const _FieldLabel(label: 'Province'),
                 const SizedBox(height: 6),
                 _InputField(controller: _provinceController),
                 const SizedBox(height: 14),
 
-                _FieldLabel(label: 'Brand'),
+                const _FieldLabel(label: 'Brand'),
                 const SizedBox(height: 6),
                 _InputField(controller: _brandController),
                 const SizedBox(height: 14),
 
-                _FieldLabel(label: 'Model'),
+                const _FieldLabel(label: 'Model'),
                 const SizedBox(height: 6),
                 _InputField(controller: _modelController),
                 const SizedBox(height: 14),
 
-                _FieldLabel(label: 'Color'),
+                const _FieldLabel(label: 'Color'),
                 const SizedBox(height: 6),
                 _InputField(controller: _colorController),
               ],
@@ -116,17 +189,17 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
             _SectionCard(
               title: 'Owner',
               children: [
-                _FieldLabel(label: 'Name'),
+                const _FieldLabel(label: 'Name'),
                 const SizedBox(height: 6),
                 _InputField(controller: _nameController),
                 const SizedBox(height: 14),
 
-                _FieldLabel(label: 'Surname'),
+                const _FieldLabel(label: 'Surname'),
                 const SizedBox(height: 6),
                 _InputField(controller: _surnameController),
                 const SizedBox(height: 14),
 
-                _FieldLabel(label: 'Citizen ID'),
+                const _FieldLabel(label: 'Citizen ID'),
                 const SizedBox(height: 6),
                 _InputField(
                   controller: _citizenIdController,
