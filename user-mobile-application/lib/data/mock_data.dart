@@ -3,151 +3,39 @@ import '../models/history_entry.dart';
 import '../models/notification_item.dart';
 import '../models/vehicle.dart';
 
+/// In-memory data store for the app's screens.
+///
+/// These lists start EMPTY and are populated at runtime by
+/// `services/app_data_repository.dart`, which fetches everything from the
+/// backend mobile API (MongoDB-backed, see `backend-node/server/Project/ivts/
+/// mobile.routes.js`). There is no hardcoded demo/mock content here anymore
+/// — per product requirement, MongoDB is the sole data source. If a fetch
+/// fails, the affected list simply stays as the last successfully loaded
+/// data (or empty, if none has loaded yet); screens must handle the empty
+/// state gracefully.
 class MockData {
-  static final List<Vehicle> vehicles = [
-    const Vehicle(
-      id: 'CR0001',
-      plateNumber: 'สน 1669',
-      vehicleCode: 'CR0001',
-      type: 'Car',
-      brand: 'Honda',
-      model: 'Accord',
-      color: 'Black',
-      ownerName: 'Wan Inwza',
-      issueDate: '11/08/2569',
-      expiryDate: '11/08/2570',
-      daysUntilExpiry: 21,
-      status: VehicleStatus.expiringSoon,
-      lastLocation: 'E2 (updated 4:40 PM)',
-      lastUpdatedTime: '4:40 PM',
-    ),
-    const Vehicle(
-      id: 'B0001',
-      plateNumber: 'สน 191',
-      vehicleCode: 'B0001',
-      type: 'Motorcycle',
-      brand: 'Yamaha',
-      model: 'Fino',
-      color: 'White',
-      ownerName: 'Wan Inwza',
-      issueDate: '02/02/2569',
-      expiryDate: '02/02/2571',
-      daysUntilExpiry: 210,
-      status: VehicleStatus.active,
-      lastLocation: 'Dorm 4 (updated 2:15 PM)',
-      lastUpdatedTime: '2:15 PM',
-    ),
-  ];
+  static final List<Vehicle> vehicles = <Vehicle>[];
 
-  static Vehicle get mostRecentlyMoved => vehicles.first;
+  /// Null when no vehicles have been loaded yet (e.g. before the first API
+  /// fetch completes, or a genuinely empty fleet).
+  static Vehicle? get mostRecentlyMoved => vehicles.isNotEmpty ? vehicles.first : null;
 
-  static final List<TripHistory> tripHistory = [
-    const TripHistory(
-      vehicleCode: 'สน 1669',
-      vehicleId: 'CR0001',
-      dateGroup: 'Today',
-      date: '11/04/2026',
-      time: '03:16 PM',
-    ),
-    const TripHistory(
-      vehicleCode: 'สน 1669',
-      vehicleId: 'CR0001',
-      dateGroup: '7 days ago',
-      date: '10/04/2026',
-      time: '09:52 AM',
-    ),
-    const TripHistory(
-      vehicleCode: 'สน 1669',
-      vehicleId: 'CR0001',
-      dateGroup: '7 days ago',
-      date: '09/04/2026',
-      time: '01:05 PM',
-    ),
-  ];
+  static final List<TripHistory> tripHistory = <TripHistory>[];
 
-  // แก้จาก description แบบ free text เป็น zoneName + eventType ตรงๆ
-  // ทำให้หน้า Trip Detail จับคู่ entry/exit ได้แม่นยำ ไม่ต้องเดาจากข้อความ
-  static final List<TripWaypoint> tripWaypoints = [
-    const TripWaypoint(
-      time: '03:16 PM',
-      zoneName: 'ประตูหน้ามหาลัย',
-      eventType: WaypointEventType.checkpoint,
-    ),
-    const TripWaypoint(
-      time: '03:16 PM',
-      zoneName: 'อาคารเรียนรวม 5',
-      eventType: WaypointEventType.entry,
-    ),
-    const TripWaypoint(
-      time: '04:24 PM',
-      zoneName: 'อาคารเรียนรวม 5',
-      eventType: WaypointEventType.exit,
-    ),
-    const TripWaypoint(
-      time: '04:26 PM',
-      zoneName: 'ที่จอดรถหอพักนักศึกษา',
-      eventType: WaypointEventType.entry,
-    ),
-  ];
+  // No backend collection currently models zone-based entry/exit waypoints
+  // (tracking_logs only stores raw lat/long detections, not zone names) —
+  // this stays empty until such a data source exists. See
+  // docs/tasks/2026-07-24-mobile-mongodb-api.md Open Questions.
+  static final List<TripWaypoint> tripWaypoints = <TripWaypoint>[];
 
-  static final List<RequestHistoryItem> requestHistory = [
-    const RequestHistoryItem(
-      title: 'Renewal',
-      vehicleCode: 'สน 1669',
-      vehicleId: 'CR0001',
-      date: '10/03/2026',
-      dateGroup: 'Today',
-    ),
-    const RequestHistoryItem(
-      title: 'Vehicle registration',
-      vehicleCode: 'สน 1669',
-      vehicleId: 'CR0001',
-      date: '10/03/2026',
-      dateGroup: '11 month ago',
-    ),
-  ];
+  static final List<RequestHistoryItem> requestHistory = <RequestHistoryItem>[];
 
-  static final List<NotificationItem> notifications = [
-    const NotificationItem(
-      type: NotificationType.system,
-      title: 'Your request had been submit',
-      description: 'Your request number TH00001 on 11/04/2026 has been submit',
-      dateGroup: 'Today',
-    ),
-    const NotificationItem(
-      type: NotificationType.system,
-      title: 'Traffic Update: Road closure for Lamduan Games 26th',
-      description: 'Road closure from Swimming pool building to the Central Stadium on 11 Jun 13 Jun',
-      dateGroup: '7 days ago',
-    ),
-    const NotificationItem(
-      type: NotificationType.renewal,
-      title: 'My Vehicle',
-      description: 'รถหมายเลขทะเบียน รถ 1999 กำลังใกล้หมดอายุ ผ่านอาคาร E4',
-      dateGroup: '7 days ago',
-    ),
-  ];
+  static final List<NotificationItem> notifications = <NotificationItem>[];
 
-  static final List<EmergencyStatusUpdate> emergencyTimeline = [
-    const EmergencyStatusUpdate(
-      step: EmergencyStep.submitted,
-      label: 'ส่งคำร้องเรียบร้อย',
-      timestamp: '4:41 PM',
-      completed: true,
-    ),
-    const EmergencyStatusUpdate(
-      step: EmergencyStep.acknowledged,
-      label: 'เจ้าหน้าที่รับคำร้องแล้ว',
-      timestamp: '4:43 PM',
-      completed: true,
-    ),
-    const EmergencyStatusUpdate(
-      step: EmergencyStep.contacting,
-      label: 'กำลังติดต่อกลับ',
-      timestamp: '',
-      completed: false,
-    ),
-  ];
+  // No backend collection models a per-report status timeline audit trail;
+  // this stays empty until such a data source exists. Not currently
+  // rendered by any screen (see emergency_status_screen.dart).
+  static final List<EmergencyStatusUpdate> emergencyTimeline = <EmergencyStatusUpdate>[];
 
   static const String securityPhoneNumber = '+66531234567';
 }
