@@ -14,6 +14,18 @@ class LocationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final vehicle = initialVehicle ?? MockData.mostRecentlyMoved;
 
+    if (vehicle == null) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Text(
+            'No vehicle location data yet',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
+        ),
+      );
+    }
+
     return Stack(
       children: [
         SizedBox(
