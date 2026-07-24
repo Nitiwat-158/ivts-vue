@@ -92,17 +92,27 @@ export default {
         const data = response && response.data ? response.data.data : null
         const rows = data && Array.isArray(data.rows) ? data.rows : []
 
-        this.cameras = rows.map((camera) => ({
-          id: camera._id || camera.id || camera.mediamtx_path,
-          name: camera.camera_name || `Camera ${camera.mediamtx_path || ''}`,
-          location: (camera.location && camera.location.description) || 'Campus Network Node',
-          status: camera.status === 'active' ? 'online' : 'offline',
-          mediamtx_path: camera.mediamtx_path,
-          source_rtsp_url: camera.source_rtsp_url,
-          stream_urls: camera.stream_urls || {}
-        }))
+        this.cameras = rows.map((camera) => {
+          const cameraId = camera._id || camera.id || camera.mediamtx_path
+          const pathName = camera.mediamtx_path || cameraId
+          const streamUrls = camera.stream_urls || {}
 
-        this.selectedCamera = this.cameras.length > 0 ? this.cameras[0] : null
+          return {
+            id: cameraId,
+            name: camera.camera_name || `Camera ${pathName}`,
+            location: (camera.location && camera.location.description) || 'Campus Network Node',
+            status: camera.status === 'active' ? 'online' : 'offline',
+            mediamtx_path: camera.mediamtx_path,
+            source_rtsp_url: camera.source_rtsp_url,
+            stream_urls: {
+              hls: streamUrls.hls_proxy || streamUrls.hls || `/api/v1/ivts/cctvs/${encodeURIComponent(cameraId)}/stream/hls`
+            }
+          }
+        })
+
+        if (this.cameras.length > 0 && !this.selectedCamera) {
+          this.selectedCamera = this.cameras[0]
+        }
       } catch (error) {
         console.error('Failed to load CCTV cameras:', error)
         this.errorMessage = this.$t('cctvViewer.connectionError')

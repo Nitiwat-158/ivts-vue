@@ -167,6 +167,9 @@ function startHlsConversion(id, rtspUrl) {
     startedAt: Date.now()
   };
 
+  const hlsBaseUrl = BASE_SERVER_URL || 'http://127.0.0.1:8082';
+  const baseUrl = `${hlsBaseUrl}/api/v1/ivts/cctvs/${cameraId}/stream/`;
+
   const command = ffmpeg(rtspUrl)
     .inputOptions(['-rtsp_transport tcp', '-stimeout 3000000'])
     .outputOptions([
@@ -176,6 +179,7 @@ function startHlsConversion(id, rtspUrl) {
       '-hls_time 2',
       '-hls_list_size 5',
       '-hls_flags delete_segments+independent_segments',
+      '-hls_base_url', baseUrl,
       `-hls_segment_filename`, segmentPattern,
       '-hls_allow_cache 0'
     ])
