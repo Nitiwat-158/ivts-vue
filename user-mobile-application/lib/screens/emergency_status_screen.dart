@@ -2,15 +2,90 @@ import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
 import '../theme/app_theme.dart';
 
-class EmergencyStatusScreen extends StatelessWidget {
+class EmergencyStatusScreen extends StatefulWidget {
   const EmergencyStatusScreen({super.key});
+
+  @override
+  State<EmergencyStatusScreen> createState() => _EmergencyStatusScreenState();
+}
+
+class _EmergencyStatusScreenState extends State<EmergencyStatusScreen> {
+  bool _isResolved = false;
+  String? _resolvedTime;
+
+  void _confirmMarkResolved() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Mark as Resolved', style: TextStyle(color: AppColors.primary)),
+        content: const Text('คุณแน่ใจหรือไม่ที่จะปิดเคสฉุกเฉินนี้? (Are you sure you want to mark this as resolved?)'),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        actions: [
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFCE8B8A),
+                    foregroundColor: AppColors.primary,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('CANCLE', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    setState(() {
+                      _isResolved = true;
+                      final now = DateTime.now();
+                      final hour = now.hour % 12 == 0 ? 12 : now.hour % 12;
+                      final minute = now.minute.toString().padLeft(2, '0');
+                      final period = now.hour >= 12 ? 'PM' : 'AM';
+                      _resolvedTime = '$hour:$minute $period';
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('เคสถูกทำเครื่องหมายว่าแก้ไขแล้ว')),
+                    );
+                  },
+                  child: const Text('CONFIRM', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final steps = [
       const _StatusStep(label: 'ส่งคำร้องเรียบร้อย', timestamp: '4:41 PM', completed: true),
       const _StatusStep(label: 'เจ้าหน้าที่รับคำร้องแล้ว', timestamp: '4:43 PM', completed: true),
-      const _StatusStep(label: 'กำลังติดต่อกลับ', timestamp: '', completed: false),
+      if (_isResolved) ...[
+        const _StatusStep(label: 'กำลังติดต่อกลับ', timestamp: '4:45 PM', completed: true),
+        _StatusStep(label: 'เคสถูกปิดแล้ว (Resolved)', timestamp: _resolvedTime ?? '', completed: true),
+      ] else ...[
+        const _StatusStep(label: 'กำลังติดต่อกลับ', timestamp: '', completed: false),
+      ]
     ];
 
     return Scaffold(
@@ -21,16 +96,6 @@ class EmergencyStatusScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).maybePop(),
         ),
         title: const Text('Emergency Request'),
-        actions: [
-          TextButton(
-            onPressed: () {},
-            child: const Text(
-              'Mark resolved',
-              style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
-            ),
-          ),
-          const SizedBox(width: 8),
-        ],
       ),
       body: SafeArea(
         child: ListView(
@@ -39,14 +104,18 @@ class EmergencyStatusScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.warningAmber.withValues(alpha: 0.18),
+                color: _isResolved ? AppColors.success.withValues(alpha: 0.18) : AppColors.warningAmber.withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.warningAmber.withValues(alpha: 0.4)),
+                border: Border.all(color: _isResolved ? AppColors.success.withValues(alpha: 0.4) : AppColors.warningAmber.withValues(alpha: 0.4)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.warning_amber_rounded, color: AppColors.warningAmber, size: 28),
-                  SizedBox(width: 12),
+                  Icon(
+                    _isResolved ? Icons.check_circle_rounded : Icons.warning_amber_rounded,
+                    color: _isResolved ? AppColors.success : AppColors.warningAmber,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,8 +128,8 @@ class EmergencyStatusScreen extends StatelessWidget {
                             fontSize: 15,
                           ),
                         ),
-                        SizedBox(height: 2),
-                        Text(
+                        const SizedBox(height: 2),
+                        const Text(
                           'ID: CR0001',
                           style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
                         ),
@@ -85,6 +154,20 @@ class EmergencyStatusScreen extends StatelessWidget {
               icon: const Icon(Icons.call),
               label: const Text('โทรหาเจ้าหน้าที่ (${MockData.securityPhoneNumber})'),
             ),
+            if (!_isResolved) ...[
+              const SizedBox(height: 16),
+              TextButton(
+                style: TextButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                ),
+                onPressed: _confirmMarkResolved,
+                child: const Text(
+                  'Mark resolved',
+                  style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 16),
+                ),
+              ),
+            ],
           ],
         ),
       ),

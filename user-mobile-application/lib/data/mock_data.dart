@@ -65,11 +65,29 @@ class MockData {
     ),
   ];
 
+  // แก้จาก description แบบ free text เป็น zoneName + eventType ตรงๆ
+  // ทำให้หน้า Trip Detail จับคู่ entry/exit ได้แม่นยำ ไม่ต้องเดาจากข้อความ
   static final List<TripWaypoint> tripWaypoints = [
-    const TripWaypoint(time: '03:16 PM', description: 'ประตูหน้ามหาลัย'),
-    const TripWaypoint(time: '03:16 PM', description: 'เข้าจอดที่อาคารเรียนรวม 5'),
-    const TripWaypoint(time: '04:24 PM', description: 'ออกจากอาคารเรียนรวม 5'),
-    const TripWaypoint(time: '04:26 PM', description: 'ถึงที่จอดรถหอพักนักศึกษา'),
+    const TripWaypoint(
+      time: '03:16 PM',
+      zoneName: 'ประตูหน้ามหาลัย',
+      eventType: WaypointEventType.checkpoint,
+    ),
+    const TripWaypoint(
+      time: '03:16 PM',
+      zoneName: 'อาคารเรียนรวม 5',
+      eventType: WaypointEventType.entry,
+    ),
+    const TripWaypoint(
+      time: '04:24 PM',
+      zoneName: 'อาคารเรียนรวม 5',
+      eventType: WaypointEventType.exit,
+    ),
+    const TripWaypoint(
+      time: '04:26 PM',
+      zoneName: 'ที่จอดรถหอพักนักศึกษา',
+      eventType: WaypointEventType.entry,
+    ),
   ];
 
   static final List<RequestHistoryItem> requestHistory = [

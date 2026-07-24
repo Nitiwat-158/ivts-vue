@@ -100,14 +100,28 @@ class VehicleDetailsScreen extends StatelessWidget {
             // ── Vehicle Registration Certificate ───────────────────────
             _DocumentRow(
               label: 'Vehicle Registration Certificate',
-              onViewTap: () {},
+              onViewTap: () {
+                _showMockImageDialog(
+                  context,
+                  'Vehicle Registration Certificate',
+                  Colors.blue,
+                  Icons.description_outlined,
+                );
+              },
             ),
             const SizedBox(height: 12),
 
             // ── Vehicle License Plate ──────────────────────────────────
             _DocumentRow(
               label: 'The vehicle license plate',
-              onViewTap: () {},
+              onViewTap: () {
+                _showMockImageDialog(
+                  context,
+                  'Vehicle License Plate',
+                  Colors.green,
+                  Icons.directions_car_filled_outlined,
+                );
+              },
             ),
             const SizedBox(height: 12),
 
@@ -239,10 +253,57 @@ class _RenewalButton extends StatelessWidget {
               ),
             ),
             Icon(Icons.chevron_right_rounded, color: Colors.white),
-            SizedBox(width: 8),
+            SizedBox(width: 16),
           ],
         ),
       ),
     );
   }
+}
+
+void _showMockImageDialog(BuildContext context, String title, Color color, IconData icon) {
+  showDialog(
+    context: context,
+    builder: (ctx) => Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: double.infinity,
+            height: 300,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: color, width: 2),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, size: 80, color: color),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Mock Document:\n$title',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          IconButton(
+            icon: const Icon(Icons.cancel, color: Colors.white, size: 40),
+            onPressed: () => Navigator.of(ctx).pop(),
+          ),
+        ],
+      ),
+    ),
+  );
 }
