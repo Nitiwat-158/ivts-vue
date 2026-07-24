@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import '../models/vehicle.dart';
 import '../screens/emergency_request_screen.dart';
-import '../screens/location_screen.dart';
 import '../theme/app_theme.dart';
 
 class VehicleCard extends StatelessWidget {
   final Vehicle vehicle;
+  final ValueChanged<Vehicle>? onLocationTap;
 
-  const VehicleCard({super.key, required this.vehicle});
+  const VehicleCard({super.key, required this.vehicle, this.onLocationTap});
 
   Color get _statusColor {
     switch (vehicle.status) {
@@ -107,13 +107,7 @@ class VehicleCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           GestureDetector(
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => LocationScreen(initialVehicle: vehicle),
-                ),
-              );
-            },
+            onTap: () => onLocationTap?.call(vehicle),
             child: Container(
               height: 110,
               width: double.infinity,

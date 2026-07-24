@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import '../data/mock_data.dart';
 import '../models/vehicle.dart';
 import '../theme/app_theme.dart';
@@ -14,19 +16,51 @@ class LocationScreen extends StatelessWidget {
 
     return Stack(
       children: [
-        Container(
+        SizedBox(
           width: double.infinity,
           height: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFFEFF5F7), Color(0xFFDDE8EE)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+          child: FlutterMap(
+            options: const MapOptions(
+              initialCenter: LatLng(20.04489, 99.878202),
+              initialZoom: 13.0,
             ),
-          ),
-          child: CustomPaint(
-            painter: _MapPainter(),
-            child: const SizedBox.expand(),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.example.app',
+              ),
+              const RichAttributionWidget(
+                attributions: [
+                  TextSourceAttribution('OpenStreetMap contributors'),
+                ],
+              ),
+              MarkerLayer(
+                markers: [
+                  Marker(
+                    point: const LatLng(20.04489, 99.878202),
+                    width: 40,
+                    height: 40,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Icon(Icons.directions_car, color: Colors.white, size: 20),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
         if (Navigator.of(context).canPop())
@@ -151,55 +185,4 @@ class LocationScreen extends StatelessWidget {
   }
 }
 
-class _MapPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFFBFD5DE)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
 
-    final verticalLines = <double>[0, size.width * 0.25, size.width * 0.5, size.width * 0.75, size.width];
-    for (final x in verticalLines) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-
-    final horizontalLines = <double>[0, size.height * 0.25, size.height * 0.5, size.height * 0.75, size.height];
-    for (final y in horizontalLines) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-
-    final outline = Paint()
-      ..color = const Color(0xFF8DA6B6)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3;
-
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(size.width * 0.12, size.height * 0.18, size.width * 0.72, size.height * 0.6),
-        const Radius.circular(26),
-      ),
-      outline,
-    );
-
-    final road = Paint()
-      ..color = const Color(0xFF6F8A99)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 8
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawLine(Offset(size.width * 0.18, size.height * 0.22), Offset(size.width * 0.42, size.height * 0.48), road);
-    canvas.drawLine(Offset(size.width * 0.42, size.height * 0.48), Offset(size.width * 0.72, size.height * 0.26), road);
-    canvas.drawLine(Offset(size.width * 0.3, size.height * 0.74), Offset(size.width * 0.82, size.height * 0.64), road);
-
-    final marker = Paint()
-      ..color = AppColors.primary
-      ..style = PaintingStyle.fill;
-
-    canvas.drawCircle(Offset(size.width * 0.68, size.height * 0.54), 12, marker);
-    canvas.drawCircle(Offset(size.width * 0.68, size.height * 0.54), 6, Paint()..color = Colors.white..style = PaintingStyle.fill);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}

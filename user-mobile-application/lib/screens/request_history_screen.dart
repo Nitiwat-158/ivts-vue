@@ -2,13 +2,70 @@ import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
 import '../theme/app_theme.dart';
 
-class RequestHistoryScreen extends StatelessWidget {
+class RequestHistoryScreen extends StatefulWidget {
   const RequestHistoryScreen({super.key});
 
   @override
+  State<RequestHistoryScreen> createState() => _RequestHistoryScreenState();
+}
+
+class _RequestHistoryScreenState extends State<RequestHistoryScreen> {
+  String _selectedDate = 'All Time';
+  String _selectedVehicle = 'All Vehicles';
+
+  List<String> get _dateOptions {
+    final dates = MockData.requestHistory.map((e) => e.dateGroup).toSet().toList();
+    return ['All Time', ...dates];
+  }
+
+  List<String> get _vehicleOptions {
+    final vehicles = MockData.requestHistory.map((e) => e.vehicleCode).toSet().toList();
+    return ['All Vehicles', ...vehicles];
+  }
+
+  void _showFilterSheet(String title, List<String> options, String currentValue, ValueChanged<String> onSelected) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.primary)),
+              ),
+              ...options.map((opt) => ListTile(
+                title: Text(opt, style: TextStyle(
+                  color: opt == currentValue ? AppColors.primary : AppColors.textSecondary,
+                  fontWeight: opt == currentValue ? FontWeight.bold : FontWeight.normal,
+                )),
+                trailing: opt == currentValue ? const Icon(Icons.check, color: AppColors.primary) : null,
+                onTap: () {
+                  onSelected(opt);
+                  Navigator.pop(ctx);
+                },
+              )),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final filtered = MockData.requestHistory.where((req) {
+      final matchDate = _selectedDate == 'All Time' || req.dateGroup == _selectedDate;
+      final matchVehicle = _selectedVehicle == 'All Vehicles' || req.vehicleCode == _selectedVehicle;
+      return matchDate && matchVehicle;
+    }).toList();
+
     final grouped = <String, List<dynamic>>{};
-    for (final request in MockData.requestHistory) {
+    for (final request in filtered) {
       grouped.putIfAbsent(request.dateGroup, () => []).add(request);
     }
 
@@ -25,14 +82,29 @@ class RequestHistoryScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            const Row(
+            Row(
               children: [
-                Expanded(child: _Chip(label: 'Today')),
-                SizedBox(width: 10),
-                Expanded(child: _Chip(label: 'สน 1669')),
+                Expanded(
+                  child: _Chip(
+                    label: _selectedDate == 'All Time' ? 'Date' : _selectedDate,
+                    onTap: () => _showFilterSheet('Select Date', _dateOptions, _selectedDate, (val) => setState(() => _selectedDate = val)),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _Chip(
+                    label: _selectedVehicle == 'All Vehicles' ? 'Vehicle' : _selectedVehicle,
+                    onTap: () => _showFilterSheet('Select Vehicle', _vehicleOptions, _selectedVehicle, (val) => setState(() => _selectedVehicle = val)),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 16),
+            if (grouped.isEmpty)
+              const Padding(
+                padding: EdgeInsets.only(top: 40),
+                child: Center(child: Text('No requests found', style: TextStyle(color: AppColors.textSecondary))),
+              ),
             for (final group in grouped.entries) ...[
               Text(
                 group.key,
@@ -76,24 +148,35 @@ class RequestHistoryScreen extends StatelessWidget {
 
 class _Chip extends StatelessWidget {
   final String label;
+  final VoidCallback? onTap;
 
-  const _Chip({required this.label});
+  const _Chip({required this.label, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(label, style: const TextStyle(color: AppColors.primary)),
-          const Icon(Icons.arrow_drop_down, size: 18, color: AppColors.primary),
-        ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.divider),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(color: AppColors.primary),
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const Icon(Icons.arrow_drop_down, size: 18, color: AppColors.primary),
+          ],
+        ),
       ),
     );
   }

@@ -161,14 +161,18 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
             ),
             const SizedBox(height: 16),
             const Text('Request for', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
-            ..._options.map((option) => RadioListTile<String>(
+            RadioGroup<String>(
+              groupValue: _selected,
+              onChanged: (value) => setState(() => _selected = value!),
+              child: Column(
+                children: _options.map((option) => RadioListTile<String>(
                   value: option,
-                  groupValue: _selected,
                   title: Text(option),
                   activeColor: AppColors.primary,
                   contentPadding: EdgeInsets.zero,
-                  onChanged: (value) => setState(() => _selected = value!),
-                )),
+                )).toList(),
+              ),
+            ),
             const SizedBox(height: 8),
             const Text('Description', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
             const SizedBox(height: 6),
