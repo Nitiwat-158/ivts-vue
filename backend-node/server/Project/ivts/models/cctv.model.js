@@ -38,6 +38,11 @@ const cctvSchema = new Schema({
   },
   source_rtsp_url: { type: String, trim: true, default: null },  // physical camera RTSP
   mediamtx_path: { type: String, trim: true, required: true, unique: true }, // e.g. "main-gate-in"
+  
+  // TODO(Backend): Add `camera_type` field.
+  // The mobile app requires this field to determine trip status (e.g. 'gateIn', 'gateOut', 'internal').
+  // camera_type: { type: String, enum: ['gateIn', 'gateOut', 'internal'] },
+
   stream_urls: { type: streamUrlsSchema, default: () => ({}) },
   location: { type: locationSchema, default: () => ({}) }
 }, {

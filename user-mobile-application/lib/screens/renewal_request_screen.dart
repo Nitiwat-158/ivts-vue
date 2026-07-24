@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/vehicle.dart';
 import '../theme/app_theme.dart';
 
@@ -15,6 +17,55 @@ class _RenewalRequestScreenState extends State<RenewalRequestScreen> {
   final _nameController = TextEditingController();
   final _surnameController = TextEditingController();
   final _citizenIdController = TextEditingController();
+
+  File? _licensePlateFile;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final picked = await _picker.pickImage(source: source);
+      if (picked != null) {
+        setState(() {
+          _licensePlateFile = File(picked.path);
+        });
+      }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+    }
+  }
+
+  void _showAttachOptions() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_camera, color: AppColors.primary),
+                title: const Text('ถ่ายรูป (Camera)'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library, color: AppColors.primary),
+                title: const Text('เลือกจากคลังภาพ (Gallery)'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   void dispose() {
@@ -210,7 +261,8 @@ class _RenewalRequestScreenState extends State<RenewalRequestScreen> {
             // Upload Photo Row
             _UploadRow(
               label: 'The vehicle license plate',
-              onAddTap: () {},
+              isAdded: _licensePlateFile != null,
+              onAddTap: _showAttachOptions,
             ),
             const SizedBox(height: 24),
 
@@ -312,8 +364,9 @@ class _InputField extends StatelessWidget {
 class _UploadRow extends StatelessWidget {
   final String label;
   final VoidCallback onAddTap;
+  final bool isAdded;
 
-  const _UploadRow({required this.label, required this.onAddTap});
+  const _UploadRow({required this.label, required this.onAddTap, this.isAdded = false});
 
   @override
   Widget build(BuildContext context) {
@@ -345,13 +398,22 @@ class _UploadRow extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Text(
-                'Add',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isAdded) ...[
+                    const Icon(Icons.check_circle, color: AppColors.success, size: 16),
+                    const SizedBox(width: 4),
+                  ],
+                  Text(
+                    isAdded ? 'Added' : 'Add',
+                    style: TextStyle(
+                      color: isAdded ? AppColors.success : AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

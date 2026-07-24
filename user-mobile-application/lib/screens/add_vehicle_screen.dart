@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../theme/app_theme.dart';
 
 class AddVehicleScreen extends StatefulWidget {
@@ -11,6 +13,60 @@ class AddVehicleScreen extends StatefulWidget {
 class _AddVehicleScreenState extends State<AddVehicleScreen> {
   String? _selectedType;
   final List<String> _vehicleTypes = ['Car', 'Motorcycle'];
+
+  File? _registrationFile;
+  File? _licensePlateFile;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage(bool isRegistration, ImageSource source) async {
+    try {
+      final picked = await _picker.pickImage(source: source);
+      if (picked != null) {
+        setState(() {
+          if (isRegistration) {
+            _registrationFile = File(picked.path);
+          } else {
+            _licensePlateFile = File(picked.path);
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+    }
+  }
+
+  void _showAttachOptions(bool isRegistration) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_camera, color: AppColors.primary),
+                title: const Text('ถ่ายรูป (Camera)'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _pickImage(isRegistration, ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library, color: AppColors.primary),
+                title: const Text('เลือกจากคลังภาพ (Gallery)'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _pickImage(isRegistration, ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   final _licensePlateController = TextEditingController();
   final _provinceController = TextEditingController();
@@ -210,14 +266,16 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                 // Vehicle Registration Certificate
                 _UploadRow(
                   label: 'Vehicle Registration Certificate',
-                  onAddTap: () {},
+                  isAdded: _registrationFile != null,
+                  onAddTap: () => _showAttachOptions(true),
                 ),
                 const SizedBox(height: 10),
 
                 // Photo of License Plate
                 _UploadRow(
                   label: 'Photo Of The Vehicle License Plate',
-                  onAddTap: () {},
+                  isAdded: _licensePlateFile != null,
+                  onAddTap: () => _showAttachOptions(false),
                 ),
               ],
             ),
@@ -324,8 +382,9 @@ class _InputField extends StatelessWidget {
 class _UploadRow extends StatelessWidget {
   final String label;
   final VoidCallback onAddTap;
+  final bool isAdded;
 
-  const _UploadRow({required this.label, required this.onAddTap});
+  const _UploadRow({required this.label, required this.onAddTap, this.isAdded = false});
 
   @override
   Widget build(BuildContext context) {
@@ -357,13 +416,22 @@ class _UploadRow extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Text(
-                'Add',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isAdded) ...[
+                    const Icon(Icons.check_circle, color: AppColors.success, size: 16),
+                    const SizedBox(width: 4),
+                  ],
+                  Text(
+                    isAdded ? 'Added' : 'Add',
+                    style: TextStyle(
+                      color: isAdded ? AppColors.success : AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
