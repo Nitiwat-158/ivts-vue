@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../services/app_data_repository.dart';
+import '../services/mobile_api_service.dart';
 import '../theme/app_theme.dart';
 
 class AddVehicleScreen extends StatefulWidget {
@@ -13,10 +15,12 @@ class AddVehicleScreen extends StatefulWidget {
 class _AddVehicleScreenState extends State<AddVehicleScreen> {
   String? _selectedType;
   final List<String> _vehicleTypes = ['Car', 'Motorcycle'];
+  final MobileApiService _api = MobileApiService();
 
   File? _registrationFile;
   File? _licensePlateFile;
   final ImagePicker _picker = ImagePicker();
+  bool _submitting = false;
 
   Future<void> _pickImage(bool isRegistration, ImageSource source) async {
     try {
@@ -79,6 +83,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
 
   @override
   void dispose() {
+    _api.close();
     _licensePlateController.dispose();
     _provinceController.dispose();
     _brandController.dispose();
@@ -88,6 +93,83 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
     _surnameController.dispose();
     _citizenIdController.dispose();
     super.dispose();
+  }
+
+  String _mapVehicleType(String? value) {
+    switch (value) {
+      case 'Motorcycle':
+        return 'motorcycle';
+      case 'Car':
+      default:
+        return 'car';
+    }
+  }
+
+  Future<void> _submitRequest() async {
+    if (_submitting) return;
+
+    final selectedType = _selectedType;
+    final licensePlate = _licensePlateController.text.trim();
+    final province = _provinceController.text.trim();
+    final brand = _brandController.text.trim();
+    final model = _modelController.text.trim();
+    final color = _colorController.text.trim();
+    final ownerName = _nameController.text.trim();
+    final ownerSurname = _surnameController.text.trim();
+    final citizenId = _citizenIdController.text.trim();
+
+    if (selectedType == null || licensePlate.isEmpty || province.isEmpty || brand.isEmpty || model.isEmpty || color.isEmpty || ownerName.isEmpty || ownerSurname.isEmpty || citizenId.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all required fields before submitting.')),
+      );
+      return;
+    }
+
+    setState(() => _submitting = true);
+    try {
+      await _api.createRequest({
+        'user_id': '1',
+        'request_type': 'register',
+        'user_type': 'student',
+        'vehicle_info': {
+          'license_plate': licensePlate,
+          'province_license': province,
+          'brand': brand,
+          'model': model,
+          'color': color,
+          'vehicle_type': _mapVehicleType(selectedType),
+          'priority_order': 'first_car',
+        },
+        'owner_info': {
+          'name': ownerName,
+          'surname': ownerSurname,
+          'citizen_id': citizenId,
+          'is_owner_match_user': true,
+        },
+        'uploaded_documents': {
+          'registration_book_url': _registrationFile?.path,
+          'vehicle_photo_url': _licensePlateFile?.path,
+        },
+      });
+
+      await AppDataRepository.instance.refresh();
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vehicle request saved to MongoDB.')),
+      );
+      Navigator.of(context).maybePop();
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Submit failed: $error')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _submitting = false);
+      }
+    }
   }
 
   void _onSubmit() {
@@ -148,11 +230,13 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        onPressed: () {
-                          Navigator.of(context).pop(); // close dialog
-                          Navigator.of(context).maybePop(); // close screen
-                        },
-                        child: const Text(
+                        onPressed: _submitting
+                            ? null
+                            : () async {
+                                Navigator.of(context).pop(); // close dialog
+                                await _submitRequest();
+                              },
+                        child: Text(
                           'SUBMIT',
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
                         ),
@@ -290,8 +374,8 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1),
               ),
-              onPressed: _onSubmit,
-              child: const Text('SUBMIT'),
+              onPressed: _submitting ? null : _onSubmit,
+              child: Text(_submitting ? 'SUBMITTING...' : 'SUBMIT'),
             ),
             const SizedBox(height: 24),
           ],
