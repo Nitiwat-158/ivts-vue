@@ -83,11 +83,35 @@ router.get('/requests', async function (request, response) {
 });
 
 /**
+ * POST /api/v1/mobile/requests
+ * Create a vehicle request from mobile client payload.
+ */
+router.post('/requests', async function (request, response) {
+  try {
+    return ok(response, await mobileService.createRequest(request.body || {}), 201);
+  } catch (error) {
+    return fail(response, error);
+  }
+});
+
+/**
  * GET /api/v1/mobile/emergency-reports?vehicle_id=
  */
 router.get('/emergency-reports', async function (request, response) {
   try {
     return ok(response, await mobileService.listEmergencyReports(request.query || {}));
+  } catch (error) {
+    return fail(response, error);
+  }
+});
+
+/**
+ * POST /api/v1/mobile/emergency-reports
+ * Create emergency report from mobile client payload.
+ */
+router.post('/emergency-reports', async function (request, response) {
+  try {
+    return ok(response, await mobileService.createEmergencyReport(request.body || {}), 201);
   } catch (error) {
     return fail(response, error);
   }

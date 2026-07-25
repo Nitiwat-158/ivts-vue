@@ -61,6 +61,12 @@ function cleanText(value) {
   return normalized || null;
 }
 
+function toDate(value) {
+  if (!value) return null;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
 function formatDateBE(date) {
   if (!date) return null;
   const d = new Date(date);
@@ -249,6 +255,128 @@ exports.listRequestHistory = async function listRequestHistory(query) {
   }));
 };
 
+function createRequestId() {
+  const time = Date.now();
+  const rand = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+  return `REQ${time}${rand}`;
+}
+
+/**
+ * Create a new vehicle request from mobile clients.
+ * Expected body:
+ * {
+ *   user_id: string,
+ *   request_type: register|renew,
+ *   user_type: student|staff|outsider,
+ *   vehicle_info?: { license_plate, province_license, brand, model, color, vehicle_type, priority_order },
+ *   owner_info?: { name, surname, citizen_id, is_owner_match_user },
+ *   uploaded_documents?: { registration_book_url, vehicle_photo_url, citizen_card_url },
+ *   validity?: { duration_years, start_date, expiry_date }
+ * }
+ */
+exports.createRequest = async function createRequest(payload) {
+  const body = payload || {};
+  const userId = cleanText(body.user_id);
+  const requestType = cleanText(body.request_type);
+  const userType = cleanText(body.user_type);
+
+  if (!userId) {
+    const error = new Error('user_id is required');
+    error.status = 400;
+    throw error;
+  }
+
+  if (!requestType) {
+    const error = new Error('request_type is required');
+    error.status = 400;
+    throw error;
+  }
+
+  if (!userType) {
+    const error = new Error('user_type is required');
+    error.status = 400;
+    throw error;
+  }
+
+  const normalizedRequestType = requestType.toLowerCase();
+  const normalizedUserType = userType.toLowerCase();
+
+  if (!['register', 'renew'].includes(normalizedRequestType)) {
+    const error = new Error('request_type must be register or renew');
+    error.status = 400;
+    throw error;
+  }
+
+  if (!['student', 'staff', 'outsider'].includes(normalizedUserType)) {
+    const error = new Error('user_type must be student, staff, or outsider');
+    error.status = 400;
+    throw error;
+  }
+
+  const vehicleInfo = body.vehicle_info && typeof body.vehicle_info === 'object' ? body.vehicle_info : {};
+  const ownerInfo = body.owner_info && typeof body.owner_info === 'object' ? body.owner_info : {};
+  const uploadedDocuments = body.uploaded_documents && typeof body.uploaded_documents === 'object'
+    ? body.uploaded_documents
+    : {};
+  const validity = body.validity && typeof body.validity === 'object' ? body.validity : {};
+
+  const document = {
+    _id: cleanText(body._id) || createRequestId(),
+    user_id: userId,
+    request_type: normalizedRequestType,
+    request_status: cleanText(body.request_status) || 'pending_review',
+    user_type: normalizedUserType,
+    vehicle_info: {
+      license_plate: cleanText(vehicleInfo.license_plate),
+      province_license: cleanText(vehicleInfo.province_license),
+      brand: cleanText(vehicleInfo.brand),
+      model: cleanText(vehicleInfo.model),
+      color: cleanText(vehicleInfo.color),
+      vehicle_type: cleanText(vehicleInfo.vehicle_type) || 'car',
+      priority_order: cleanText(vehicleInfo.priority_order) || 'first_car'
+    },
+    owner_info: {
+      name: cleanText(ownerInfo.name),
+      surname: cleanText(ownerInfo.surname),
+      citizen_id: cleanText(ownerInfo.citizen_id),
+      is_owner_match_user: Boolean(ownerInfo.is_owner_match_user)
+    },
+    uploaded_documents: {
+      registration_book_url: cleanText(uploadedDocuments.registration_book_url),
+      vehicle_photo_url: cleanText(uploadedDocuments.vehicle_photo_url),
+      citizen_card_url: cleanText(uploadedDocuments.citizen_card_url)
+    },
+    validity: {
+      duration_years: toNumber(validity.duration_years, 1),
+      start_date: toDate(validity.start_date),
+      expiry_date: toDate(validity.expiry_date)
+    },
+    created_at: toDate(body.created_at) || new Date(),
+    updated_at: new Date()
+  };
+
+  let created;
+  try {
+    created = await Request.create(document);
+  } catch (error) {
+    if (error && error.code === 11000) {
+      const conflict = new Error('Request id already exists');
+      conflict.status = 400;
+      throw conflict;
+    }
+
+    if (error && error.name === 'ValidationError') {
+      const validation = new Error(error.message || 'Request validation failed');
+      validation.status = 400;
+      throw validation;
+    }
+
+    throw error;
+  }
+
+  return created.toObject();
+};
+
 // ─── Emergency reports ─────────────────────────────────────────────────────────
 
 function buildEmergencyTimeline(report) {
@@ -277,6 +405,12 @@ function buildEmergencyTimeline(report) {
   ];
 }
 
+function createEmergencyId() {
+  const time = Date.now();
+  const rand = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+  return `ER${time}${rand}`;
+}
+
 exports.listEmergencyReports = async function listEmergencyReports(query) {
   const filter = {};
   const vehicleId = cleanText(query.vehicle_id);
@@ -295,6 +429,75 @@ exports.getEmergencyReportById = async function getEmergencyReportById(id) {
     throw error;
   }
   return Object.assign({}, report, { timeline: buildEmergencyTimeline(report) });
+};
+
+/**
+ * Create a new emergency report from mobile clients.
+ * Expected body:
+ * {
+ *   vehicle_id?: string,
+ *   request_type: string,
+ *   severity?: low|medium|high|critical,
+ *   incident_time: string|Date,
+ *   description?: string,
+ *   location?: any,
+ *   media_urls?: string[]
+ * }
+ */
+exports.createEmergencyReport = async function createEmergencyReport(payload) {
+  const body = payload || {};
+  const requestType = cleanText(body.request_type);
+  const incidentTime = toDate(body.incident_time);
+
+  if (!requestType) {
+    const error = new Error('request_type is required');
+    error.status = 400;
+    throw error;
+  }
+
+  if (!incidentTime) {
+    const error = new Error('incident_time is required and must be a valid date');
+    error.status = 400;
+    throw error;
+  }
+
+  const document = {
+    _id: cleanText(body._id) || createEmergencyId(),
+    vehicle_id: cleanText(body.vehicle_id),
+    request_type: requestType,
+    severity: cleanText(body.severity) || 'medium',
+    incident_time: incidentTime,
+    submitted_at: toDate(body.submitted_at) || new Date(),
+    description: cleanText(body.description),
+    location: body.location || null,
+    media_urls: Array.isArray(body.media_urls)
+      ? body.media_urls.filter((item) => typeof item === 'string' && item.trim())
+      : [],
+    status: cleanText(body.status) || 'NEW',
+    assigned_admin_id: cleanText(body.assigned_admin_id)
+  };
+
+  let created;
+  try {
+    created = await EmergencyReport.create(document);
+  } catch (error) {
+    if (error && error.code === 11000) {
+      const conflict = new Error('Emergency report id already exists');
+      conflict.status = 400;
+      throw conflict;
+    }
+
+    if (error && error.name === 'ValidationError') {
+      const validation = new Error(error.message || 'Emergency report validation failed');
+      validation.status = 400;
+      throw validation;
+    }
+
+    throw error;
+  }
+
+  const plain = created.toObject();
+  return Object.assign({}, plain, { timeline: buildEmergencyTimeline(plain) });
 };
 
 // ─── Notifications (derived, no dedicated collection) ─────────────────────────
