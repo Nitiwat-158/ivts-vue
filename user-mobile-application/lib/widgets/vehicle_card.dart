@@ -1,3 +1,5 @@
+import '../providers/locale_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import '../models/vehicle.dart';
 import '../screens/emergency_request_screen.dart';
@@ -101,7 +103,7 @@ class VehicleCard extends StatelessWidget {
                   );
                 },
                 icon: const Icon(Icons.warning_amber_rounded, size: 16),
-                label: const Text('Emergency'),
+                label: Text(context.watch<LocaleProvider>().t('emergency')),
               ),
             ],
           ),

@@ -1,3 +1,5 @@
+import '../providers/locale_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
 import '../models/history_entry.dart';
@@ -85,7 +87,7 @@ class HistoryDetailScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: const Text('Trip detail'),
+        title: Text(context.watch<LocaleProvider>().t('trip_detail')),
       ),
       body: SafeArea(
         child: Column(

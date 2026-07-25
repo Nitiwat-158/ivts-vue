@@ -1,3 +1,5 @@
+import '../providers/locale_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
 import '../models/vehicle.dart';
@@ -47,10 +49,10 @@ class VehiclesListScreen extends StatelessWidget {
         Container(
           color: AppColors.background,
           child: MockData.vehicles.isEmpty
-              ? const Center(
+              ? Center(
                   child: Padding(
-                    padding: EdgeInsets.all(24),
-                    child: Text('ยังไม่มีรถที่ลงทะเบียน'),
+                    padding: const EdgeInsets.all(24),
+                    child: Text(context.watch<LocaleProvider>().t('no_registered_vehicles')),
                   ),
                 )
               : ListView(
@@ -147,7 +149,7 @@ class VehiclesListScreen extends StatelessWidget {
                                       ),
                                       onPressed: () => onLocationTap(v),
                                       icon: const Icon(Icons.location_on_outlined, size: 18),
-                                      label: const Text('Location', style: TextStyle(fontWeight: FontWeight.w600)),
+                                      label: Text(context.watch<LocaleProvider>().t('location'), style: TextStyle(fontWeight: FontWeight.w600)),
                                     ),
                                   ),
                                   const SizedBox(width: 10),
@@ -168,7 +170,7 @@ class VehiclesListScreen extends StatelessWidget {
                                           ),
                                         );
                                       },
-                                      child: const Text('More', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                      child: Text(context.watch<LocaleProvider>().t('more'), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                                     ),
                                   ),
                                 ],
@@ -193,7 +195,7 @@ class VehiclesListScreen extends StatelessWidget {
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add),
-            label: const Text('Add Vehicle'),
+            label: Text(context.watch<LocaleProvider>().t('add_vehicle')),
           ),
         ),
       ],

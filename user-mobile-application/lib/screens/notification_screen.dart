@@ -1,3 +1,5 @@
+import '../providers/locale_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
 import '../models/notification_item.dart';
@@ -44,7 +46,7 @@ class NotificationScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: onBack ?? () => Navigator.of(context).maybePop(),
         ),
-        title: const Text('Notification'),
+        title: Text(context.watch<LocaleProvider>().t('notification')),
       ),
       body: SafeArea(
         child: ListView(

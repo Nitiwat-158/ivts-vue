@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/locale_provider.dart';
 import '../data/mock_data.dart';
 import '../models/vehicle.dart';
 import '../theme/app_theme.dart';
@@ -91,14 +93,14 @@ class _HomeScreenState extends State<HomeScreen> {
               _ActionBanner(
                 color: AppColors.primary,
                 icon: Icons.directions_car_outlined,
-                text: 'คุณยังไม่ได้ลงทะเบียนรถ — เริ่มต้นลงทะเบียนรถของคุณ',
+                text: context.watch<LocaleProvider>().t('no_vehicle_banner'),
                 onTap: () {},
               ),
             if (!_hasNoVehicles)
               _ActionBanner(
                 color: AppColors.accentRed,
                 icon: Icons.fmd_bad_rounded,
-                text: 'มีคำร้องฉุกเฉิน (Theft / Stolen) กำลังดำเนินการ — แตะเพื่อดู',
+                text: context.watch<LocaleProvider>().t('emergency_banner'),
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
@@ -113,7 +115,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? AppColors.accentRed.withValues(alpha: 0.85)
                     : AppColors.warningAmber,
                 icon: Icons.warning_amber_rounded,
-                text: 'รถ ${expiring.vehicleCode} ใกล้หมดอายุทะเบียนใน ${expiring.daysUntilExpiry} วัน',
+                text: context.watch<LocaleProvider>().t('vehicle_expiring')
+                    .replaceFirst('{code}', expiring.vehicleCode)
+                    .replaceFirst('{days}', expiring.daysUntilExpiry.toString()),
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(

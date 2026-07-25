@@ -1,3 +1,5 @@
+import '../providers/locale_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import '../models/vehicle.dart';
 import '../theme/app_theme.dart';
@@ -17,7 +19,7 @@ class VehicleDetailsScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: const Text('Details'),
+        title: Text(context.watch<LocaleProvider>().t('details')),
       ),
       body: SafeArea(
         child: ListView(

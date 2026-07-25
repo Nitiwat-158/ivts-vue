@@ -1,3 +1,5 @@
+import '../providers/locale_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
 import '../models/history_entry.dart';
@@ -97,9 +99,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
           const SizedBox(height: 16),
           if (grouped.isEmpty)
-            const Padding(
+            Padding(
               padding: EdgeInsets.only(top: 40),
-              child: Center(child: Text('No trips found', style: TextStyle(color: AppColors.textSecondary))),
+              child: Center(child: Text(context.watch<LocaleProvider>().t('no_trips_found'), style: TextStyle(color: AppColors.textSecondary))),
             ),
           for (final group in grouped.entries) ...[
             Text(

@@ -1,3 +1,5 @@
+import '../providers/locale_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
 import '../theme/app_theme.dart';
@@ -18,8 +20,8 @@ class _EmergencyStatusScreenState extends State<EmergencyStatusScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Mark as Resolved', style: TextStyle(color: AppColors.primary)),
-        content: const Text('คุณแน่ใจหรือไม่ที่จะปิดเคสฉุกเฉินนี้? (Are you sure you want to mark this as resolved?)'),
+        title: Text(context.watch<LocaleProvider>().t('mark_as_resolved'), style: TextStyle(color: AppColors.primary)),
+        content: Text(context.watch<LocaleProvider>().t('confirm_close_emergency')),
         actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         actions: [
           Row(
@@ -36,7 +38,7 @@ class _EmergencyStatusScreenState extends State<EmergencyStatusScreen> {
                     ),
                   ),
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('CANCLE', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+                  child: Text(context.watch<LocaleProvider>().t('cancel'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
                 ),
               ),
               const SizedBox(width: 16),
@@ -62,10 +64,10 @@ class _EmergencyStatusScreenState extends State<EmergencyStatusScreen> {
                       _resolvedTime = '$hour:$minute $period';
                     });
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('เคสถูกทำเครื่องหมายว่าแก้ไขแล้ว')),
+                      SnackBar(content: Text(context.watch<LocaleProvider>().t('case_marked_resolved'))),
                     );
                   },
-                  child: const Text('CONFIRM', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+                  child: Text(context.watch<LocaleProvider>().t('confirm'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
                 ),
               ),
             ],
@@ -78,13 +80,13 @@ class _EmergencyStatusScreenState extends State<EmergencyStatusScreen> {
   @override
   Widget build(BuildContext context) {
     final steps = [
-      const _StatusStep(label: 'ส่งคำร้องเรียบร้อย', timestamp: '4:41 PM', completed: true),
-      const _StatusStep(label: 'เจ้าหน้าที่รับคำร้องแล้ว', timestamp: '4:43 PM', completed: true),
+      _StatusStep(label: context.watch<LocaleProvider>().t('request_submitted'), timestamp: '4:41 PM', completed: true),
+      _StatusStep(label: context.watch<LocaleProvider>().t('request_accepted'), timestamp: '4:43 PM', completed: true),
       if (_isResolved) ...[
-        const _StatusStep(label: 'กำลังติดต่อกลับ', timestamp: '4:45 PM', completed: true),
-        _StatusStep(label: 'เคสถูกปิดแล้ว (Resolved)', timestamp: _resolvedTime ?? '', completed: true),
+        _StatusStep(label: context.watch<LocaleProvider>().t('contacting_back'), timestamp: '4:45 PM', completed: true),
+        _StatusStep(label: context.watch<LocaleProvider>().t('case_resolved'), timestamp: _resolvedTime ?? '', completed: true),
       ] else ...[
-        const _StatusStep(label: 'กำลังติดต่อกลับ', timestamp: '', completed: false),
+        _StatusStep(label: context.watch<LocaleProvider>().t('contacting_back'), timestamp: '', completed: false),
       ]
     ];
 
@@ -95,7 +97,7 @@ class _EmergencyStatusScreenState extends State<EmergencyStatusScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: const Text('Emergency Request'),
+        title: Text(context.watch<LocaleProvider>().t('emergency_request')),
       ),
       body: SafeArea(
         child: ListView(
@@ -152,7 +154,7 @@ class _EmergencyStatusScreenState extends State<EmergencyStatusScreen> {
               ),
               onPressed: () {},
               icon: const Icon(Icons.call),
-              label: const Text('โทรหาเจ้าหน้าที่ (${MockData.securityPhoneNumber})'),
+              label: Text('${context.watch<LocaleProvider>().t('call_staff')} (${MockData.securityPhoneNumber})'),
             ),
             if (!_isResolved) ...[
               const SizedBox(height: 16),
@@ -162,9 +164,9 @@ class _EmergencyStatusScreenState extends State<EmergencyStatusScreen> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                 ),
                 onPressed: _confirmMarkResolved,
-                child: const Text(
-                  'Mark resolved',
-                  style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 16),
+                child: Text(
+                  context.watch<LocaleProvider>().t('mark_resolved'),
+                  style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 16),
                 ),
               ),
             ],

@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
+import '../providers/locale_provider.dart';
 import 'request_history_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -40,7 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.photo_camera, color: AppColors.primary),
-                title: const Text('ถ่ายรูป'),
+                title: Text(context.watch<LocaleProvider>().t('take_photo')),
                 onTap: () {
                   Navigator.pop(ctx);
                   _pickAvatar(ImageSource.camera);
@@ -48,7 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library, color: AppColors.primary),
-                title: const Text('เลือกจากคลังภาพ'),
+                title: Text(context.watch<LocaleProvider>().t('choose_from_gallery_short')),
                 onTap: () {
                   Navigator.pop(ctx);
                   _pickAvatar(ImageSource.gallery);
@@ -57,7 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (_avatarImage != null)
                 ListTile(
                   leading: const Icon(Icons.delete_outline, color: Colors.red),
-                  title: const Text('ลบรูปโปรไฟล์', style: TextStyle(color: Colors.red)),
+                  title: Text(context.watch<LocaleProvider>().t('delete_profile_picture'), style: TextStyle(color: Colors.red)),
                   onTap: () {
                     Navigator.pop(ctx);
                     setState(() => _avatarImage = null);
@@ -81,7 +83,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (ctx) {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Change Password', style: TextStyle(color: AppColors.primary)),
+          title: Text(context.watch<LocaleProvider>().t('change_password'), style: TextStyle(color: AppColors.primary)),
           content: Form(
             key: formKey,
             child: Column(
@@ -90,25 +92,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 TextFormField(
                   controller: oldPasswordCtrl,
                   obscureText: true,
-                  decoration: const InputDecoration(labelText: 'Current password'),
+                  decoration: InputDecoration(labelText: context.watch<LocaleProvider>().t('current_password')),
                   validator: (v) =>
-                      (v == null || v.isEmpty) ? 'กรุณากรอกรหัสผ่านปัจจุบัน' : null,
+                      (v == null || v.isEmpty) ? context.read<LocaleProvider>().t('error_enter_current_password') : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: newPasswordCtrl,
                   obscureText: true,
-                  decoration: const InputDecoration(labelText: 'New password'),
+                  decoration: InputDecoration(labelText: context.watch<LocaleProvider>().t('new_password')),
                   validator: (v) =>
-                      (v == null || v.length < 8) ? 'รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร' : null,
+                      (v == null || v.length < 8) ? context.read<LocaleProvider>().t('error_password_length') : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: confirmPasswordCtrl,
                   obscureText: true,
-                  decoration: const InputDecoration(labelText: 'Confirm new password'),
+                  decoration: InputDecoration(labelText: context.watch<LocaleProvider>().t('confirm_new_password')),
                   validator: (v) =>
-                      (v != newPasswordCtrl.text) ? 'รหัสผ่านไม่ตรงกัน' : null,
+                      (v != newPasswordCtrl.text) ? context.read<LocaleProvider>().t('error_password_mismatch') : null,
                 ),
               ],
             ),
@@ -129,9 +131,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     onPressed: () => Navigator.pop(ctx),
-                    child: const Text(
-                      'CANCLE',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                    child: Text(
+                      context.watch<LocaleProvider>().t('cancel').toUpperCase(),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
                     ),
                   ),
                 ),
@@ -153,13 +155,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         // (MongoDB collection: user -> field passwordHash)
                         Navigator.pop(ctx);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('เปลี่ยนรหัสผ่านสำเร็จ (mock)')),
+                          SnackBar(content: Text(context.watch<LocaleProvider>().t('password_changed_success'))),
                         );
                       }
                     },
-                    child: const Text(
-                      'CONFIRM',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                    child: Text(
+                      context.watch<LocaleProvider>().t('confirm').toUpperCase(),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
                     ),
                   ),
                 ),
@@ -181,7 +183,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Close'),
+            child: Text(context.watch<LocaleProvider>().t('close')),
           ),
         ],
       ),
@@ -204,8 +206,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Widget _languageTile(BuildContext context) {
+    final localeProvider = context.watch<LocaleProvider>();
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.language, color: AppColors.primary),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(localeProvider.t('language'), style: const TextStyle(color: AppColors.primary)),
+          ),
+          SegmentedButton<AppLanguage>(
+            segments: [
+              ButtonSegment<AppLanguage>(
+                value: AppLanguage.thai,
+                label: Text(context.watch<LocaleProvider>().t('thai')),
+              ),
+              ButtonSegment<AppLanguage>(
+                value: AppLanguage.english,
+                label: Text(context.watch<LocaleProvider>().t('english')),
+              ),
+            ],
+            selected: {localeProvider.currentLanguage},
+            onSelectionChanged: (Set<AppLanguage> newSelection) {
+              context.read<LocaleProvider>().setLanguage(newSelection.first);
+            },
+            style: SegmentedButton.styleFrom(
+              visualDensity: VisualDensity.compact,
+              selectedForegroundColor: Colors.white,
+              selectedBackgroundColor: AppColors.primary,
+            ),
+            showSelectedIcon: false,
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final localeProvider = context.watch<LocaleProvider>();
     return Container(
       color: AppColors.background,
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -268,9 +315,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             child: Column(
               children: [
-                const Align(
+                Align(
                   alignment: Alignment.centerLeft,
-                  child: Text('User Information',
+                  child: Text(context.watch<LocaleProvider>().t('user_information'),
                       style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
                 ),
                 const SizedBox(height: 10),
@@ -293,12 +340,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 16),
           _menuTile(
             context,
-            'Request History',
+            localeProvider.t('request_history'),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const RequestHistoryScreen()),
             ),
           ),
-          _menuTile(context, 'Change Password', onTap: _showChangePasswordDialog),
+          _menuTile(context, localeProvider.t('change_password'), onTap: _showChangePasswordDialog),
+          _languageTile(context),
           const SizedBox(height: 12),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -308,7 +356,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: widget.onBack,
-            child: const Text('LOG OUT'),
+            child: Text(localeProvider.t('logout')),
           ),
         ],
       ),

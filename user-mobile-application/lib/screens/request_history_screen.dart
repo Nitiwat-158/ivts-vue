@@ -1,3 +1,5 @@
+import '../providers/locale_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
 import '../theme/app_theme.dart';
@@ -76,7 +78,7 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: const Text('Request History'),
+        title: Text(context.watch<LocaleProvider>().t('request_history')),
       ),
       body: SafeArea(
         child: ListView(
@@ -101,9 +103,9 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen> {
             ),
             const SizedBox(height: 16),
             if (grouped.isEmpty)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(top: 40),
-                child: Center(child: Text('No requests found', style: TextStyle(color: AppColors.textSecondary))),
+                child: Center(child: Text(context.watch<LocaleProvider>().t('no_requests_found'), style: TextStyle(color: AppColors.textSecondary))),
               ),
             for (final group in grouped.entries) ...[
               Text(

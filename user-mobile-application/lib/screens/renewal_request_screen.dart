@@ -1,3 +1,5 @@
+import '../providers/locale_provider.dart';
+import 'package:provider/provider.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -46,7 +48,7 @@ class _RenewalRequestScreenState extends State<RenewalRequestScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.photo_camera, color: AppColors.primary),
-                title: const Text('ถ่ายรูป (Camera)'),
+                title: Text(context.watch<LocaleProvider>().t('take_photo_camera')),
                 onTap: () {
                   Navigator.pop(ctx);
                   _pickImage(ImageSource.camera);
@@ -54,7 +56,7 @@ class _RenewalRequestScreenState extends State<RenewalRequestScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library, color: AppColors.primary),
-                title: const Text('เลือกจากคลังภาพ (Gallery)'),
+                title: Text(context.watch<LocaleProvider>().t('choose_from_gallery')),
                 onTap: () {
                   Navigator.pop(ctx);
                   _pickImage(ImageSource.gallery);
@@ -162,7 +164,7 @@ class _RenewalRequestScreenState extends State<RenewalRequestScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: const Text('Renewal Request'),
+        title: Text(context.watch<LocaleProvider>().t('renewal_request')),
       ),
       body: SafeArea(
         child: ListView(
@@ -276,7 +278,7 @@ class _RenewalRequestScreenState extends State<RenewalRequestScreen> {
                 textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1),
               ),
               onPressed: _onSubmit,
-              child: const Text('SUBMIT'),
+              child: Text(context.watch<LocaleProvider>().t('submit')),
             ),
             const SizedBox(height: 24),
           ],

@@ -1,3 +1,5 @@
+import '../providers/locale_provider.dart';
+import 'package:provider/provider.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -90,7 +92,7 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.photo_camera, color: AppColors.primary),
-                title: const Text('ถ่ายรูป'),
+                title: Text(context.watch<LocaleProvider>().t('take_photo')),
                 onTap: () {
                   Navigator.pop(ctx);
                   _pickImage(ImageSource.camera);
@@ -98,7 +100,7 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library, color: AppColors.primary),
-                title: const Text('เลือกจากคลังภาพ'),
+                title: Text(context.watch<LocaleProvider>().t('choose_from_gallery_short')),
                 onTap: () {
                   Navigator.pop(ctx);
                   _pickImage(ImageSource.gallery);
@@ -151,9 +153,9 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
                           ),
                         ),
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text(
-                          'CANCLE',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                        child: Text(
+                          context.watch<LocaleProvider>().t('cancel').toUpperCase(),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
                         ),
                       ),
                     ),
@@ -227,7 +229,7 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: const Text('Emergency Request'),
+        title: Text(context.watch<LocaleProvider>().t('emergency_request')),
       ),
       body: SafeArea(
         child: ListView(
@@ -273,13 +275,19 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  Text('Date: ${_formatDate(displayTime)}'),
-                  Text('Time: ${_formatTime(displayTime)}'),
+                              Text(
+                                '${context.watch<LocaleProvider>().t('date_prefix')}: ${_formatDate(displayTime)}',
+                                style: const TextStyle(color: AppColors.textSecondary),
+                              ),
+                              Text(
+                                '${context.watch<LocaleProvider>().t('time_prefix')}: ${_formatTime(displayTime)}',
+                                style: const TextStyle(color: AppColors.textSecondary),
+                              ),
                 ],
               ),
             ),
             const SizedBox(height: 16),
-            const Text('Request for', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+            Text(context.watch<LocaleProvider>().t('request_for'), style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
             RadioGroup<String>(
               groupValue: _selected,
               onChanged: (value) => setState(() => _selected = value!),
@@ -295,7 +303,7 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
             const SizedBox(height: 12),
 
             // ช่องแนบรูป — เพิ่มใหม่ระหว่าง Request for กับ Description
-            const Text('แนบรูปภาพ', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+            Text(context.watch<LocaleProvider>().t('attach_picture'), style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
             const SizedBox(height: 8),
             SizedBox(
               height: 84,
@@ -350,17 +358,17 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
             ),
             const SizedBox(height: 16),
 
-            const Text('Description', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+            Text(context.watch<LocaleProvider>().t('description'), style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
             const SizedBox(height: 6),
             TextField(
               controller: _descriptionController,
               maxLines: 4,
-              decoration: const InputDecoration(hintText: 'type here...'),
+              decoration: InputDecoration(hintText: context.watch<LocaleProvider>().t('type_here')),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _confirmAndSubmit,
-              child: const Text('SUBMIT'),
+              child: Text(context.watch<LocaleProvider>().t('submit')),
             ),
           ],
         ),
@@ -382,7 +390,7 @@ class _CallButton extends StatelessWidget {
         HapticFeedback.mediumImpact();
       },
       icon: const Icon(Icons.call),
-      label: const Text('โทรแจ้งเจ้าหน้าที่ทันที (${MockData.securityPhoneNumber})'),
+      label: Text('${context.watch<LocaleProvider>().t('call_staff_now')} (${MockData.securityPhoneNumber})'),
     );
   }
 }
