@@ -23,7 +23,7 @@
 | Backend module | `backend-node/server/Project/ivts/service/mobile.js`, `mobile.routes.js` | Full read-only mapping layer over live Mongo collections. |
 | Live DB shape | `docker exec ivts-vue-mongodb-1 mongosh IVTS --quiet --eval "printjson(db.<collection>.findOne())"` | `vehicles` real documents use flat fields (`plate_number`, `vehicle_code`, `type`, `owner_name`, `validity_start`, `validity_expiry`, `last_location`, `updated_at`, `user_id`) that diverge from the declared Mongoose schema. `tracking_histories`, `requests`, `tracking_logs` are empty (0 docs). `emergency_report` (1 doc) matches its schema. |
 | Frontend route | N/A (Flutter, not Vue) — screens read `MockData`/`AppDataRepository` directly | See T12. |
-| Frontend API | `user-mobile-application/lib/services/mobile_api_service.dart`, `api_config.dart`, `app_data_repository.dart` | HTTP GET + JSON→model mapping + in-place `MockData` replacement. |
+| Frontend API | `user-mobile-application/lib/services/mobile_api_service.dart`, `api_config.dart`, `app_data_repository.dart` | HTTP GET + JSON→model mapping + in-place `MockData` replacement. `createRequest()` was added for Add Vehicle POST submission. |
 | Privacy / PDPA | `mobile.routes.js` header comment | No PDPA-sensitive fields (e.g. citizen_id) are exposed; router documented as temporarily unauthenticated. |
 | Tests | See T16 | `node --check`, `flutter analyze`, live `curl` smoke tests. |
 | PRD/docs | none found referencing mobile API | No existing PRD section to update; documented as an open item. |
@@ -167,8 +167,9 @@ Privacy / PDPA requirements:
 | `backend-node/server/routes/app.routes.js` | Mounted `mobile.routes.js` at `/api/v1/mobile`. |
 | `user-mobile-application/pubspec.yaml` | Added `http: ^1.2.2` dependency. |
 | `user-mobile-application/lib/services/api_config.dart` | New — base URL config (Android emulator `10.0.2.2` alias, `--dart-define` override), request timeout. |
-| `user-mobile-application/lib/services/mobile_api_service.dart` | New — HTTP GET + JSON→model mapping for vehicles/trip history/request history/notifications. |
+| `user-mobile-application/lib/services/mobile_api_service.dart` | New — HTTP GET + JSON→model mapping for vehicles/trip history/request history/notifications; POST helper for request inserts. |
 | `user-mobile-application/lib/services/app_data_repository.dart` | New — fetches all four resources and replaces `MockData` lists in place; no mock fallback. |
+| `user-mobile-application/lib/screens/add_vehicle_screen.dart` | Wired Add Vehicle form to `POST /api/v1/mobile/requests` and refresh app data after success. |
 | `user-mobile-application/lib/app.dart` | Converted to `StatefulWidget`; triggers `refresh()` on startup; rebuilds `HomeScreen` via `ValueListenableBuilder`. |
 | `user-mobile-application/lib/data/mock_data.dart` | Removed all hardcoded demo records; lists now start empty; `mostRecentlyMoved` made null-safe. |
 | `user-mobile-application/lib/screens/location_screen.dart` | Handles a null vehicle (empty list) with an empty-state message instead of crashing. |
@@ -243,12 +244,12 @@ Status: Done — backend + Flutter data layer implemented, smoke-tested, and ver
 Active tasklist: docs/tasks/2026-07-24-mobile-mongodb-api.md
 Task IDs: ivts-MOBAPI-001..011
 Progress: 100%
-Changed files: backend-node/server/Project/ivts/service/mobile.js, backend-node/server/Project/ivts/mobile.routes.js, backend-node/server/routes/app.routes.js, user-mobile-application/pubspec.yaml, user-mobile-application/lib/services/api_config.dart, user-mobile-application/lib/services/mobile_api_service.dart, user-mobile-application/lib/services/app_data_repository.dart, user-mobile-application/lib/app.dart, user-mobile-application/lib/data/mock_data.dart, user-mobile-application/lib/screens/location_screen.dart, user-mobile-application/windows/ (new platform folder)
+Changed files: backend-node/server/Project/ivts/service/mobile.js, backend-node/server/Project/ivts/mobile.routes.js, backend-node/server/routes/app.routes.js, user-mobile-application/pubspec.yaml, user-mobile-application/lib/services/api_config.dart, user-mobile-application/lib/services/mobile_api_service.dart, user-mobile-application/lib/services/app_data_repository.dart, user-mobile-application/lib/screens/add_vehicle_screen.dart, user-mobile-application/lib/app.dart, user-mobile-application/lib/data/mock_data.dart, user-mobile-application/lib/screens/location_screen.dart, user-mobile-application/windows/ (new platform folder)
 Routes: GET /api/v1/mobile/vehicles, /vehicles/:id, /tracking/history, /requests, /emergency-reports, /emergency-reports/:id, /notifications
 UI routes: N/A (Flutter tab-based navigation, unchanged)
 Permission: none applied to /api/v1/mobile/* (documented, temporary — A-001)
 Data migration: none (read-only)
-Tests run: node --check (backend), flutter analyze (frontend), curl live smoke tests (7/7 pass), flutter run -d emulator-5554 (fetch timeout — B-001), flutter run -d windows (PASS — real data loaded, confirmed via runtime log)
+Tests run: node --check (backend), flutter analyze (frontend), curl live smoke tests (7/7 pass), curl POST /api/v1/mobile/requests (PASS), flutter run -d emulator-5554 (fetch timeout — B-001), flutter run -d windows (PASS — real data loaded, confirmed via runtime log)
 PRD/docs: no existing PRD section for mobile API; flagged for Product Owner follow-up
 Security decision: temporary no-auth read-only API, no PDPA-sensitive fields exposed
 Privacy/PDPA decision: no personal data stored/changed; only non-sensitive display fields returned

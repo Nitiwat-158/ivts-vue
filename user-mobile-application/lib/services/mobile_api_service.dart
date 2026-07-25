@@ -32,6 +32,28 @@ class MobileApiService {
     return json.map(_requestHistoryFromJson).toList();
   }
 
+  Future<Map<String, dynamic>> createRequest(Map<String, dynamic> payload) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}/requests');
+    final response = await _client
+        .post(
+          uri,
+          headers: const {'Content-Type': 'application/json'},
+          body: jsonEncode(payload),
+        )
+        .timeout(ApiConfig.requestTimeout);
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('POST $uri failed with status ${response.statusCode}');
+    }
+
+    final decoded = jsonDecode(response.body);
+    if (decoded is! Map<String, dynamic> || decoded['data'] is! Map<String, dynamic>) {
+      throw const FormatException('Unexpected create request API response shape');
+    }
+
+    return decoded['data'] as Map<String, dynamic>;
+  }
+
   Future<List<NotificationItem>> fetchNotifications({String? userId}) async {
     final json = await _getJson('/notifications', userId: userId);
     return json.map(_notificationFromJson).toList();
