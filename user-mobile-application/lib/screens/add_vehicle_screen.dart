@@ -140,7 +140,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
           'brand': brand,
           'model': model,
           'color': color,
-          'vehicle_type': _mapVehicleType(selectedType),
+          'type': _mapVehicleType(selectedType),
           'priority_order': 'first_car',
         },
         'owner_info': {

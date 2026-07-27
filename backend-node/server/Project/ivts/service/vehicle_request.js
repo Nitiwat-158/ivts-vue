@@ -3,9 +3,7 @@
 /**
  * Service: vehicle_request
  * Business logic for request submission, admin review, and automatic
- * vehicle/owner synchronisation on approval.
- *
- * Pattern follows ivts_document.js service conventions.
+ * vehicle synchronisation on approval.
  */
 
 const Request = require('../models/request.model');
@@ -35,8 +33,6 @@ function cleanDate(value) {
 
 /**
  * Extract the current user_id from the request context.
- * Follows the existing pattern: `request.body.accounts` holds the logged-in
- * account's internal ID (set by the auth middleware chain).
  */
 function userIdFromRequest(request) {
   return (
@@ -80,13 +76,15 @@ async function resolvePriorityOrder(userId) {
 
 function sanitizeVehicleInfo(body) {
   const vi = body.vehicle_info || {};
+  // Accept both 'type' (new mobile field from 2026-07-27) and 'vehicle_type' (legacy backward compat)
+  const rawType = vi.type || vi.vehicle_type || '';
   return {
     license_plate: cleanText(vi.license_plate),
     province_license: cleanText(vi.province_license),
     brand: cleanText(vi.brand),
     model: cleanText(vi.model),
     color: cleanText(vi.color),
-    vehicle_type: ['car', 'motorcycle'].includes(vi.vehicle_type) ? vi.vehicle_type : 'car'
+    type: ['car', 'motorcycle'].includes(rawType) ? rawType : 'car'
     // priority_order is set by the service — not accepted from client
   };
 }
@@ -160,7 +158,6 @@ exports.getById = async function getById(id) {
 /**
  * POST /requests/submit
  * Authenticated users submit a vehicle registration or renewal application.
- * The service resolves priority_order automatically.
  */
 exports.submit = async function submit(body, request) {
   const userId = userIdFromRequest(request);
@@ -217,10 +214,8 @@ exports.submit = async function submit(body, request) {
 
 /**
  * PUT /requests/:id/review  (admin only)
- * Approve or reject a request. On approval:
- *   1. Sets validity.start_date = now, validity.expiry_date = now + 1 year.
- *   2. Upserts a Vehicle document.
- *   3. Upserts an OwnerVehicle document.
+ * Approve or reject a request. On approval syncs vehicle document.
+ * Body: { request_status: 'approved' | 'rejected' | 'expired' }
  */
 exports.review = async function review(id, body, request) {
   const new_status = cleanText(body.request_status);
@@ -253,7 +248,7 @@ exports.review = async function review(id, body, request) {
     updatePayload['validity.start_date'] = now;
     updatePayload['validity.expiry_date'] = expiryDate;
 
-    // ── Data synchronicity guardrail: sync vehicles + owner_vehicles ──────
+    // Sync vehicle document on approval
     await _syncVehicleOnApproval(existing, now);
   }
 
@@ -265,7 +260,6 @@ exports.review = async function review(id, body, request) {
 
   return updated;
 };
-
 
 /**
  * Generate a sequential vehicle_code in "CR0001" format.
@@ -289,6 +283,9 @@ async function _generateVehicleCode() {
  *   last_location : String
  *   updated_at, created_at : Date
  *   user_id       : String
+ *
+ * vehicle_info.type field: mobile app sends 'type' from 2026-07-27.
+ * Legacy 'vehicle_type' stored in old requests is also handled here.
  */
 async function _syncVehicleOnApproval(requestDoc, now) {
   const vi = requestDoc.vehicle_info || {};
@@ -305,6 +302,9 @@ async function _syncVehicleOnApproval(requestDoc, now) {
 
   const ownerName = [oi.name, oi.surname].filter(Boolean).join(' ').trim() || null;
 
+  // Resolve vehicle type: accept 'type' (new) or 'vehicle_type' (legacy)
+  const vehicleType = vi.type || vi.vehicle_type || null;
+
   // Check if a vehicle with this plate_number already exists for this user
   const existing = await Vehicle.findOne({
     plate_number: plateSrc,
@@ -315,7 +315,7 @@ async function _syncVehicleOnApproval(requestDoc, now) {
     await Vehicle.findByIdAndUpdate(existing._id, {
       $set: {
         plate_number: plateSrc,
-        type: vi.vehicle_type || existing.type || null,
+        type: vehicleType || existing.type || null,
         brand: vi.brand || existing.brand || null,
         model: vi.model || existing.model || null,
         color: vi.color || existing.color || null,
@@ -333,7 +333,7 @@ async function _syncVehicleOnApproval(requestDoc, now) {
       _id: vehicleCode,
       plate_number: plateSrc,
       vehicle_code: vehicleCode,
-      type: vi.vehicle_type || null,
+      type: vehicleType,
       brand: vi.brand || null,
       model: vi.model || null,
       color: vi.color || null,
