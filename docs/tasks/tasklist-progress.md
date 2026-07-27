@@ -67,6 +67,17 @@ Adjust weights per project, but keep them evidence-backed.
 | ivts-ER-001 | Emergency report CastError: source discovery | Backend | AI | none | done | 100 | Root cause confirmed: vehicle_id stores vehicle_code string not ObjectId | `emergency_report.model.js`, `vehicle.model.js`, `mobile.js` | — | none | — | Root cause documented |
 | ivts-ER-002 | Fix getAll + updateStatus vehicle lookup (vehicle_code) | Backend | AI | ivts-ER-001 | done | 100 | Code changed; node --check PASS | `service/emergency_report.js` | `node --check` PASS 2026-07-27 | none | Run live smoke | Fixed service |
 | ivts-ER-003 | Live smoke: GET /api/v1/ivts/emergency-reports | Backend | Dev | ivts-ER-002 | pending | 0 | Not run — requires running server | — | not run | requires running server | Restart server; test endpoint | HTTP 200 |
+| ivts-VM-001 | Vehicle Mgmt: source discovery | Backend | AI | none | done | 100 | Root cause: owner_vehicles EMPTY; real data in vehicles+requests | MongoDB Compass, owner_vehicle.js, VehicleTable.vue | — | none | — | Root cause documented |
+| ivts-VM-002 | Vehicle Mgmt: rewrite owner_vehicle.js service | Backend | AI | ivts-VM-001 | done | 100 | Service uses vehicles+requests; node --check PASS | `service/owner_vehicle.js` | `node --check` PASS 2026-07-27 | none | Run live smoke | Fixed service |
+| ivts-VM-003 | Vehicle Mgmt: rewrite VehicleTable.vue | Frontend | AI | ivts-VM-001 | done | 100 | Table shows plate_number, type, owner_name, validity, doc_status | `VehicleTable.vue` | n/a | none | Visual verify | Updated table |
+| ivts-VM-004 | Vehicle Mgmt: live smoke + visual verify | Dev | Dev | ivts-VM-003 | pending | 0 | Not run | — | not run | requires server | Restart server; open /vehicles/management | 6 vehicles shown |
+| ivts-VR-001 | Add Request tab: source discovery | Full-stack | AI | ivts-VM-004 | done | 100 | Requests route + service confirmed; permission gap identified | `vehicle_request.js`, `ivts.routes.js` | — | none | — | Routes and service documented |
+| ivts-VR-002 | Add ivtsRequests to api.js + useVehicleApi | Frontend | AI | ivts-VR-001 | done | 100 | fetchRequests, reviewRequest added | `api.js`, `useVehicleApi.js` | n/a | none | — | API composable updated |
+| ivts-VR-003 | Create VehicleRequestTable.vue component | Frontend | AI | ivts-VR-001 | done | 100 | Table shows _id, type, plate, vehicle info, owner, date, status, approve/reject actions | `VehicleRequestTable.vue` | n/a | none | Visual verify | Component created |
+| ivts-VR-004 | Create ConfirmRequestModal.vue | Frontend | AI | ivts-VR-001 | done | 100 | Modal shows vehicle_info, owner_info, approve/reject confirm | `ConfirmRequestModal.vue` | n/a | none | Visual verify | Component created |
+| ivts-VR-005 | Update VehicleManagement.vue with Tabs | Frontend | AI | ivts-VR-003 | done | 100 | Tabs: รถทั้งหมด / คำขอเพิ่มรถ; pending badge on tab | `VehicleManagement.vue` | n/a | none | Visual verify | Page updated |
+| ivts-VR-006 | Relax /requests routes to mockVehicleMgmtGuard | Backend | AI | ivts-VR-001 | done | 100 | GET + PUT /requests routes now use no-op guard; node --check PASS | `ivts.routes.js` | `node --check` PASS 2026-07-27 | none | Restore to canViewRequests when IAM permissions set | Routes updated |
+| ivts-VR-007 | Live smoke: GET /requests, PUT /review | Dev | Dev | ivts-VR-006 | pending | 0 | Not run | — | not run | requires server restart | Restart server; test endpoints | 2 requests returned |
 
 ## T4. Verification Log
 

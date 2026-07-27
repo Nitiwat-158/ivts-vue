@@ -83,11 +83,11 @@
       <h1>Tasklist: IVTS System Progress And Readiness</h1>
     </section>
     <section class="metrics">
-      <div class="metric"><div class="label">Done</div><div class="value">15</div><div class="note">Completed task rows</div></div>
-      <div class="metric"><div class="label">Blocked</div><div class="value">4</div><div class="note">Rows needing action</div></div>
+      <div class="metric"><div class="label">Done</div><div class="value">24</div><div class="note">Completed task rows</div></div>
+      <div class="metric"><div class="label">Blocked</div><div class="value">6</div><div class="note">Rows needing action</div></div>
       <div class="metric"><div class="label">Verifying</div><div class="value">0</div><div class="note">Rows under validation</div></div>
       <div class="metric"><div class="label">In Progress</div><div class="value">1</div><div class="note">Discovery or active work</div></div>
-      <div class="metric"><div class="label">Pending</div><div class="value">10</div><div class="note">Not started rows</div></div>
+      <div class="metric"><div class="label">Pending</div><div class="value">12</div><div class="note">Not started rows</div></div>
     </section>
     <section class="summary-board" aria-label="Summary">
 <div class="table-wrap">
@@ -162,7 +162,7 @@
       <div class="board-panel active" data-board-panel="t3">
         <div class="board-section-title">
           <h3>T3. Active Tasklist</h3>
-          <p class="subcopy">26 task rows. Use task filters for task status; blocker details are in the T5 tab.</p>
+          <p class="subcopy">37 task rows. Use task filters for task status; blocker details are in the T5 tab.</p>
         </div>
       <div class="toolbar">
         <div class="filters task-filters" aria-label="Task filters">
@@ -173,7 +173,7 @@
           <button type="button" data-task-filter="pending">Pending</button>
           <button type="button" data-task-filter="blocked">Tasks with blocker</button>
         </div>
-        <span id="visible-count">Showing 26 tasks</span>
+        <span id="visible-count">Showing 37 tasks</span>
       </div>
       <div class="table-wrap">
         <table class="task-table">
@@ -205,6 +205,17 @@
             <tr data-status="done" data-blocked="false"><td>ivts-ER-001</td><td>Emergency report CastError: source discovery</td><td>Backend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>—</td><td>Root cause documented</td></tr>
             <tr data-status="done" data-blocked="false"><td>ivts-ER-002</td><td>Fix getAll + updateStatus vehicle lookup (vehicle_code)</td><td>Backend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>Run live smoke</td><td>Fixed service</td></tr>
             <tr data-status="pending" data-blocked="true"><td>ivts-ER-003</td><td>Live smoke: GET /api/v1/ivts/emergency-reports</td><td>Backend</td><td><span class="badge pending">pending</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td><span class="badge blocker">requires running server</span></td><td>Restart server; test endpoint</td><td>HTTP 200</td></tr>
+            <tr data-status="done" data-blocked="false"><td>ivts-VM-001</td><td>Vehicle Mgmt: source discovery</td><td>Backend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>—</td><td>Root cause documented</td></tr>
+            <tr data-status="done" data-blocked="false"><td>ivts-VM-002</td><td>Vehicle Mgmt: rewrite owner_vehicle.js service</td><td>Backend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>Run live smoke</td><td>Fixed service</td></tr>
+            <tr data-status="done" data-blocked="false"><td>ivts-VM-003</td><td>Vehicle Mgmt: rewrite VehicleTable.vue</td><td>Frontend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>Visual verify</td><td>Updated table</td></tr>
+            <tr data-status="pending" data-blocked="true"><td>ivts-VM-004</td><td>Vehicle Mgmt: live smoke + visual verify</td><td>Dev</td><td><span class="badge pending">pending</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td><span class="badge blocker">requires server</span></td><td>Restart server; open /vehicles/management</td><td>6 vehicles shown</td></tr>
+            <tr data-status="done" data-blocked="false"><td>ivts-VR-001</td><td>Add Request tab: source discovery</td><td>Full-stack</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>—</td><td>Routes and service documented</td></tr>
+            <tr data-status="done" data-blocked="false"><td>ivts-VR-002</td><td>Add ivtsRequests to api.js + useVehicleApi</td><td>Frontend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>—</td><td>API composable updated</td></tr>
+            <tr data-status="done" data-blocked="false"><td>ivts-VR-003</td><td>Create VehicleRequestTable.vue component</td><td>Frontend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>Visual verify</td><td>Component created</td></tr>
+            <tr data-status="done" data-blocked="false"><td>ivts-VR-004</td><td>Create ConfirmRequestModal.vue</td><td>Frontend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>Visual verify</td><td>Component created</td></tr>
+            <tr data-status="done" data-blocked="false"><td>ivts-VR-005</td><td>Update VehicleManagement.vue with Tabs</td><td>Frontend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>Visual verify</td><td>Page updated</td></tr>
+            <tr data-status="done" data-blocked="false"><td>ivts-VR-006</td><td>Relax /requests routes to mockVehicleMgmtGuard</td><td>Backend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>Restore to canViewRequests when IAM permissions set</td><td>Routes updated</td></tr>
+            <tr data-status="pending" data-blocked="true"><td>ivts-VR-007</td><td>Live smoke: GET /requests, PUT /review</td><td>Dev</td><td><span class="badge pending">pending</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td><span class="badge blocker">requires server restart</span></td><td>Restart server; test endpoints</td><td>2 requests returned</td></tr>
           </tbody>
         </table>
       </div>

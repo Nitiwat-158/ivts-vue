@@ -745,5 +745,19 @@ export default {
       default:
         break;
     }
+  },
+
+  ivtsRequests(method, data) {
+    switch (method) {
+      case 'get-all':
+        return instance.get('/api/v1/ivts/requests', { params: data || {} });
+      case 'get-by-id':
+        return instance.get(`/api/v1/ivts/requests/${data.id}`);
+      case 'review':
+        // PUT /api/v1/ivts/requests/:id/review  body: { request_status: 'approved'|'rejected' }
+        return instance.put(`/api/v1/ivts/requests/${data.id}/review`, data.payload || {});
+      default:
+        break;
+    }
   }
 }

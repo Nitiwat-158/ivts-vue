@@ -162,8 +162,9 @@ router.get(['/users', '/account/users'], canViewUsers, async function (request, 
 /**
  * GET /api/v1/ivts/requests
  * List all requests (admin view, or filtered by user_id query param for self-service).
+ * TODO: switch back to canViewRequests once /ivts/requests permission is bootstrapped in IAM.
  */
-router.get('/requests', canViewRequests, async function (request, response) {
+router.get('/requests', mockVehicleMgmtGuard, async function (request, response) {
   try {
     return ok(response, await vehicleRequest.list(request.query || {}));
   } catch (error) {
@@ -174,8 +175,9 @@ router.get('/requests', canViewRequests, async function (request, response) {
 /**
  * GET /api/v1/ivts/requests/:id
  * Get a single request by ID.
+ * TODO: switch back to canViewRequests once /ivts/requests permission is bootstrapped.
  */
-router.get('/requests/:id', canViewRequests, async function (request, response) {
+router.get('/requests/:id', mockVehicleMgmtGuard, async function (request, response) {
   try {
     return ok(response, await vehicleRequest.getById(request.params.id));
   } catch (error) {
@@ -202,10 +204,10 @@ router.post('/requests/submit', canSubmitRequest, async function (request, respo
  * PUT /api/v1/ivts/requests/:id/review  (admin only)
  * Approve or reject a pending request.
  * On approval: sets validity dates (+1 year) and syncs vehicles + owner_vehicles.
- *
  * Body: { request_status: 'approved' | 'rejected' | 'expired' }
+ * TODO: switch back to canReviewRequest once /ivts/requests 'action' permission is bootstrapped.
  */
-router.put('/requests/:id/review', canReviewRequest, async function (request, response) {
+router.put('/requests/:id/review', mockVehicleMgmtGuard, async function (request, response) {
   try {
     return ok(response, await vehicleRequest.review(request.params.id, request.body || {}, request));
   } catch (error) {

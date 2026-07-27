@@ -63,6 +63,7 @@ Do not add these unless the project has a real need and source evidence:
 | `tasks/2026-07-24-profile-password-buttons.md` | active | Active tasklist for Profile Change Password buttons. |
 | `tasks/2026-07-24-mobile-mongodb-api.md` | active | Active tasklist for mobile app MongoDB-backed API (no mock data). |
 | `tasks/2026-07-27-emergency-report-castError.md` | active | Active tasklist for Emergency Report CastError fix (vehicle_id → vehicle_code lookup). |
+| `tasks/2026-07-27-vehicle-management-fix.md` | active | Active tasklist for Vehicle Management page fix (vehicles+requests instead of empty owner_vehicles). |
 | `tasks/2026-06-18-<topic>.md` | active as needed | One focused tasklist per work item. |
 
 ## Change Records
@@ -84,6 +85,7 @@ Do not add these unless the project has a real need and source evidence:
 | `changes/2026-07-24-profile-password-buttons.md` | active | T1-T20 change record for Profile Change Password buttons. |
 | `changes/2026-07-24-mobile-mongodb-api.md` | active | T1-T20 change record for mobile app MongoDB-backed API (no mock data). |
 | `changes/2026-07-27-emergency-report-castError.md` | active | T1-T20 change record for Emergency Report CastError fix (vehicle_id → vehicle_code). |
+| `changes/2026-07-27-vehicle-management-fix.md` | active | T1-T20 change record for Vehicle Management page fix (backend service + VehicleTable.vue). |
 | `changes/2026-06-18-<topic>.md` | active as needed | T1-T20 handoff for each completed or handed-off work item. |
 
 ## Rule
