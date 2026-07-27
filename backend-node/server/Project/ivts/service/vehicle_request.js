@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 /**
  * Service: vehicle_request
@@ -266,62 +266,95 @@ exports.review = async function review(id, body, request) {
   return updated;
 };
 
+
 /**
- * Internal helper: upsert Vehicle and OwnerVehicle records when a request
- * is approved, granting the vehicle instant perimeter clearance status.
+ * Generate a sequential vehicle_code in "CR0001" format.
+ */
+async function _generateVehicleCode() {
+  const count = await Vehicle.countDocuments({});
+  return 'CR' + String(count + 1).padStart(4, '0');
+}
+
+/**
+ * Internal helper: upsert Vehicle record when a request is approved.
  *
- * @param {Document} requestDoc - The existing request Mongoose document.
- * @param {Date} now
+ * Source evidence (2026-07-27, MongoDB Compass, vehicles collection):
+ *   _id           : String "CR0001" (managed manually)
+ *   plate_number  : String "สน 1669"
+ *   vehicle_code  : String "CR0001" (same as _id)
+ *   type          : String "car"|"motorcycle"
+ *   brand, model, color, province_license
+ *   owner_name    : String
+ *   validity_start, validity_expiry : Date
+ *   last_location : String
+ *   updated_at, created_at : Date
+ *   user_id       : String
  */
 async function _syncVehicleOnApproval(requestDoc, now) {
   const vi = requestDoc.vehicle_info || {};
   const oi = requestDoc.owner_info || {};
 
-  if (!vi.license_plate) return; // Nothing to sync without a plate
+  const plateSrc = (vi.license_plate || '').trim();
+  if (!plateSrc) {
+    console.warn('[vehicle_request] _syncVehicleOnApproval: no license_plate — skipping');
+    return;
+  }
 
-  // Upsert vehicle by license_plate + province_license + user_id
-  const vehicleFilter = {
-    user_id: requestDoc.user_id,
-    license_plate: vi.license_plate
-  };
-  if (vi.province_license) vehicleFilter.province_license = vi.province_license;
+  const expiryDate = new Date(now);
+  expiryDate.setFullYear(expiryDate.getFullYear() + 1);
 
-  const vehicleUpdate = {
-    $set: {
-      user_id: requestDoc.user_id,
-      license_plate: vi.license_plate,
-      province_license: vi.province_license || null,
+  const ownerName = [oi.name, oi.surname].filter(Boolean).join(' ').trim() || null;
+
+  // Check if a vehicle with this plate_number already exists for this user
+  const existing = await Vehicle.findOne({
+    plate_number: plateSrc,
+    user_id: String(requestDoc.user_id)
+  }).lean();
+
+  if (existing) {
+    await Vehicle.findByIdAndUpdate(existing._id, {
+      $set: {
+        plate_number: plateSrc,
+        type: vi.vehicle_type || existing.type || null,
+        brand: vi.brand || existing.brand || null,
+        model: vi.model || existing.model || null,
+        color: vi.color || existing.color || null,
+        province_license: vi.province_license || existing.province_license || null,
+        owner_name: ownerName || existing.owner_name || null,
+        validity_start: now,
+        validity_expiry: expiryDate,
+        updated_at: now
+      }
+    }, { runValidators: false });
+    console.log('[vehicle_request] Vehicle updated: ' + existing._id + ' plate: ' + plateSrc);
+  } else {
+    const vehicleCode = await _generateVehicleCode();
+    const newVehicle = {
+      _id: vehicleCode,
+      plate_number: plateSrc,
+      vehicle_code: vehicleCode,
+      type: vi.vehicle_type || null,
       brand: vi.brand || null,
       model: vi.model || null,
-      color: vi.color || null
+      color: vi.color || null,
+      province_license: vi.province_license || null,
+      owner_name: ownerName,
+      validity_start: now,
+      validity_expiry: expiryDate,
+      last_location: null,
+      updated_at: now,
+      created_at: now,
+      user_id: String(requestDoc.user_id)
+    };
+    try {
+      await Vehicle.create(newVehicle);
+      console.log('[vehicle_request] Vehicle created: ' + vehicleCode + ' plate: ' + plateSrc);
+    } catch (createErr) {
+      if (createErr.code === 11000) {
+        console.warn('[vehicle_request] Duplicate vehicle_code, skipping');
+      } else {
+        throw createErr;
+      }
     }
-  };
-
-  const vehicleDoc = await Vehicle.findOneAndUpdate(vehicleFilter, vehicleUpdate, {
-    new: true,
-    upsert: true,
-    runValidators: true
-  });
-
-  // Ensure the vehicle document exists and contains the generated sequential numeric ID
-  if (!vehicleDoc || !vehicleDoc.vehicle_numeric_id) return;
-
-  // Upsert owner_vehicle by using the sequential vehicle_numeric_id
-  const ownerFilter = { vehicle_id: vehicleDoc.vehicle_numeric_id };
-  const ownerUpdate = {
-    $set: {
-      vehicle_id: vehicleDoc.vehicle_numeric_id, // Safely assign the sequential Number to meet schema requirements
-      owner_name: oi.name || null,
-      owner_surname: oi.surname || null,
-      citizen_id: oi.citizen_id || null,
-      vehicle_image_url: (requestDoc.uploaded_documents || {}).vehicle_photo_url || null,
-      certificate_image_url: (requestDoc.uploaded_documents || {}).registration_book_url || null
-    }
-  };
-
-  await OwnerVehicle.findOneAndUpdate(ownerFilter, ownerUpdate, {
-    new: true,
-    upsert: true,
-    runValidators: true
-  });
+  }
 }

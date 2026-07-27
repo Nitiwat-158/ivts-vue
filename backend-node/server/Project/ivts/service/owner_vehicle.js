@@ -1,27 +1,20 @@
-﻿'use strict';
+'use strict';
 
 /**
  * Service: owner_vehicle (Vehicle Management page)
  *
- * Source evidence (T1-T4, 2026-07-27):
- * - Live DB (MongoDB Compass):
- *   vehicles: 6 docs, _id=String("CR0001"), plate_number, vehicle_code,
- *             type, brand, model, color, owner_name, user_id,
- *             validity_start, validity_expiry, last_location
- *   requests: 2 docs, request_status="pending_review", request_type="register",
- *             embedded vehicle_info (license_plate), owner_info, uploaded_documents
- *   owner_vehicles: EMPTY — no longer used as data source
+ * Source evidence (2026-07-27):
+ * - vehicle.model.js schema fields: license_plate (required), province_license,
+ *   brand, model, color, user_id, cctv_id, vehicle_numeric_id (auto-increment)
+ *   Extra fields stored as-is by _syncVehicleOnApproval: owner_name, validity_start,
+ *   validity_expiry, updated_at
+ * - Older IVTS registry vehicles use plate_number / vehicle_code / type fields.
+ *   Both schemas coexist in the vehicles collection — use helpers to handle both.
+ * - requests collection uses vehicle_info.license_plate as the plate join key.
+ * - owner_vehicles collection: EMPTY — not used as data source.
  *
- * Decisions:
- * - Read vehicles + requests directly; owner_vehicles collection is unused.
- * - document_status derived from latest request per vehicle plate_number:
- *     pending_review -> Pending
- *     approved       -> Approved
- *     rejected       -> Rejected
- *     (no request)   -> Approved
- * - approve/reject: update request_status in requests collection
- * - delete: remove from vehicles collection; requests kept as history
- * - account_status: always "Active" (vehicles collection has no such field)
+ * Join key: vehiclePlateKey(v) returns v.license_plate || v.plate_number
+ *   This handles both old IVTS registry docs and new registration system docs.
  */
 
 const Vehicle = require('../models/vehicle.model');
@@ -58,25 +51,27 @@ function convertToCSV(data) {
   return [headerRow, ...rows].join('\n');
 }
 
-async function getAdminDetails(req) {
-  try {
-    const result = await iamAdminClient.resolveCurrentAccount(req);
-    const account = result.account || {};
-    const name = account.name || '';
-    const surname = account.surname || '';
-    const fullName = (name + ' ' + surname).trim();
-    return {
-      id: account._id ? String(account._id) : 'unknown',
-      name: fullName || account.email || 'Unknown Admin'
-    };
-  } catch (error) {
-    console.error('Failed to fetch admin details from IAM', error);
-    throw new Error('iam_api_unavailable');
-  }
+/**
+ * Get the effective license plate from a vehicle document.
+ * Primary field is plate_number (matching live DB schema confirmed 2026-07-27).
+ */
+function vehiclePlateKey(v) {
+  return v.plate_number || v.license_plate || '';
+}
+
+/**
+ * Get the display plate for a vehicle.
+ */
+function vehiclePlateDisplay(v) {
+  return v.plate_number || v.license_plate || '';
 }
 
 /**
  * Derive document_status from the latest request for a vehicle.
+ * pending_review -> Pending
+ * approved       -> Approved
+ * rejected       -> Rejected
+ * (no request)   -> Approved  (vehicle exists without a pending request = registered)
  */
 function deriveDocumentStatus(latestRequest) {
   if (!latestRequest) return 'Approved';
@@ -88,21 +83,26 @@ function deriveDocumentStatus(latestRequest) {
 }
 
 /**
- * Build enriched row shape compatible with frontend VehicleTable.vue.
- * Keys: _id, vehicle, user, document_status, account_status, pending_request_id, registered_at
+ * Build enriched row shape compatible with VehicleTable.vue.
+ * Handles both old (plate_number / vehicle_code / type) and new (license_plate / brand / model) vehicles.
  */
 function buildRow(vehicle, latestRequest, user) {
+  const plate = vehiclePlateDisplay(vehicle);
+  const ownerDisplay = vehicle.owner_name ||
+    (user ? [user.name, user.surname].filter(Boolean).join(' ') : '');
+
   return {
     _id: String(vehicle._id),
     vehicle: {
       _id: String(vehicle._id),
-      plate_number: vehicle.plate_number || '',
+      plate_number: plate,
       vehicle_code: vehicle.vehicle_code || '',
       type: vehicle.type || '',
       brand: vehicle.brand || '',
       model: vehicle.model || '',
       color: vehicle.color || '',
-      owner_name: vehicle.owner_name || '',
+      province_license: vehicle.province_license || '',
+      owner_name: ownerDisplay,
       validity_start: vehicle.validity_start || null,
       validity_expiry: vehicle.validity_expiry || null,
       last_location: vehicle.last_location || null
@@ -114,7 +114,7 @@ function buildRow(vehicle, latestRequest, user) {
           surname: user.surname || '',
           email: user.email || ''
         }
-      : { _id: vehicle.user_id || '', name: vehicle.owner_name || '', surname: '', email: '' },
+      : { _id: vehicle.user_id || '', name: ownerDisplay, surname: '', email: '' },
     document_status: deriveDocumentStatus(latestRequest),
     account_status: 'Active',
     pending_request_id: latestRequest && latestRequest.request_status === 'pending_review'
@@ -125,6 +125,7 @@ function buildRow(vehicle, latestRequest, user) {
 }
 
 // ─── Build requestByPlate map (latest request per license plate) ────────────
+// Join key = vehicle_info.license_plate (from requests) vs vehiclePlateKey(vehicle)
 
 async function buildRequestByPlate() {
   const requests = await Request.find({}).sort({ created_at: -1 }).lean();
@@ -146,6 +147,7 @@ class OwnerVehicleService {
 
   /**
    * GET /api/v1/ivts/owner-vehicles
+   * List all vehicles enriched with latest request status, user info, and stats.
    */
   async getAll(req, res) {
     try {
@@ -157,7 +159,9 @@ class OwnerVehicleService {
         vehicleFilter.$or = [
           { plate_number: regex },
           { vehicle_code: regex },
-          { owner_name: regex }
+          { owner_name: regex },
+          { brand: regex },
+          { model: regex }
         ];
       }
 
@@ -172,9 +176,9 @@ class OwnerVehicleService {
         : [];
       const userMap = users.reduce((m, u) => { m[String(u._id)] = u; return m; }, {});
 
-      // Build enriched rows for stats
+      // Build enriched rows — join on vehiclePlateKey (handles both old and new format)
       const allRows = allVehicles.map(v =>
-        buildRow(v, requestByPlate[v.plate_number] || null, userMap[String(v.user_id)] || null)
+        buildRow(v, requestByPlate[vehiclePlateKey(v)] || null, userMap[String(v.user_id)] || null)
       );
 
       const stats = {
@@ -184,13 +188,11 @@ class OwnerVehicleService {
         rejected: allRows.filter(r => r.document_status === 'Rejected').length
       };
 
-      // Apply document_status filter after join
       let filteredRows = allRows;
       if (document_status && document_status !== 'all') {
         filteredRows = allRows.filter(r => r.document_status === document_status);
       }
 
-      // Pagination
       const parsedPage = Math.max(1, parseInt(page, 10));
       const parsedLimit = Math.max(1, parseInt(limit, 10));
       const skip = (parsedPage - 1) * parsedLimit;
@@ -212,7 +214,7 @@ class OwnerVehicleService {
       if (!vehicle) return fail(res, new Error('not_found'), 404);
 
       const requestByPlate = await buildRequestByPlate();
-      const latestRequest = requestByPlate[vehicle.plate_number] || null;
+      const latestRequest = requestByPlate[vehiclePlateKey(vehicle)] || null;
       const user = vehicle.user_id ? await User.findById(vehicle.user_id).lean() : null;
 
       return ok(res, { data: buildRow(vehicle, latestRequest, user) });
@@ -230,8 +232,9 @@ class OwnerVehicleService {
       const vehicle = await Vehicle.findById(req.params.id).lean();
       if (!vehicle) return fail(res, new Error('vehicle_not_found'), 404);
 
+      const plate = vehiclePlateKey(vehicle);
       const request = await Request.findOne({
-        'vehicle_info.license_plate': vehicle.plate_number,
+        'vehicle_info.license_plate': plate,
         request_status: 'pending_review'
       });
 
@@ -260,8 +263,9 @@ class OwnerVehicleService {
       const vehicle = await Vehicle.findById(req.params.id).lean();
       if (!vehicle) return fail(res, new Error('vehicle_not_found'), 404);
 
+      const plate = vehiclePlateKey(vehicle);
       const request = await Request.findOne({
-        'vehicle_info.license_plate': vehicle.plate_number,
+        'vehicle_info.license_plate': plate,
         request_status: 'pending_review'
       });
 
@@ -290,7 +294,7 @@ class OwnerVehicleService {
       const vehicle = await Vehicle.findById(req.params.id).lean();
       if (!vehicle) return fail(res, new Error('not_found'), 404);
       const requestByPlate = await buildRequestByPlate();
-      const latestRequest = requestByPlate[vehicle.plate_number] || null;
+      const latestRequest = requestByPlate[vehiclePlateKey(vehicle)] || null;
       const user = vehicle.user_id ? await User.findById(vehicle.user_id).lean() : null;
       return ok(res, { data: buildRow(vehicle, latestRequest, user) });
     } catch (err) {
@@ -314,7 +318,6 @@ class OwnerVehicleService {
 
   /**
    * GET /api/v1/ivts/owner-vehicles/export
-   * Export vehicles as CSV.
    */
   async exportCsv(req, res) {
     try {
@@ -324,6 +327,7 @@ class OwnerVehicleService {
       if (search && search.trim() !== '') {
         const regex = new RegExp(escapeRegex(search.trim()), 'i');
         vehicleFilter.$or = [
+          { license_plate: regex },
           { plate_number: regex },
           { vehicle_code: regex },
           { owner_name: regex }
@@ -336,14 +340,15 @@ class OwnerVehicleService {
       ]);
 
       const csvData = vehicles.map(v => ({
-        'Vehicle Code': v.vehicle_code || String(v._id),
-        'License Plate': v.plate_number || '',
-        'Type': v.type || '',
+        'License Plate': vehiclePlateDisplay(v),
+        'Vehicle Code': v.vehicle_code || v.vehicle_numeric_id || String(v._id),
+        'Type': v.type || v.vehicle_type || '',
         'Brand': v.brand || '',
         'Model': v.model || '',
         'Color': v.color || '',
         'Owner Name': v.owner_name || '',
-        'Document Status': deriveDocumentStatus(requestByPlate[v.plate_number] || null),
+        'Province': v.province_license || '',
+        'Document Status': deriveDocumentStatus(requestByPlate[vehiclePlateKey(v)] || null),
         'Validity Start': v.validity_start ? new Date(v.validity_start).toISOString() : '',
         'Validity Expiry': v.validity_expiry ? new Date(v.validity_expiry).toISOString() : '',
         'Last Location': v.last_location || ''

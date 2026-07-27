@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="vehicle-table-wrapper">
     <div v-if="vehicles.length === 0" class="vehicle-table-empty text-center py-5">
       <CIcon name="cil-car-alt" class="text-secondary mb-3" size="3xl" />
@@ -40,8 +40,8 @@
             <td>
               <div class="vehicle-cell">
                 <span class="vehicle-plate">{{ plateNumber(item) }}</span>
-                <span v-if="vehicleCode(item)" class="vehicle-code text-muted">
-                  {{ vehicleCode(item) }}
+                <span v-if="provinceLicense(item)" class="vehicle-code text-muted">
+                  {{ provinceLicense(item) }}
                 </span>
                 <span v-if="vehicleBrand(item)" class="vehicle-brand text-muted">
                   {{ vehicleBrand(item) }}
@@ -170,11 +170,13 @@ export default {
   methods: {
     // ─── Data accessors ──────────────────────────────────────────────────────
     plateNumber (item) {
-      return (item.vehicle && item.vehicle.plate_number) || String(item._id) || '-'
+      // plate_number is the primary field in live vehicles collection (confirmed 2026-07-27)
+      const v = item.vehicle || {}
+      return v.plate_number || v.license_plate || String(item._id) || '-'
     },
-    vehicleCode (item) {
-      const code = item.vehicle && item.vehicle.vehicle_code
-      return code && code !== item._id ? code : null
+    provinceLicense (item) {
+      const v = item.vehicle || {}
+      return v.province_license || null
     },
     vehicleBrand (item) {
       const v = item.vehicle || {}
