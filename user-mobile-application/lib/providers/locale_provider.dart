@@ -106,5 +106,6 @@ class LocaleProvider extends ChangeNotifier {
     'call_staff_now': {AppLanguage.english: 'Call staff immediately', AppLanguage.thai: 'โทรแจ้งเจ้าหน้าที่ทันที'},
     'vehicle_registration_placeholder': {AppLanguage.english: 'Vehicle registration form placeholder', AppLanguage.thai: 'ฟอร์มลงทะเบียนรถ'},
     'vehicle_expiring': {AppLanguage.english: 'Vehicle {code} is expiring in {days} days', AppLanguage.thai: 'รถ {code} ใกล้หมดอายุทะเบียนใน {days} วัน'},
+    'today': {AppLanguage.english: 'Today', AppLanguage.thai: 'วันนี้'},
   };
 }

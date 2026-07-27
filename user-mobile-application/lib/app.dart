@@ -4,7 +4,7 @@ import 'screens/home_screen.dart';
 import 'services/app_data_repository.dart';
 import 'theme/app_theme.dart';
 import 'providers/locale_provider.dart';
-
+import 'screens/auth_gate.dart';
 class UserMobileApp extends StatefulWidget {
   const UserMobileApp({super.key});
 
@@ -30,9 +30,11 @@ class _UserMobileAppState extends State<UserMobileApp> {
         title: 'IVTS User Mobile',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.theme,
-      home: ValueListenableBuilder<int>(
-        valueListenable: AppDataRepository.instance.refreshTick,
-        builder: (context, _, __) => const HomeScreen(),
+      home: AuthGate(
+        authenticatedChild: ValueListenableBuilder<int>(
+          valueListenable: AppDataRepository.instance.refreshTick,
+          builder: (context, _, __) => const HomeScreen(),
+        ),
       ),
       ),
     );

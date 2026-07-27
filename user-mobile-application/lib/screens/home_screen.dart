@@ -84,9 +84,9 @@ class _HomeScreenState extends State<HomeScreen> {
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           children: [
-            const Text(
-              'Today (April 11, 2026)',
-              style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
+            Text(
+              context.watch<LocaleProvider>().t('today'),
+              style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
             if (_hasNoVehicles)
