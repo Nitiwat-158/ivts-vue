@@ -107,5 +107,6 @@ class LocaleProvider extends ChangeNotifier {
     'vehicle_registration_placeholder': {AppLanguage.english: 'Vehicle registration form placeholder', AppLanguage.thai: 'ฟอร์มลงทะเบียนรถ'},
     'vehicle_expiring': {AppLanguage.english: 'Vehicle {code} is expiring in {days} days', AppLanguage.thai: 'รถ {code} ใกล้หมดอายุทะเบียนใน {days} วัน'},
     'today': {AppLanguage.english: 'Today', AppLanguage.thai: 'วันนี้'},
+    'skip_sign_in': {AppLanguage.english: 'Skip for now', AppLanguage.thai: 'ข้ามการเข้าสู่ระบบ'},
   };
 }

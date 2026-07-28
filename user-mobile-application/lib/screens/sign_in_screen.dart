@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/locale_provider.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 import 'home_screen.dart';
@@ -14,6 +16,17 @@ class SignInScreen extends StatefulWidget {
 
 class _SignInScreenState extends State<SignInScreen> {
   bool _isLoading = false;
+
+  void _skipSignIn() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => ValueListenableBuilder<int>(
+          valueListenable: AppDataRepository.instance.refreshTick,
+          builder: (context, _, __) => const HomeScreen(),
+        ),
+      ),
+    );
+  }
 
   Future<void> _signIn() async {
     setState(() {
@@ -108,7 +121,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                 ),
               const SizedBox(height: 16),
-              if (!_isLoading)
+              if (!_isLoading) ...[
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).push(
@@ -120,6 +133,26 @@ class _SignInScreenState extends State<SignInScreen> {
                     style: TextStyle(color: AppColors.primary),
                   ),
                 ),
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  onPressed: _skipSignIn,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    context.watch<LocaleProvider>().t('skip_sign_in'),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
               const Spacer(),
               const Text(
                 'Mae Fah Luang University',

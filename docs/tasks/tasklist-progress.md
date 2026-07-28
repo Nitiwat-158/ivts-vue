@@ -79,6 +79,7 @@ Adjust weights per project, but keep them evidence-backed.
 | ivts-VR-006 | Relax /requests routes to mockVehicleMgmtGuard | Backend | AI | ivts-VR-001 | done | 100 | GET + PUT /requests routes now use no-op guard; node --check PASS | `ivts.routes.js` | `node --check` PASS 2026-07-27 | none | Restore to canViewRequests when IAM permissions set | Routes updated |
 | ivts-VR-007 | Live smoke: GET /requests, PUT /review | Dev | Dev | ivts-VR-006 | pending | 0 | Not run | — | not run | requires server restart | Restart server; test endpoints | 2 requests returned |
 | ivts-MOB-001 | Mobile add_vehicle: vehicle_info.vehicle_type → type | Mobile/Backend | AI | ivts-VR-005 | done | 100 | add_vehicle_screen.dart line 143 changed; sanitizeVehicleInfo accepts vi.type||vi.vehicle_type; node --check PASS | `add_vehicle_screen.dart`, `service/vehicle_request.js` | `node --check` PASS 2026-07-27 | none | Live test with mobile app | Field renamed in mobile + backend backward compat |
+| ivts-MSIP-001 | Mobile App: Add Skip Sign In button | Mobile | AI | none | done | 100 | Code modified, flutter analyze clean, T1-T20 change record created | `user-mobile-application/lib/screens/sign_in_screen.dart` | flutter analyze PASS | none | none | Added Skip button to mobile sign in |
 
 ## T4. Verification Log
 
