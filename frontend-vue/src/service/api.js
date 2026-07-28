@@ -759,5 +759,17 @@ export default {
       default:
         break;
     }
+  },
+
+  ivtsCctvs(method, data) {
+    switch (method) {
+      case 'list':
+        return instance.get('/api/v1/ivts/cctvs', { params: data || {} });
+      case 'get-by-id':
+        return instance.get(`/api/v1/ivts/cctvs/${data.id}`);
+      default:
+        break;
+    }
   }
 }
+
