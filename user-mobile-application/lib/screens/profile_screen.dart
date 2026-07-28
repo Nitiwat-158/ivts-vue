@@ -4,7 +4,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../providers/locale_provider.dart';
+import '../services/auth_service.dart';
 import 'request_history_screen.dart';
+import 'sign_in_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final VoidCallback onBack;
@@ -22,6 +24,77 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // TODO: mock ไว้ก่อน — เปลี่ยนเป็นค่าจริงจาก session/API ตอนต่อ backend
   final String _fullEmail = 'Boonmee.s@gmail.com';
   final String _fullPhone = '+66812345999';
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(
+            context.watch<LocaleProvider>().t('confirm_logout_title'),
+            style: const TextStyle(color: AppColors.primary),
+          ),
+          content: Text(
+            context.watch<LocaleProvider>().t('confirm_logout_message'),
+            style: const TextStyle(color: AppColors.textSecondary, fontSize: 16),
+          ),
+          actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFCE8B8A),
+                      foregroundColor: AppColors.primary,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(ctx),
+                    child: Text(
+                      context.watch<LocaleProvider>().t('cancel').toUpperCase(),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: () async {
+                      Navigator.pop(ctx);
+                      await AuthService().signOut();
+                      if (!mounted) return;
+                      Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => const SignInScreen()),
+                        (route) => false,
+                      );
+                    },
+                    child: Text(
+                      context.watch<LocaleProvider>().t('confirm').toUpperCase(),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   Future<void> _pickAvatar(ImageSource source) async {
     final picked = await _picker.pickImage(source: source, imageQuality: 80);
@@ -355,7 +428,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               minimumSize: const Size.fromHeight(48),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            onPressed: widget.onBack,
+            onPressed: _showLogoutDialog,
             child: Text(localeProvider.t('logout')),
           ),
         ],

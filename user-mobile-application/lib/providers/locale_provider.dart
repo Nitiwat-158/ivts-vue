@@ -108,5 +108,7 @@ class LocaleProvider extends ChangeNotifier {
     'vehicle_expiring': {AppLanguage.english: 'Vehicle {code} is expiring in {days} days', AppLanguage.thai: 'รถ {code} ใกล้หมดอายุทะเบียนใน {days} วัน'},
     'today': {AppLanguage.english: 'Today', AppLanguage.thai: 'วันนี้'},
     'skip_sign_in': {AppLanguage.english: 'Skip for now', AppLanguage.thai: 'ข้ามการเข้าสู่ระบบ'},
+    'confirm_logout_title': {AppLanguage.english: 'Confirm Logout', AppLanguage.thai: 'ยืนยันการออกจากระบบ'},
+    'confirm_logout_message': {AppLanguage.english: 'Are you sure you want to log out?', AppLanguage.thai: 'คุณแน่ใจหรือไม่ที่จะออกจากระบบ?'},
   };
 }
