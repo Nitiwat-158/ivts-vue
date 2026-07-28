@@ -78,12 +78,14 @@ Adjust weights per project, but keep them evidence-backed.
 | ivts-VR-005 | Update VehicleManagement.vue with Tabs | Frontend | AI | ivts-VR-003 | done | 100 | Tabs: รถทั้งหมด / คำขอเพิ่มรถ; pending badge on tab | `VehicleManagement.vue` | n/a | none | Visual verify | Page updated |
 | ivts-VR-006 | Relax /requests routes to mockVehicleMgmtGuard | Backend | AI | ivts-VR-001 | done | 100 | GET + PUT /requests routes now use no-op guard; node --check PASS | `ivts.routes.js` | `node --check` PASS 2026-07-27 | none | Restore to canViewRequests when IAM permissions set | Routes updated |
 | ivts-VR-007 | Live smoke: GET /requests, PUT /review | Dev | Dev | ivts-VR-006 | pending | 0 | Not run | — | not run | requires server restart | Restart server; test endpoints | 2 requests returned |
+| ivts-MOB-001 | Mobile add_vehicle: vehicle_info.vehicle_type → type | Mobile/Backend | AI | ivts-VR-005 | done | 100 | add_vehicle_screen.dart line 143 changed; sanitizeVehicleInfo accepts vi.type||vi.vehicle_type; node --check PASS | `add_vehicle_screen.dart`, `service/vehicle_request.js` | `node --check` PASS 2026-07-27 | none | Live test with mobile app | Field renamed in mobile + backend backward compat |
 
 ## T4. Verification Log
 
 | Command / Check | Result | Evidence |
 |---|---|---|
 | `node --check` all 12 new backend files | PASS | Exit code 0 — 2026-07-14 |
+| `node --check` vehicle_request.js + vehicle.model.js + owner_vehicle.js + ivts.routes.js | PASS | Exit code 0 — 2026-07-27 |
 | backend npm test | not run | requires running server + DB |
 | frontend lint/test/build | not run | |
 | live smoke/e2e | not run | |
@@ -101,5 +103,7 @@ Adjust weights per project, but keep them evidence-backed.
 ## T6. Decision
 
 Backend models, services, and routes are implemented and syntax-verified. System progress updated from 25% to 45% based on implementation gate completion. Live smoke tests blocked by IAM permission seeding requirement (B-001).
+
+Vehicle Management fix (2026-07-27): owner_vehicle.js + vehicle.model.js + vehicle_request.js rewritten to use vehicles+requests collections (not empty owner_vehicles). Frontend VehicleManagement.vue refactored with 2 tabs (รถทั้งหมด / คำขอเพิ่มรถ). VehicleRequestTable.vue + ConfirmRequestModal.vue added. Mobile add_vehicle_screen.dart vehicle_type → type renamed. All backend node --check PASS. Live smoke pending server restart (B-001).
 
 Mobile API (`docs/tasks/2026-07-24-mobile-mongodb-api.md`): backend `/api/v1/mobile` read-only API implemented against real MongoDB collections (live schema verified via mongosh) and smoke-tested via curl (7/7 endpoints pass). Flutter app's `mock_data.dart` fully emptied per explicit user instruction — MongoDB is now the sole data source, no mock fallback. Windows desktop build (`flutter create --platforms=windows .` + `flutter run -d windows`) verified end-to-end: real data loaded (`6 vehicles`, `4 notifications`, `0 trip history`/`0 requests` matching real empty collections). Android emulator verification remains blocked by Windows Firewall scoping (B-002); this does not block the completed feature since Windows-target verification succeeded.

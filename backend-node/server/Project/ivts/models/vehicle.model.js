@@ -7,7 +7,7 @@ const Schema = mongoose.Schema;
  * Collection: vehicles
  *
  * Schema aligned with ACTUAL live MongoDB collection (verified 2026-07-27 via Compass):
- *   _id            : String  e.g. "CR0001" — managed manually
+ *   _id            : String  e.g. "CR0001" — set manually on creation
  *   plate_number   : String  e.g. "สน 1669"
  *   vehicle_code   : String  e.g. "CR0001"  (same as _id)
  *   type           : String  "car" | "motorcycle"
@@ -23,7 +23,9 @@ const Schema = mongoose.Schema;
  *   created_at     : Date
  *   user_id        : String
  *
- * OLD schema used `license_plate` — kept as alias index for backward compat.
+ * IMPORTANT: _id is a String (not ObjectId). Do NOT set _id:false in schema options
+ * as that breaks findById(). Instead, define _id as { type: String } in the schema
+ * and leave _id management to the application layer.
  */
 const vehicleSchema = new Schema({
   _id: { type: String },
@@ -42,9 +44,9 @@ const vehicleSchema = new Schema({
   created_at: { type: Date, default: Date.now },
   user_id: { type: String, ref: 'User', default: null, index: true }
 }, {
-  _id: false,
   collection: 'vehicles',
-  strict: false
+  strict: false    // allow extra fields stored by legacy code
+  // NOTE: do NOT add _id: false here — it breaks findById() on String _id
 });
 
 vehicleSchema.index({ plate_number: 1, province_license: 1 });

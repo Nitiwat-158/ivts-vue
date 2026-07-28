@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="vehicle-management-page">
     <!-- Hero section with stats -->
     <AppSectionHero
@@ -337,9 +337,11 @@ export default {
       try {
         await deleteVehicle(this.currentVehicle._id)
         this.showDeleteModal = false
+        this.currentVehicle = null
         this.notifyToast(this.$t('ivts.toast.deleteSuccess'), 'success')
         await this.loadVehicles()
-      } catch {
+      } catch (err) {
+        console.error('[VehicleManagement] confirmDelete error:', err?.response?.data || err?.message || err)
         this.notifyToast(this.$t('ivts.toast.deleteFailed'), 'danger')
       }
     },
