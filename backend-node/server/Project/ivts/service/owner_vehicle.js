@@ -165,10 +165,20 @@ class OwnerVehicleService {
         ];
       }
 
-      const [allVehicles, requestByPlate] = await Promise.all([
+      const [allVehicles, allRequests] = await Promise.all([
         Vehicle.find(vehicleFilter).sort({ created_at: -1 }).lean(),
-        buildRequestByPlate()
+        Request.find({}).sort({ created_at: -1 }).lean()
       ]);
+
+      const requestByPlate = {};
+      for (const r of allRequests) {
+        const plate = r.vehicle_info && r.vehicle_info.license_plate
+          ? String(r.vehicle_info.license_plate).trim()
+          : null;
+        if (plate && !requestByPlate[plate]) {
+          requestByPlate[plate] = r; // sorted desc -> first = latest
+        }
+      }
 
       const userIds = [...new Set(allVehicles.map(v => v.user_id).filter(Boolean))];
       const users = userIds.length > 0
@@ -176,16 +186,24 @@ class OwnerVehicleService {
         : [];
       const userMap = users.reduce((m, u) => { m[String(u._id)] = u; return m; }, {});
 
-      // Build enriched rows — join on vehiclePlateKey (handles both old and new format)
+      // Build enriched rows — join on vehiclePlateKey
       const allRows = allVehicles.map(v =>
         buildRow(v, requestByPlate[vehiclePlateKey(v)] || null, userMap[String(v.user_id)] || null)
       );
 
+      // System stats:
+      // total: total registered vehicles in vehicles collection
+      // pending: count of pending verification requests (request_status = pending_review)
+      // approved: total registered vehicles in vehicles collection
+      // rejected: count of rejected requests (request_status = rejected)
+      const pendingCount = allRequests.filter(r => r.request_status === 'pending_review').length;
+      const rejectedCount = allRequests.filter(r => r.request_status === 'rejected').length;
+
       const stats = {
-        total: allRows.length,
-        pending: allRows.filter(r => r.document_status === 'Pending').length,
-        approved: allRows.filter(r => r.document_status === 'Approved').length,
-        rejected: allRows.filter(r => r.document_status === 'Rejected').length
+        total: allVehicles.length,
+        pending: pendingCount,
+        approved: allVehicles.length,
+        rejected: rejectedCount
       };
 
       let filteredRows = allRows;

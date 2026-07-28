@@ -225,15 +225,23 @@ export default {
       return dd + '/' + m + '/' + y + ' ' + hh + ':' + mm + ':' + ss
     },
     heroStats () {
+      const total = (this.stats && this.stats.total !== undefined) ? this.stats.total : this.vehicles.length
+      const pending = (this.stats && this.stats.pending !== undefined) ? this.stats.pending : this.pendingRequestCount
+      const approved = (this.stats && this.stats.approved !== undefined) ? this.stats.approved : total
+      const rejected = (this.stats && this.stats.rejected !== undefined) ? this.stats.rejected : this.rejectedRequestCount
+
       return [
-        { label: this.$t('vehicleManagement.statTotal'), value: String(this.stats.total), icon: 'cil-car-alt', iconClass: 'app-section-stat__icon--total' },
-        { label: this.$t('vehicleManagement.statPending'), value: String(this.stats.pending), icon: 'cil-history', iconClass: 'app-section-stat__icon--attention' },
-        { label: this.$t('vehicleManagement.statApproved'), value: String(this.stats.approved), icon: 'cil-check-circle', iconClass: 'app-section-stat__icon--active' },
-        { label: this.$t('vehicleManagement.statRejected'), value: String(this.stats.rejected), icon: 'cil-x-circle', iconClass: 'app-section-stat__icon--danger' }
+        { label: this.$t('vehicleManagement.statTotal'), value: String(total), icon: 'cil-car-alt', iconClass: 'app-section-stat__icon--total' },
+        { label: this.$t('vehicleManagement.statPending'), value: String(pending), icon: 'cil-history', iconClass: 'app-section-stat__icon--attention' },
+        { label: this.$t('vehicleManagement.statApproved'), value: String(approved), icon: 'cil-check-circle', iconClass: 'app-section-stat__icon--active' },
+        { label: this.$t('vehicleManagement.statRejected'), value: String(rejected), icon: 'cil-x-circle', iconClass: 'app-section-stat__icon--danger' }
       ]
     },
     pendingRequestCount () {
       return this.requests.filter(r => r.request_status === 'pending_review').length
+    },
+    rejectedRequestCount () {
+      return this.requests.filter(r => r.request_status === 'rejected').length
     },
     filteredRequests () {
       if (this.requestStatusFilter === 'all') return this.requests
