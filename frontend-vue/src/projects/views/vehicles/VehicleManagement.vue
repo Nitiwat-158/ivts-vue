@@ -392,7 +392,7 @@ export default {
     },
     handleViewRequest (req) {
       this.currentRequest = req
-      this.requestModalMode = 'approve'
+      this.requestModalMode = 'view'
       this.showRequestModal = true
     },
     async confirmReviewRequest (req) {
