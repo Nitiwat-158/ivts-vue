@@ -6,10 +6,12 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import '../data/mock_data.dart';
 import '../models/vehicle.dart';
+import '../services/app_data_repository.dart';
 import '../theme/app_theme.dart';
 import 'emergency_status_screen.dart';
 
 class EmergencyRequestScreen extends StatefulWidget {
+
   final Vehicle vehicle;
 
   const EmergencyRequestScreen({super.key, required this.vehicle});
@@ -195,8 +197,10 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
                             'assigned_admin_id': null,
                           };
                           debugPrint('Emergency report (mock): $reportPayload');
+                          AppDataRepository.instance.hasActiveEmergencyNotifier.value = true;
 
                           Navigator.of(context).pop();
+
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(builder: (_) => const EmergencyStatusScreen()),

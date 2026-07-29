@@ -2,7 +2,9 @@ import '../providers/locale_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
+import '../services/app_data_repository.dart';
 import '../theme/app_theme.dart';
+
 
 class EmergencyStatusScreen extends StatefulWidget {
   const EmergencyStatusScreen({super.key});
@@ -63,7 +65,9 @@ class _EmergencyStatusScreenState extends State<EmergencyStatusScreen> {
                       final period = now.hour >= 12 ? 'PM' : 'AM';
                       _resolvedTime = '$hour:$minute $period';
                     });
+                    AppDataRepository.instance.hasActiveEmergencyNotifier.value = false;
                     ScaffoldMessenger.of(context).showSnackBar(
+
                       SnackBar(content: Text(context.watch<LocaleProvider>().t('case_marked_resolved'))),
                     );
                   },

@@ -85,6 +85,8 @@ Adjust weights per project, but keep them evidence-backed.
 | ivts-TASK-026 | Containerize user-mobile-application & Docker Compose | Ops/Mobile | AI | none | done | 100 | Created Dockerfile, nginx.server.conf & updated docker-compose files | `user-mobile-application/Dockerfile`, `docker-compose.yml` | `docker compose config` PASS | none | none | Dockerized user-mobile service published on port 8088 |
 | ivts-TASK-031 | Mobile App: Docker Connection Notification Alert | Mobile | AI | none | done | 100 | Added AppDataRepository notifier, LocaleProvider translations & HomeScreen banner alert | `app_data_repository.dart`, `home_screen.dart` | `flutter analyze lib/` PASS | none | none | Docker connection status banner & SnackBar alert |
 | ivts-TASK-037 | Mobile App: Temporary Docker Connection Alert (3s SnackBar) | Mobile | AI | none | done | 100 | Converted Docker connection alert to temporary 3-second floating SnackBar & removed static banner | `home_screen.dart` | `flutter analyze lib/` PASS | none | none | Temporary 3-second SnackBar alert |
+| ivts-TASK-041 | Mobile App: Conditional Emergency Request Banner Display | Mobile | AI | none | done | 100 | Added hasActiveEmergencyNotifier, showing banner on HomeScreen ONLY when active report exists | `home_screen.dart`, `emergency_request_screen.dart` | `flutter analyze lib/` PASS | none | none | Conditional emergency request banner |
+
 
 
 
