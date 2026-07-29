@@ -128,9 +128,9 @@ class HistoryDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'สรุปการเข้า-ออกพื้นที่',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 15),
+                  Text(
+                    context.watch<LocaleProvider>().t('entry_exit_summary'),
+                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 15),
                   ),
                   const SizedBox(height: 10),
                   ...sessions.map((s) => _ZoneSessionCard(session: s)),

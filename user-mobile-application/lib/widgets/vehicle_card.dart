@@ -118,14 +118,14 @@ class VehicleCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               alignment: Alignment.center,
-              child: const Column(
+              child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.map_rounded, color: AppColors.textSecondary, size: 28),
-                  SizedBox(height: 4),
+                  const Icon(Icons.map_rounded, color: AppColors.textSecondary, size: 28),
+                  const SizedBox(height: 4),
                   Text(
-                    'แตะเพื่อดูเส้นทางแบบเต็มจอ',
-                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    context.watch<LocaleProvider>().t('tap_to_view_full_route'),
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ],
               ),

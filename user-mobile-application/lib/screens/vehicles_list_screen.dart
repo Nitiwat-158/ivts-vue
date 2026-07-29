@@ -17,16 +17,17 @@ class VehiclesListScreen extends StatelessWidget {
     required this.onLocationTap,
   });
 
-  String _statusLabel(VehicleStatus s) {
+  String _statusLabel(VehicleStatus s, BuildContext context) {
+    final loc = context.read<LocaleProvider>();
     switch (s) {
       case VehicleStatus.pending:
-        return 'Pending';
+        return loc.t('status_pending');
       case VehicleStatus.expiringSoon:
-        return 'Expiring soon';
+        return loc.t('status_expiring_soon');
       case VehicleStatus.expired:
-        return 'Expired';
+        return loc.t('status_expired');
       case VehicleStatus.active:
-        return 'Active';
+        return loc.t('status_active');
     }
   }
 
@@ -124,7 +125,7 @@ class VehiclesListScreen extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(999),
                                     ),
                                     child: Text(
-                                      _statusLabel(v.status),
+                                      _statusLabel(v.status, context),
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 11,

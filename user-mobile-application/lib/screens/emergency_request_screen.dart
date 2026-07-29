@@ -19,15 +19,15 @@ class EmergencyRequestScreen extends StatefulWidget {
 }
 
 class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
-  String _selected = 'Theft / Stolen';
-  final _options = const ['Theft / Stolen', 'Accident', 'Vehicle Breakdown', 'Other'];
+  String _selected = 'theft';
+  final _options = const ['theft', 'accident', 'breakdown', 'other'];
 
   // Map label ที่โชว์บน UI ไปเป็นค่าที่ backend เก็บจริง (ตรงกับ collection emergency_reports)
   static const Map<String, String> _requestTypeValues = {
-    'Theft / Stolen': 'theft',
-    'Accident': 'accident',
-    'Vehicle Breakdown': 'breakdown',
-    'Other': 'other',
+    'theft': 'theft',
+    'accident': 'accident',
+    'breakdown': 'breakdown',
+    'other': 'other',
   };
 
   final _descriptionController = TextEditingController();
@@ -114,9 +114,10 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
   }
 
   void _confirmAndSubmit() {
+    final loc = context.read<LocaleProvider>();
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogCtx) {
         return Dialog(
           backgroundColor: const Color(0xFFDFDFDF),
           shape: RoundedRectangleBorder(
@@ -127,10 +128,10 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'Are you sure to\nsubmit your request ?',
+                Text(
+                  loc.t('confirm_submit_request'),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.primary,
                     fontSize: 22,
                     fontWeight: FontWeight.w900,
@@ -152,9 +153,9 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: () => Navigator.of(dialogCtx).pop(),
                         child: Text(
-                          context.watch<LocaleProvider>().t('cancel').toUpperCase(),
+                          loc.t('cancel').toUpperCase(),
                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
                         ),
                       ),
@@ -196,15 +197,15 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
                           };
                           debugPrint('Emergency report (mock): $reportPayload');
 
-                          Navigator.of(context).pop();
+                          Navigator.of(dialogCtx).pop();
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(builder: (_) => const EmergencyStatusScreen()),
                           );
                         },
-                        child: const Text(
-                          'SUBMIT',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                        child: Text(
+                          loc.t('submit'),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
                         ),
                       ),
                     ),
@@ -294,7 +295,7 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
               child: Column(
                 children: _options.map((option) => RadioListTile<String>(
                   value: option,
-                  title: Text(option),
+                  title: Text(context.watch<LocaleProvider>().t(option)),
                   activeColor: AppColors.primary,
                   contentPadding: EdgeInsets.zero,
                 )).toList(),
