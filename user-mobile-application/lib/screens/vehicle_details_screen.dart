@@ -12,6 +12,7 @@ class VehicleDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocaleProvider>();
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -19,7 +20,7 @@ class VehicleDetailsScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: Text(context.watch<LocaleProvider>().t('details')),
+        title: Text(loc.t('details')),
       ),
       body: SafeArea(
         child: ListView(
@@ -77,16 +78,16 @@ class VehicleDetailsScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  _InfoRow(label: 'Brand', value: vehicle.brand),
-                  _InfoRow(label: 'Model', value: vehicle.model),
-                  _InfoRow(label: 'Color', value: vehicle.color),
+                  _InfoRow(label: loc.t('brand'), value: vehicle.brand),
+                  _InfoRow(label: loc.t('model'), value: vehicle.model),
+                  _InfoRow(label: loc.t('color'), value: vehicle.color),
                   const SizedBox(height: 8),
-                  _InfoRow(label: 'Date of Issue', value: vehicle.issueDate),
-                  _InfoRow(label: 'Date of Expiry', value: vehicle.expiryDate),
+                  _InfoRow(label: loc.t('date_of_issue'), value: vehicle.issueDate),
+                  _InfoRow(label: loc.t('date_of_expiry'), value: vehicle.expiryDate),
                   if (vehicle.daysUntilExpiry > 0) ...[
                     const SizedBox(height: 8),
                     Text(
-                      'เหลืออีก ${vehicle.daysUntilExpiry} วันก่อนหมดอายุ',
+                      loc.t('expires_in_days').replaceAll('{days}', vehicle.daysUntilExpiry.toString()),
                       style: const TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
@@ -101,11 +102,11 @@ class VehicleDetailsScreen extends StatelessWidget {
 
             // ── Vehicle Registration Certificate ───────────────────────
             _DocumentRow(
-              label: 'Vehicle Registration Certificate',
+              label: loc.t('vehicle_registration_certificate'),
               onViewTap: () {
                 _showMockImageDialog(
                   context,
-                  'Vehicle Registration Certificate',
+                  loc.t('vehicle_registration_certificate'),
                   Colors.blue,
                   Icons.description_outlined,
                 );
@@ -115,11 +116,11 @@ class VehicleDetailsScreen extends StatelessWidget {
 
             // ── Vehicle License Plate ──────────────────────────────────
             _DocumentRow(
-              label: 'The vehicle license plate',
+              label: loc.t('photo_license_plate'),
               onViewTap: () {
                 _showMockImageDialog(
                   context,
-                  'Vehicle License Plate',
+                  loc.t('photo_license_plate'),
                   Colors.green,
                   Icons.directions_car_filled_outlined,
                 );
@@ -182,6 +183,7 @@ class _DocumentRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocaleProvider>();
     return Container(
       height: 56,
       decoration: BoxDecoration(
@@ -210,9 +212,9 @@ class _DocumentRow extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Text(
-                'View',
-                style: TextStyle(
+              child: Text(
+                loc.t('view'),
+                style: const TextStyle(
                   color: AppColors.primary,
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
@@ -233,6 +235,7 @@ class _RenewalButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocaleProvider>();
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -241,21 +244,21 @@ class _RenewalButton extends StatelessWidget {
           color: AppColors.warningAmber,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: const Row(
+        child: Row(
           children: [
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
             Expanded(
               child: Text(
-                'Renewal Request',
-                style: TextStyle(
+                loc.t('renewal_request'),
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
                 ),
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: Colors.white),
-            SizedBox(width: 16),
+            const Icon(Icons.chevron_right_rounded, color: Colors.white),
+            const SizedBox(width: 16),
           ],
         ),
       ),
@@ -264,6 +267,7 @@ class _RenewalButton extends StatelessWidget {
 }
 
 void _showMockImageDialog(BuildContext context, String title, Color color, IconData icon) {
+  final loc = context.read<LocaleProvider>();
   showDialog(
     context: context,
     builder: (ctx) => Dialog(
@@ -287,7 +291,7 @@ void _showMockImageDialog(BuildContext context, String title, Color color, IconD
                   Icon(icon, size: 80, color: color),
                   const SizedBox(height: 16),
                   Text(
-                    'Mock Document:\n$title',
+                    '${loc.t('mock_document')}:\n$title',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: color,

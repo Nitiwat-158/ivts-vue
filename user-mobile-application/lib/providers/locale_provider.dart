@@ -18,6 +18,27 @@ class LocaleProvider extends ChangeNotifier {
     return _translations[key]?[_currentLanguage] ?? key;
   }
 
+  String translateDateGroup(String dateGroup) {
+    if (_currentLanguage == AppLanguage.english) return dateGroup;
+    
+    if (dateGroup == 'Today') return 'วันนี้';
+    if (dateGroup == 'Yesterday') return 'เมื่อวานนี้';
+    
+    final daysReg = RegExp(r'^(\d+)\s+days?\s+ago$', caseSensitive: false);
+    final match = daysReg.firstMatch(dateGroup);
+    if (match != null) {
+      return '${match.group(1)} วันก่อน';
+    }
+    
+    final monthsReg = RegExp(r'^(\d+)\s+month(?:s)?\s+ago$', caseSensitive: false);
+    final match2 = monthsReg.firstMatch(dateGroup);
+    if (match2 != null) {
+      return '${match2.group(1)} เดือนก่อน';
+    }
+    
+    return dateGroup;
+  }
+
   static const Map<String, Map<AppLanguage, String>> _translations = {
     'home': {AppLanguage.english: 'Home', AppLanguage.thai: 'หน้าแรก'},
     'location': {AppLanguage.english: 'Location', AppLanguage.thai: 'ตำแหน่ง'},
@@ -122,6 +143,22 @@ class LocaleProvider extends ChangeNotifier {
     'docker_connected_title': {AppLanguage.english: 'Docker Connected', AppLanguage.thai: 'เชื่อมต่อ Docker สำเร็จ'},
     'docker_connected_msg': {AppLanguage.english: 'Connected to Docker Backend Server', AppLanguage.thai: 'เชื่อมต่อกับระบบ Docker Server เรียบร้อยแล้ว'},
     'docker_disconnected_msg': {AppLanguage.english: 'Disconnected from Docker Server', AppLanguage.thai: 'ไม่สามารถเชื่อมต่อกับ Docker Server ได้'},
+    'expires_in_days': {AppLanguage.english: 'Expires in {days} days', AppLanguage.thai: 'เหลืออีก {days} วันก่อนหมดอายุ'},
+    'mock_document': {AppLanguage.english: 'Mock Document', AppLanguage.thai: 'เอกสารจำลอง'},
+    'all_time': {AppLanguage.english: 'All Time', AppLanguage.thai: 'ทุกเวลา'},
+    'all_vehicles': {AppLanguage.english: 'All Vehicles', AppLanguage.thai: 'รถทุกคัน'},
+    'select_date': {AppLanguage.english: 'Select Date', AppLanguage.thai: 'เลือกวันที่'},
+    'select_vehicle': {AppLanguage.english: 'Select Vehicle', AppLanguage.thai: 'เลือกรถ'},
+    'date': {AppLanguage.english: 'Date', AppLanguage.thai: 'วันที่'},
+    'theft': {AppLanguage.english: 'Theft / Stolen', AppLanguage.thai: 'ถูกโจรกรรม / สูญหาย'},
+    'accident': {AppLanguage.english: 'Accident', AppLanguage.thai: 'อุบัติเหตุ'},
+    'breakdown': {AppLanguage.english: 'Vehicle Breakdown', AppLanguage.thai: 'รถเสีย'},
+    'other': {AppLanguage.english: 'Other', AppLanguage.thai: 'อื่นๆ'},
+    'case_resolved': {AppLanguage.english: 'Case resolved', AppLanguage.thai: 'เคสได้รับการแก้ไขแล้ว'},
+    'status_active': {AppLanguage.english: 'Active', AppLanguage.thai: 'ปกติ'},
+    'status_expiring_soon': {AppLanguage.english: 'Expiring soon', AppLanguage.thai: 'ใกล้หมดอายุ'},
+    'status_expired': {AppLanguage.english: 'Expired', AppLanguage.thai: 'หมดอายุ'},
+    'status_pending': {AppLanguage.english: 'Pending', AppLanguage.thai: 'รอดำเนินการ'},
   };
 }
 

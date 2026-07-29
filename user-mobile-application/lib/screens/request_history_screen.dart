@@ -12,20 +12,21 @@ class RequestHistoryScreen extends StatefulWidget {
 }
 
 class _RequestHistoryScreenState extends State<RequestHistoryScreen> {
-  String _selectedDate = 'All Time';
-  String _selectedVehicle = 'All Vehicles';
+  String _selectedDate = 'all_time';
+  String _selectedVehicle = 'all_vehicles';
 
   List<String> get _dateOptions {
     final dates = MockData.requestHistory.map((e) => e.dateGroup).toSet().toList();
-    return ['All Time', ...dates];
+    return ['all_time', ...dates];
   }
 
   List<String> get _vehicleOptions {
     final vehicles = MockData.requestHistory.map((e) => e.vehicleCode).toSet().toList();
-    return ['All Vehicles', ...vehicles];
+    return ['all_vehicles', ...vehicles];
   }
 
   void _showFilterSheet(String title, List<String> options, String currentValue, ValueChanged<String> onSelected) {
+    final loc = context.read<LocaleProvider>();
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -40,17 +41,28 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.primary)),
               ),
-              ...options.map((opt) => ListTile(
-                title: Text(opt, style: TextStyle(
-                  color: opt == currentValue ? AppColors.primary : AppColors.textSecondary,
-                  fontWeight: opt == currentValue ? FontWeight.bold : FontWeight.normal,
-                )),
-                trailing: opt == currentValue ? const Icon(Icons.check, color: AppColors.primary) : null,
-                onTap: () {
-                  onSelected(opt);
-                  Navigator.pop(ctx);
-                },
-              )),
+              ...options.map((opt) {
+                String displayOpt = opt;
+                if (opt == 'all_time') {
+                  displayOpt = loc.t('all_time');
+                } else if (opt == 'all_vehicles') {
+                  displayOpt = loc.t('all_vehicles');
+                } else {
+                  displayOpt = loc.translateDateGroup(opt);
+                }
+
+                return ListTile(
+                  title: Text(displayOpt, style: TextStyle(
+                    color: opt == currentValue ? AppColors.primary : AppColors.textSecondary,
+                    fontWeight: opt == currentValue ? FontWeight.bold : FontWeight.normal,
+                  )),
+                  trailing: opt == currentValue ? const Icon(Icons.check, color: AppColors.primary) : null,
+                  onTap: () {
+                    onSelected(opt);
+                    Navigator.pop(ctx);
+                  },
+                );
+              }),
             ],
           ),
         );
@@ -60,9 +72,10 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocaleProvider>();
     final filtered = MockData.requestHistory.where((req) {
-      final matchDate = _selectedDate == 'All Time' || req.dateGroup == _selectedDate;
-      final matchVehicle = _selectedVehicle == 'All Vehicles' || req.vehicleCode == _selectedVehicle;
+      final matchDate = _selectedDate == 'all_time' || req.dateGroup == _selectedDate;
+      final matchVehicle = _selectedVehicle == 'all_vehicles' || req.vehicleCode == _selectedVehicle;
       return matchDate && matchVehicle;
     }).toList();
 
@@ -88,15 +101,15 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen> {
               children: [
                 Expanded(
                   child: _Chip(
-                    label: _selectedDate == 'All Time' ? 'Date' : _selectedDate,
-                    onTap: () => _showFilterSheet('Select Date', _dateOptions, _selectedDate, (val) => setState(() => _selectedDate = val)),
+                    label: _selectedDate == 'all_time' ? loc.t('date') : loc.translateDateGroup(_selectedDate),
+                    onTap: () => _showFilterSheet(loc.t('select_date'), _dateOptions, _selectedDate, (val) => setState(() => _selectedDate = val)),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: _Chip(
-                    label: _selectedVehicle == 'All Vehicles' ? 'Vehicle' : _selectedVehicle,
-                    onTap: () => _showFilterSheet('Select Vehicle', _vehicleOptions, _selectedVehicle, (val) => setState(() => _selectedVehicle = val)),
+                    label: _selectedVehicle == 'all_vehicles' ? loc.t('vehicle') : _selectedVehicle,
+                    onTap: () => _showFilterSheet(loc.t('select_vehicle'), _vehicleOptions, _selectedVehicle, (val) => setState(() => _selectedVehicle = val)),
                   ),
                 ),
               ],
@@ -104,12 +117,17 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen> {
             const SizedBox(height: 16),
             if (grouped.isEmpty)
               Padding(
-                padding: EdgeInsets.only(top: 40),
-                child: Center(child: Text(context.watch<LocaleProvider>().t('no_requests_found'), style: TextStyle(color: AppColors.textSecondary))),
+                padding: const EdgeInsets.only(top: 40),
+                child: Center(
+                  child: Text(
+                    loc.t('no_requests_found') ?? 'No requests found',
+                    style: const TextStyle(color: AppColors.textSecondary),
+                  ),
+                ),
               ),
             for (final group in grouped.entries) ...[
               Text(
-                group.key,
+                loc.translateDateGroup(group.key),
                 style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
