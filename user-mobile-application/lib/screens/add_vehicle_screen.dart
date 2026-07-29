@@ -16,7 +16,7 @@ class AddVehicleScreen extends StatefulWidget {
 
 class _AddVehicleScreenState extends State<AddVehicleScreen> {
   String? _selectedType;
-  final List<String> _vehicleTypes = ['Car', 'Motorcycle'];
+  final List<String> _vehicleTypeKeys = ['car', 'motorcycle'];
   final MobileApiService _api = MobileApiService();
 
   File? _registrationFile;
@@ -97,11 +97,11 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
     super.dispose();
   }
 
-  String _mapVehicleType(String? value) {
-    switch (value) {
-      case 'Motorcycle':
+  String _mapVehicleType(String? key) {
+    switch (key) {
+      case 'motorcycle':
         return 'motorcycle';
-      case 'Car':
+      case 'car':
       default:
         return 'car';
     }
@@ -110,6 +110,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
   Future<void> _submitRequest() async {
     if (_submitting) return;
 
+    final loc = context.read<LocaleProvider>();
     final selectedType = _selectedType;
     final licensePlate = _licensePlateController.text.trim();
     final province = _provinceController.text.trim();
@@ -123,7 +124,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
     if (selectedType == null || licensePlate.isEmpty || province.isEmpty || brand.isEmpty || model.isEmpty || color.isEmpty || ownerName.isEmpty || ownerSurname.isEmpty || citizenId.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all required fields before submitting.')),
+        SnackBar(content: Text(loc.t('fill_required_fields'))),
       );
       return;
     }
@@ -159,13 +160,13 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vehicle request saved to MongoDB.')),
+        SnackBar(content: Text(context.read<LocaleProvider>().t('vehicle_saved_success'))),
       );
       Navigator.of(context).maybePop();
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Submit failed: $error')),
+        SnackBar(content: Text('${context.read<LocaleProvider>().t('submit_failed_prefix')}: $error')),
       );
     } finally {
       if (mounted) {
@@ -175,9 +176,10 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
   }
 
   void _onSubmit() {
+    final loc = context.read<LocaleProvider>();
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogCtx) {
         return Dialog(
           backgroundColor: const Color(0xFFDFDFDF),
           shape: RoundedRectangleBorder(
@@ -188,10 +190,10 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'Are you sure to\nsubmit your request ?',
+                Text(
+                  loc.t('confirm_submit_request'),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.primary,
                     fontSize: 22,
                     fontWeight: FontWeight.w900,
@@ -213,10 +215,10 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text(
-                          'CANCLE',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                        onPressed: () => Navigator.of(dialogCtx).pop(),
+                        child: Text(
+                          loc.t('cancel').toUpperCase(),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
                         ),
                       ),
                     ),
@@ -235,12 +237,12 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                         onPressed: _submitting
                             ? null
                             : () async {
-                                Navigator.of(context).pop(); // close dialog
+                                Navigator.of(dialogCtx).pop(); // close dialog
                                 await _submitRequest();
                               },
                         child: Text(
-                          'SUBMIT',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                          loc.t('submit'),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
                         ),
                       ),
                     ),
@@ -256,6 +258,9 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocaleProvider>();
+    final vehicleTypeLabels = _vehicleTypeKeys.map((k) => loc.t(k)).toList();
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -263,7 +268,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: Text(context.watch<LocaleProvider>().t('add_vehicle')),
+        title: Text(loc.t('add_vehicle')),
       ),
       body: SafeArea(
         child: ListView(
@@ -271,10 +276,10 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
           children: [
             // ── Vehicle Section ────────────────────────────────────────
             _SectionCard(
-              title: 'Vehicle',
+              title: loc.t('vehicle'),
               children: [
                 // Type Dropdown
-                const _FieldLabel(label: 'Type'),
+                _FieldLabel(label: loc.t('type')),
                 const SizedBox(height: 6),
                 Container(
                   decoration: BoxDecoration(
@@ -288,39 +293,39 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                       isExpanded: true,
                       hint: const SizedBox.shrink(),
                       icon: const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
-                      items: _vehicleTypes.map((type) {
+                      items: List.generate(_vehicleTypeKeys.length, (i) {
                         return DropdownMenuItem<String>(
-                          value: type,
-                          child: Text(type, style: const TextStyle(color: AppColors.textPrimary)),
+                          value: _vehicleTypeKeys[i],
+                          child: Text(vehicleTypeLabels[i], style: const TextStyle(color: AppColors.textPrimary)),
                         );
-                      }).toList(),
+                      }),
                       onChanged: (value) => setState(() => _selectedType = value),
                     ),
                   ),
                 ),
                 const SizedBox(height: 14),
 
-                const _FieldLabel(label: 'License Plate'),
+                _FieldLabel(label: loc.t('license_plate')),
                 const SizedBox(height: 6),
                 _InputField(controller: _licensePlateController),
                 const SizedBox(height: 14),
 
-                const _FieldLabel(label: 'Province'),
+                _FieldLabel(label: loc.t('province')),
                 const SizedBox(height: 6),
                 _InputField(controller: _provinceController),
                 const SizedBox(height: 14),
 
-                const _FieldLabel(label: 'Brand'),
+                _FieldLabel(label: loc.t('brand')),
                 const SizedBox(height: 6),
                 _InputField(controller: _brandController),
                 const SizedBox(height: 14),
 
-                const _FieldLabel(label: 'Model'),
+                _FieldLabel(label: loc.t('model')),
                 const SizedBox(height: 6),
                 _InputField(controller: _modelController),
                 const SizedBox(height: 14),
 
-                const _FieldLabel(label: 'Color'),
+                _FieldLabel(label: loc.t('color')),
                 const SizedBox(height: 6),
                 _InputField(controller: _colorController),
               ],
@@ -329,19 +334,19 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
 
             // ── Owner Section ──────────────────────────────────────────
             _SectionCard(
-              title: 'Owner',
+              title: loc.t('owner'),
               children: [
-                const _FieldLabel(label: 'Name'),
+                _FieldLabel(label: loc.t('name')),
                 const SizedBox(height: 6),
                 _InputField(controller: _nameController),
                 const SizedBox(height: 14),
 
-                const _FieldLabel(label: 'Surname'),
+                _FieldLabel(label: loc.t('surname')),
                 const SizedBox(height: 6),
                 _InputField(controller: _surnameController),
                 const SizedBox(height: 14),
 
-                const _FieldLabel(label: 'Citizen ID'),
+                _FieldLabel(label: loc.t('citizen_id')),
                 const SizedBox(height: 6),
                 _InputField(
                   controller: _citizenIdController,
@@ -351,7 +356,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
 
                 // Vehicle Registration Certificate
                 _UploadRow(
-                  label: 'Vehicle Registration Certificate',
+                  label: loc.t('vehicle_registration_certificate'),
                   isAdded: _registrationFile != null,
                   onAddTap: () => _showAttachOptions(true),
                 ),
@@ -359,7 +364,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
 
                 // Photo of License Plate
                 _UploadRow(
-                  label: 'Photo Of The Vehicle License Plate',
+                  label: loc.t('photo_license_plate'),
                   isAdded: _licensePlateFile != null,
                   onAddTap: () => _showAttachOptions(false),
                 ),
@@ -377,7 +382,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                 textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1),
               ),
               onPressed: _submitting ? null : _onSubmit,
-              child: Text(_submitting ? context.watch<LocaleProvider>().t('submitting') : context.watch<LocaleProvider>().t('submit')),
+              child: Text(_submitting ? loc.t('submitting') : loc.t('submit')),
             ),
             const SizedBox(height: 24),
           ],
@@ -474,6 +479,7 @@ class _UploadRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocaleProvider>();
     return Container(
       height: 52,
       decoration: BoxDecoration(
@@ -510,7 +516,7 @@ class _UploadRow extends StatelessWidget {
                     const SizedBox(width: 4),
                   ],
                   Text(
-                    isAdded ? 'Added' : 'Add',
+                    isAdded ? loc.t('added') : loc.t('add'),
                     style: TextStyle(
                       color: isAdded ? AppColors.success : AppColors.primary,
                       fontWeight: FontWeight.w700,

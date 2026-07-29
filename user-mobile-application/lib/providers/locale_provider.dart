@@ -111,5 +111,13 @@ class LocaleProvider extends ChangeNotifier {
     'confirm_logout_title': {AppLanguage.english: 'Confirm Logout', AppLanguage.thai: 'ยืนยันการออกจากระบบ'},
     'confirm_logout_message': {AppLanguage.english: 'Are you sure you want to log out?', AppLanguage.thai: 'คุณแน่ใจหรือไม่ที่จะออกจากระบบ?'},
     'my_vehicles': {AppLanguage.english: 'My Vehicles', AppLanguage.thai: 'ยานพาหนะของฉัน'},
+    'submitting': {AppLanguage.english: 'Submitting...', AppLanguage.thai: 'กำลังส่ง...'},
+    'car': {AppLanguage.english: 'Car', AppLanguage.thai: 'รถยนต์'},
+    'motorcycle': {AppLanguage.english: 'Motorcycle', AppLanguage.thai: 'มอเตอร์ไซค์'},
+    'add': {AppLanguage.english: 'Add', AppLanguage.thai: 'เพิ่ม'},
+    'added': {AppLanguage.english: 'Added', AppLanguage.thai: 'เพิ่มแล้ว'},
+    'fill_required_fields': {AppLanguage.english: 'Please fill in all required fields before submitting.', AppLanguage.thai: 'กรุณากรอกข้อมูลให้ครบก่อนส่ง'},
+    'vehicle_saved_success': {AppLanguage.english: 'Vehicle request submitted successfully.', AppLanguage.thai: 'ส่งคำร้องสำเร็จ'},
+    'submit_failed_prefix': {AppLanguage.english: 'Submit failed', AppLanguage.thai: 'ส่งข้อมูลไม่สำเร็จ'},
   };
 }

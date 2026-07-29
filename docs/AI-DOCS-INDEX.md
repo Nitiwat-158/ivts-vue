@@ -68,6 +68,7 @@ Do not add these unless the project has a real need and source evidence:
 | `tasks/2026-07-28-mobile-profile-logout-popup.md` | active | Active tasklist for mobile app profile logout confirmation pop-up. |
 | `tasks/2026-07-29-mobile-add-vehicle-type-field.md` | completed | Tasklist for mobile add vehicle type field standardisation in MongoDB (`vehicle_info.type`). |
 | `tasks/2026-07-29-localization-nav.md` | active | Active tasklist for Navigation Bar & AppBar title localization fix. |
+| `tasks/2026-07-29-localization-add-vehicle.md` | active | Active tasklist for Add Vehicle screen localization fix. |
 | `tasks/2026-06-18-<topic>.md` | active as needed | One focused tasklist per work item. |
 
 ## Change Records
@@ -92,6 +93,8 @@ Do not add these unless the project has a real need and source evidence:
 | `changes/2026-07-27-vehicle-management-fix.md` | active | T1-T20 change record for Vehicle Management page fix (backend service + VehicleTable.vue). |
 | `changes/2026-07-28-mobile-skip-signin.md` | active | T1-T20 change record for mobile app Skip Sign In button. |
 | `changes/2026-07-28-mobile-profile-logout-popup.md` | active | T1-T20 change record for mobile app profile logout confirmation pop-up. |
+| `changes/2026-07-29-localization-nav.md` | active | T1-T20 change record for Navigation Bar & AppBar title localization fix. |
+| `changes/2026-07-29-localization-add-vehicle.md` | active | T1-T20 change record for Add Vehicle screen localization fix. |
 | `changes/2026-06-18-<topic>.md` | active as needed | T1-T20 handoff for each completed or handed-off work item. |
 
 ## Rule
