@@ -12,7 +12,7 @@ const vehicleInfoSchema = new Schema({
   brand: { type: String, trim: true, default: null },
   model: { type: String, trim: true, default: null },
   color: { type: String, trim: true, default: null },
-  vehicle_type: {
+  type: {
     type: String,
     enum: ['car', 'motorcycle'],
     default: 'car'

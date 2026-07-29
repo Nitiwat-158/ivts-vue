@@ -268,7 +268,7 @@ function createRequestId() {
  *   user_id: string,
  *   request_type: register|renew,
  *   user_type: student|staff|outsider,
- *   vehicle_info?: { license_plate, province_license, brand, model, color, vehicle_type, priority_order },
+ *   vehicle_info?: { license_plate, province_license, brand, model, color, type, priority_order },
  *   owner_info?: { name, surname, citizen_id, is_owner_match_user },
  *   uploaded_documents?: { registration_book_url, vehicle_photo_url, citizen_card_url },
  *   validity?: { duration_years, start_date, expiry_date }
@@ -332,7 +332,7 @@ exports.createRequest = async function createRequest(payload) {
       brand: cleanText(vehicleInfo.brand),
       model: cleanText(vehicleInfo.model),
       color: cleanText(vehicleInfo.color),
-      vehicle_type: cleanText(vehicleInfo.vehicle_type) || 'car',
+      type: cleanText(vehicleInfo.type || vehicleInfo.vehicle_type) || 'car',
       priority_order: cleanText(vehicleInfo.priority_order) || 'first_car'
     },
     owner_info: {
