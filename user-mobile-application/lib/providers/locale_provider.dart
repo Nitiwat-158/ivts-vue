@@ -119,5 +119,9 @@ class LocaleProvider extends ChangeNotifier {
     'fill_required_fields': {AppLanguage.english: 'Please fill in all required fields before submitting.', AppLanguage.thai: 'กรุณากรอกข้อมูลให้ครบก่อนส่ง'},
     'vehicle_saved_success': {AppLanguage.english: 'Vehicle request submitted successfully.', AppLanguage.thai: 'ส่งคำร้องสำเร็จ'},
     'submit_failed_prefix': {AppLanguage.english: 'Submit failed', AppLanguage.thai: 'ส่งข้อมูลไม่สำเร็จ'},
+    'docker_connected_title': {AppLanguage.english: 'Docker Connected', AppLanguage.thai: 'เชื่อมต่อ Docker สำเร็จ'},
+    'docker_connected_msg': {AppLanguage.english: 'Connected to Docker Backend Server', AppLanguage.thai: 'เชื่อมต่อกับระบบ Docker Server เรียบร้อยแล้ว'},
+    'docker_disconnected_msg': {AppLanguage.english: 'Disconnected from Docker Server', AppLanguage.thai: 'ไม่สามารถเชื่อมต่อกับ Docker Server ได้'},
   };
 }
+

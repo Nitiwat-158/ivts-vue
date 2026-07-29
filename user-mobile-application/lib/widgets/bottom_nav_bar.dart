@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/locale_provider.dart';
 import '../theme/app_theme.dart';
-import '../screens/notification_screen.dart';
+
 
 class AppBottomNavBar extends StatelessWidget {
   final int currentIndex;

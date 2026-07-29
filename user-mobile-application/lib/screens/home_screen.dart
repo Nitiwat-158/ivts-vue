@@ -7,6 +7,7 @@ import '../theme/app_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/top_bar_actions.dart';
 import '../widgets/vehicle_card.dart';
+import '../services/app_data_repository.dart';
 import 'emergency_status_screen.dart';
 import 'history_screen.dart';
 import 'location_screen.dart';
@@ -24,8 +25,51 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _tabIndex = 0;
   bool _showRenewalBanner = true;
+  bool _dockerAlertNotified = false;
   final bool _hasNoVehicles = false;
   Vehicle? _selectedLocationVehicle;
+
+  @override
+  void initState() {
+    super.initState();
+    AppDataRepository.instance.dockerConnectedNotifier.addListener(_onDockerStatusChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _onDockerStatusChanged());
+  }
+
+  @override
+  void dispose() {
+    AppDataRepository.instance.dockerConnectedNotifier.removeListener(_onDockerStatusChanged);
+    super.dispose();
+  }
+
+  void _onDockerStatusChanged() {
+    if (!mounted) return;
+    final isConnected = AppDataRepository.instance.dockerConnectedNotifier.value;
+    if (isConnected == true && !_dockerAlertNotified) {
+      _dockerAlertNotified = true;
+      final loc = context.read<LocaleProvider>();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          content: Row(
+            children: [
+              const Icon(Icons.dns_rounded, color: Colors.white),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  loc.t('docker_connected_msg'),
+                  style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFF059669),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
 
   void _onNavTap(int index) {
     if (index == _tabIndex) return;
@@ -82,11 +126,12 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0:
       default:
         final expiring = _expiringVehicle;
+        final loc = context.watch<LocaleProvider>();
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           children: [
             Text(
-              context.watch<LocaleProvider>().t('today'),
+              loc.t('today'),
               style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
@@ -97,52 +142,55 @@ class _HomeScreenState extends State<HomeScreen> {
                 text: context.watch<LocaleProvider>().t('no_vehicle_banner'),
                 onTap: () {},
               ),
-            if (!_hasNoVehicles)
-              _ActionBanner(
-                color: AppColors.accentRed,
-                icon: Icons.fmd_bad_rounded,
-                text: context.watch<LocaleProvider>().t('emergency_banner'),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const EmergencyStatusScreen(),
-                    ),
-                  );
-                },
-              ),
-            if (!_hasNoVehicles && expiring != null && _showRenewalBanner)
-              _ActionBanner(
-                color: expiring.daysUntilExpiry <= 7
-                    ? AppColors.accentRed.withValues(alpha: 0.85)
-                    : AppColors.warningAmber,
-                icon: Icons.warning_amber_rounded,
-                text: context.watch<LocaleProvider>().t('vehicle_expiring')
-                    .replaceFirst('{code}', expiring.vehicleCode)
-                    .replaceFirst('{days}', expiring.daysUntilExpiry.toString()),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => RenewalRequestScreen(vehicle: expiring),
-                    ),
-                  );
-                },
-                onDismiss: () => setState(() => _showRenewalBanner = false),
-              ),
-            const SizedBox(height: 8),
-            if (!_hasNoVehicles)
-              ...MockData.vehicles.map((v) => VehicleCard(
-                    vehicle: v,
-                    onLocationTap: (vehicle) {
-                      setState(() {
-                        _selectedLocationVehicle = vehicle;
-                        _tabIndex = 2;
-                      });
+
+                if (!_hasNoVehicles)
+                  _ActionBanner(
+                    color: AppColors.accentRed,
+                    icon: Icons.fmd_bad_rounded,
+                    text: loc.t('emergency_banner'),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const EmergencyStatusScreen(),
+                        ),
+                      );
                     },
-                  )),
-          ],
-        );
+                  ),
+                if (!_hasNoVehicles && expiring != null && _showRenewalBanner)
+                  _ActionBanner(
+                    color: expiring.daysUntilExpiry <= 7
+                        ? AppColors.accentRed.withValues(alpha: 0.85)
+                        : AppColors.warningAmber,
+                    icon: Icons.warning_amber_rounded,
+                    text: loc.t('vehicle_expiring')
+                        .replaceFirst('{code}', expiring.vehicleCode)
+                        .replaceFirst('{days}', expiring.daysUntilExpiry.toString()),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => RenewalRequestScreen(vehicle: expiring),
+                        ),
+                      );
+                    },
+                    onDismiss: () => setState(() => _showRenewalBanner = false),
+                  ),
+                const SizedBox(height: 8),
+                if (!_hasNoVehicles)
+                  ...MockData.vehicles.map((v) => VehicleCard(
+                        vehicle: v,
+                        onLocationTap: (vehicle) {
+                          setState(() {
+                            _selectedLocationVehicle = vehicle;
+                            _tabIndex = 2;
+                          });
+                        },
+                      )),
+              ],
+            );
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
