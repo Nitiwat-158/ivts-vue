@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="request-table-wrapper">
     <!-- Empty state -->
     <div v-if="requests.length === 0" class="request-table-empty">
@@ -52,8 +52,8 @@
                 <span v-if="req.vehicle_info && req.vehicle_info.color" class="text-muted">
                   {{ req.vehicle_info.color }}
                 </span>
-                <span v-if="req.vehicle_info && req.vehicle_info.vehicle_type" class="text-muted small">
-                  {{ vehicleTypeLabel(req.vehicle_info.vehicle_type) }}
+                <span v-if="req.vehicle_info && (req.vehicle_info.type || req.vehicle_info.vehicle_type)" class="text-muted small">
+                  {{ vehicleTypeLabel(req.vehicle_info.type || req.vehicle_info.vehicle_type) }}
                 </span>
               </div>
             </td>
