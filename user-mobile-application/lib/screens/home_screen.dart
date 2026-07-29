@@ -33,19 +33,20 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String _tabTitle(int index) {
+    final loc = context.read<LocaleProvider>();
     switch (index) {
       case 0:
-        return 'Home';
+        return loc.t('home');
       case 1:
-        return 'My Vehicles';
+        return loc.t('my_vehicles');
       case 2:
-        return 'Location';
+        return loc.t('location');
       case 3:
-        return 'History';
+        return loc.t('history');
       case 4:
-        return 'Profile';
+        return loc.t('profile');
       default:
-        return 'Home';
+        return loc.t('home');
     }
   }
 
