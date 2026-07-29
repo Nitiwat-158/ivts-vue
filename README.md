@@ -11,7 +11,8 @@ IVTS is an IAM-integrated agreement management system for MFU. It includes:
 ## Runtime Ports
 
 - Backend host port: `8095`
-- Frontend host port: `8084`
+- Frontend host port: `8086`
+- Mobile web host port: `8088`
 - Production domain: `https://ivts.mfu.ac.th`
 
 ## Local Run
@@ -20,7 +21,8 @@ IVTS is an IAM-integrated agreement management system for MFU. It includes:
 docker compose --env-file .env.local up -d --build
 ```
 
-Open `http://127.0.0.1:8084`.
+Open `http://127.0.0.1:8086` for Web Frontend or `http://127.0.0.1:8088` for User Mobile Web App.
+
 
 ## Server Run
 

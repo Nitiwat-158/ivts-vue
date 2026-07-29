@@ -69,11 +69,17 @@ Do not add these unless the project has a real need and source evidence:
 | `tasks/2026-07-29-mobile-add-vehicle-type-field.md` | completed | Tasklist for mobile add vehicle type field standardisation in MongoDB (`vehicle_info.type`). |
 | `tasks/2026-07-29-localization-nav.md` | active | Active tasklist for Navigation Bar & AppBar title localization fix. |
 | `tasks/2026-07-29-localization-add-vehicle.md` | active | Active tasklist for Add Vehicle screen localization fix. |
+| `tasks/2026-07-29-user-mobile-docker.md` | completed | Active tasklist for user-mobile-application Docker containerization & compose integration. |
+| `tasks/2026-07-29-mobile-docker-notification.md` | completed | Active tasklist for mobile app Docker connection notification alert. |
+| `tasks/2026-07-29-mobile-docker-temporary-alert.md` | completed | Active tasklist for temporary (3-second SnackBar) Docker connection alert. |
 | `tasks/2026-07-29-localization-vehicle-details.md` | active | Active tasklist for Vehicle Details screen localization fix. |
 | `tasks/2026-07-29-localization-renewal-request.md` | active | Active tasklist for Renewal Request screen localization fix. |
 | `tasks/2026-07-29-localization-history-dropdown.md` | active | Active tasklist for History screen dropdowns localization fix. |
 | `tasks/2026-07-29-localization-date-group.md` | active | Active tasklist for translating date groups from backend. |
 | `tasks/2026-06-18-<topic>.md` | active as needed | One focused tasklist per work item. |
+
+
+
 
 ## Change Records
 
@@ -99,11 +105,10 @@ Do not add these unless the project has a real need and source evidence:
 | `changes/2026-07-28-mobile-profile-logout-popup.md` | active | T1-T20 change record for mobile app profile logout confirmation pop-up. |
 | `changes/2026-07-29-localization-nav.md` | active | T1-T20 change record for Navigation Bar & AppBar title localization fix. |
 | `changes/2026-07-29-localization-add-vehicle.md` | active | T1-T20 change record for Add Vehicle screen localization fix. |
-| `changes/2026-07-29-localization-vehicle-details.md` | active | T1-T20 change record for Vehicle Details screen localization fix. |
-| `changes/2026-07-29-localization-renewal-request.md` | active | T1-T20 change record for Renewal Request screen localization fix. |
-| `changes/2026-07-29-localization-history-dropdown.md` | active | T1-T20 change record for History screen dropdowns localization fix. |
-| `changes/2026-07-29-localization-date-group.md` | active | T1-T20 change record for translating date groups from backend. |
 | `changes/2026-06-18-<topic>.md` | active as needed | T1-T20 handoff for each completed or handed-off work item. |
+
+
+
 
 ## Rule
 
