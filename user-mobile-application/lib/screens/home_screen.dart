@@ -143,14 +143,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTap: () {},
               ),
             if (!_hasNoVehicles)
-              _ActionBanner(
-                color: AppColors.accentRed,
-                icon: Icons.fmd_bad_rounded,
-                text: context.watch<LocaleProvider>().t('emergency_banner'),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const EmergencyStatusScreen(),
+              ValueListenableBuilder<bool>(
+                valueListenable: AppDataRepository.instance.hasActiveEmergencyNotifier,
+                builder: (context, hasEmergency, child) {
+                  if (!hasEmergency) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: _ActionBanner(
+                      color: AppColors.accentRed,
+                      icon: Icons.fmd_bad_rounded,
+                      text: context.watch<LocaleProvider>().t('emergency_banner'),
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const EmergencyStatusScreen(),
+                          ),
+                        );
+                      },
                     ),
                   );
                 },

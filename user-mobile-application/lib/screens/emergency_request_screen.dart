@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../data/mock_data.dart';
 import '../models/vehicle.dart';
 import '../theme/app_theme.dart';
+import '../services/app_data_repository.dart';
 import 'emergency_status_screen.dart';
 
 class EmergencyRequestScreen extends StatefulWidget {
@@ -191,6 +192,8 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
                             'assigned_admin_id': null,
                           };
                           debugPrint('Emergency report (mock): $reportPayload');
+
+                          AppDataRepository.instance.hasActiveEmergencyNotifier.value = true;
 
                           Navigator.of(context).pop();
                           Navigator.pushReplacement(

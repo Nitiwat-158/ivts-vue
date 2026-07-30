@@ -314,7 +314,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                 ),
               ],
-              const Spacer(),
+              const SizedBox(height: 32),
               const Text(
                 'Mae Fah Luang University',
                 textAlign: TextAlign.center,
