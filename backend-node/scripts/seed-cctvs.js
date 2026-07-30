@@ -25,7 +25,7 @@ function parseMediamtxYaml(text) {
     if (/^paths\s*:\s*$/.test(line)) {
       continue;
     }
-    const pathMatch = rawLine.match(/^([A-Za-z0-9_-]+):\s*$/);
+    const pathMatch = rawLine.match(/^\s+([A-Za-z0-9_-]+):\s*$/);
     if (pathMatch) {
       currentKey = pathMatch[1];
       data.paths[currentKey] = {};
