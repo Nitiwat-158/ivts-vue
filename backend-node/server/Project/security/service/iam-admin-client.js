@@ -847,18 +847,44 @@ async function forwardScopedSignin(request, response) {
             const UserModel = require('../../ivts/models/user.model');
             let user = await UserModel.findOne({ email: decoded.email });
             
+            const gIamId = 'google-' + (decoded.sub || decoded.email);
+            const gName = decoded.given_name || '';
+            const gSurname = decoded.family_name || '';
+
             if (!user) {
               const mongoose = require('mongoose');
               user = new UserModel({
                 _id: new mongoose.Types.ObjectId().toString(),
-                iam_user_id: 'google-' + (decoded.sub || decoded.email),
+                iam_user_id: gIamId,
                 email: decoded.email,
-                name: decoded.given_name || '',
-                surname: decoded.family_name || '',
+                name: gName,
+                surname: gSurname,
                 role: 'user'
               });
               await user.save();
               console.log(`[DEBUG-TEMP] JIT created user from Google Token in dev bypass`);
+            } else {
+              // Security & Sync Check
+              if (user.iam_user_id && user.iam_user_id !== gIamId) {
+                return response.status(403).json({
+                  status: false,
+                  error: 'account_conflict_hijack_attempt'
+                });
+              }
+              let needsUpdate = false;
+              if (user.name !== gName || user.surname !== gSurname) {
+                user.name = gName;
+                user.surname = gSurname;
+                needsUpdate = true;
+              }
+              if (!user.iam_user_id) {
+                user.iam_user_id = gIamId;
+                needsUpdate = true;
+              }
+              if (needsUpdate) {
+                await user.save();
+                console.log(`[DEBUG-TEMP] JIT updated user from Google Token in dev bypass`);
+              }
             }
 
             console.log(`[DEBUG-TEMP] Dev bypass successful for mobile client`);
@@ -867,7 +893,14 @@ async function forwardScopedSignin(request, response) {
               data: {
                 xAccessToken: 'dev-bypass-token-' + decoded.email,
                 role: user.role || 'user',
-                require2FA: false
+                require2FA: false,
+                account: {
+                  _id: user.id || user._id,
+                  email: user.email,
+                  firstname: user.name,
+                  lastname: user.surname,
+                  role: user.role || 'user'
+                }
               }
             });
           }
@@ -906,11 +939,11 @@ async function forwardScopedSignin(request, response) {
 
         console.log(`[DEBUG-TEMP] Users collection lookup result: ${user ? 'found' : 'not found'}`);
 
+        const firstName = current.account.userinfo && current.account.userinfo.firstName ? current.account.userinfo.firstName : '';
+        const lastName = current.account.userinfo && current.account.userinfo.lastName ? current.account.userinfo.lastName : '';
+
         if (!user && iamUserId && email) {
           const mongoose = require('mongoose');
-          const firstName = current.account.userinfo && current.account.userinfo.firstName ? current.account.userinfo.firstName : '';
-          const lastName = current.account.userinfo && current.account.userinfo.lastName ? current.account.userinfo.lastName : '';
-          
           user = new UserModel({
             _id: new mongoose.Types.ObjectId().toString(),
             iam_user_id: iamUserId,
@@ -921,6 +954,30 @@ async function forwardScopedSignin(request, response) {
           });
           await user.save();
           console.log(`[DEBUG-TEMP] JIT created user in collection`);
+        } else if (user) {
+          // Security & Sync Check
+          if (user.iam_user_id && user.iam_user_id !== iamUserId) {
+            await revokeUserSession(request, accessToken);
+            return response.status(403).json({
+              status: false,
+              error: 'account_conflict_hijack_attempt'
+            });
+          }
+          let needsUpdate = false;
+          if (user.name !== firstName || user.surname !== lastName || user.email !== email) {
+            user.name = firstName;
+            user.surname = lastName;
+            user.email = email;
+            needsUpdate = true;
+          }
+          if (!user.iam_user_id) {
+            user.iam_user_id = iamUserId;
+            needsUpdate = true;
+          }
+          if (needsUpdate) {
+            await user.save();
+            console.log(`[DEBUG-TEMP] JIT updated user profile from IAM`);
+          }
         }
 
         if (user) {
@@ -928,6 +985,13 @@ async function forwardScopedSignin(request, response) {
           payload.role = 'user';
           if (payload.data) {
             payload.data.role = 'user';
+            payload.data.account = {
+              _id: user.id || user._id,
+              email: user.email,
+              firstname: user.name,
+              lastname: user.surname,
+              role: user.role || 'user'
+            };
           }
           relaySetCookie(response, signinResult);
           return response.status(signinResult.statusCode || 200).json(payload);

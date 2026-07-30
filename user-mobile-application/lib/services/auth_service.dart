@@ -124,16 +124,19 @@ class AuthService {
     await _storage.write(key: 'app_token', value: accessToken);
     
     final account = data['data']['account'] ?? {};
-    return SignInResult(
-      requires2FA: false,
-      user: AuthUser(
-        id: account['_id'] ?? '',
-        name: account['firstname'] ?? account['name'] ?? '',
-        surname: account['lastname'] ?? account['surname'] ?? '',
-        email: account['email'] ?? '',
-        role: account['role'] ?? 'user',
-      ),
+    final user = AuthUser(
+      id: account['_id'] ?? '',
+      name: account['firstname'] ?? account['name'] ?? '',
+      surname: account['lastname'] ?? account['surname'] ?? '',
+      email: account['email'] ?? '',
+      role: account['role'] ?? 'user',
     );
+    
+    await _storage.write(key: 'user', value: jsonEncode({
+      'id': user.id, 'name': user.name, 'surname': user.surname, 'email': user.email, 'role': user.role,
+    }));
+
+    return SignInResult(requires2FA: false, user: user);
   }
 
   Future<SignInResult> signInWithGoogle(String idToken) async {
@@ -186,19 +189,34 @@ class AuthService {
     await _storage.write(key: 'app_token', value: accessToken);
     
     final account = data['data']['account'] ?? {};
-    return SignInResult(
-      requires2FA: false,
-      user: AuthUser(
-        id: account['_id'] ?? '',
-        name: account['firstname'] ?? account['name'] ?? '',
-        surname: account['lastname'] ?? account['surname'] ?? '',
-        email: account['email'] ?? '',
-        role: account['role'] ?? 'user',
-      ),
+    final user = AuthUser(
+      id: account['_id'] ?? '',
+      name: account['firstname'] ?? account['name'] ?? '',
+      surname: account['lastname'] ?? account['surname'] ?? '',
+      email: account['email'] ?? '',
+      role: account['role'] ?? 'user',
     );
+    
+    await _storage.write(key: 'user', value: jsonEncode({
+      'id': user.id, 'name': user.name, 'surname': user.surname, 'email': user.email, 'role': user.role,
+    }));
+
+    return SignInResult(requires2FA: false, user: user);
   }
 
   Future<String?> getStoredToken() => _storage.read(key: 'app_token');
+
+  Future<AuthUser?> getCurrentUser() async {
+    final userStr = await _storage.read(key: 'user');
+    if (userStr != null && userStr.isNotEmpty) {
+      try {
+        return AuthUser.fromJson(jsonDecode(userStr));
+      } catch (e) {
+        debugPrint('Failed to parse stored user: $e');
+      }
+    }
+    return null;
+  }
 
   Future<void> verifyTwoFactor(String otpCode, String pendingToken, {bool trustDevice = false}) async {
     final response = await http.post(

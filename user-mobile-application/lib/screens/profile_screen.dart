@@ -20,10 +20,24 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   File? _avatarImage;
   final ImagePicker _picker = ImagePicker();
+  AuthUser? _currentUser;
+  bool _isLoadingUser = true;
 
-  // TODO: mock ไว้ก่อน — เปลี่ยนเป็นค่าจริงจาก session/API ตอนต่อ backend
-  final String _fullEmail = 'Boonmee.s@gmail.com';
-  final String _fullPhone = '+66812345999';
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    final user = await AuthService().getCurrentUser();
+    if (mounted) {
+      setState(() {
+        _currentUser = user;
+        _isLoadingUser = false;
+      });
+    }
+  }
 
   void _showLogoutDialog() {
     showDialog(
@@ -364,14 +378,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
               const SizedBox(width: 14),
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Sodsroi Mala',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primary)),
-                  SizedBox(height: 2),
-                  Text('6631501148', style: TextStyle(color: AppColors.textSecondary)),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_isLoadingUser)
+                      const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    else ...[
+                      Text('${_currentUser?.name ?? ''} ${_currentUser?.surname ?? ''}'.trim(),
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primary)),
+                      const SizedBox(height: 2),
+                      Text(_currentUser?.role.toUpperCase() ?? 'USER', style: const TextStyle(color: AppColors.textSecondary)),
+                    ],
+                  ],
+                ),
               ),
             ],
           ),
@@ -400,15 +424,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _InfoRow(
                   icon: Icons.mail_outline,
                   label: 'Email address',
-                  value: 'B*****@gmail.com',
-                  onTap: () => _showDetailDialog('Email address', _fullEmail),
-                ),
-                const Divider(height: 24),
-                _InfoRow(
-                  icon: Icons.phone_iphone,
-                  label: 'Phone number',
-                  value: '+66*****999',
-                  onTap: () => _showDetailDialog('Phone number', _fullPhone),
+                  value: _currentUser?.email ?? '-',
+                  onTap: () => _showDetailDialog('Email address', _currentUser?.email ?? '-'),
                 ),
               ],
             ),
