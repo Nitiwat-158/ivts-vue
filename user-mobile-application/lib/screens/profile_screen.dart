@@ -6,6 +6,7 @@ import '../theme/app_theme.dart';
 import '../providers/locale_provider.dart';
 import '../services/auth_service.dart';
 import 'request_history_screen.dart';
+import 'sign_in_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final VoidCallback onBack;
@@ -430,7 +431,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               minimumSize: const Size.fromHeight(48),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            onPressed: widget.onBack,
+            onPressed: _showLogoutDialog,
             child: Text(localeProvider.t('logout')),
           ),
         ],

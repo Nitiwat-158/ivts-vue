@@ -120,7 +120,7 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen> {
                 padding: const EdgeInsets.only(top: 40),
                 child: Center(
                   child: Text(
-                    loc.t('no_requests_found') ?? 'No requests found',
+                    loc.t('no_requests_found'),
                     style: const TextStyle(color: AppColors.textSecondary),
                   ),
                 ),

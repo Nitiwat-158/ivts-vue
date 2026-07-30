@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 import 'home_screen.dart';
@@ -23,6 +24,101 @@ class _SignInScreenState extends State<SignInScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
+  late final GoogleSignIn _googleSignIn;
+  StreamSubscription<GoogleSignInAccount?>? _currentUserSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _googleSignIn = GoogleSignIn(
+      scopes: ['email', 'profile', 'openid'],
+      clientId: '298470872970-am1echombj03p2n223p9gavitmo811kq.apps.googleusercontent.com',
+    );
+
+    _currentUserSubscription = _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) async {
+      if (account != null) {
+        await _handleGoogleSignInResult(account);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _currentUserSubscription?.cancel();
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _devLogin() {
+    _usernameController.text = 'tester01'; // Username ที่รัน seed
+    _passwordController.text = '********'; // Backdoor Password
+    _signIn();
+  }
+
+  Future<void> _triggerMobileGoogleSignIn() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      await _googleSignIn.signIn();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
+  }
+
+  Future<void> _handleGoogleSignInResult(GoogleSignInAccount account) async {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final GoogleSignInAuthentication auth = await account.authentication;
+      final String? idToken = auth.idToken;
+
+      if (idToken == null) {
+        throw Exception('ไม่สามารถดึงข้อมูลยืนยันตัวตนจาก Google ได้ (idToken is null)');
+      }
+
+      final result = await AuthService().signInWithGoogle(idToken);
+      if (!mounted) return;
+
+      if (result.requires2FA && result.pendingToken != null) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => TwoFactorScreen(pendingToken: result.pendingToken!),
+          ),
+        );
+      } else if (!result.requires2FA && result.user != null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => ValueListenableBuilder<int>(
+              valueListenable: AppDataRepository.instance.refreshTick,
+              builder: (context, _, __) => const HomeScreen(),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
   Future<void> _signIn() async {
     if (!_formKey.currentState!.validate()) return;
     
@@ -217,6 +313,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     style: TextStyle(color: AppColors.primary),
                   ),
                 ),
+              ],
               const Spacer(),
               const Text(
                 'Mae Fah Luang University',
