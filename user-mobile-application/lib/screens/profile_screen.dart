@@ -271,10 +271,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.divider),
       ),
-      child: ListTile(
-        title: Text(label, style: const TextStyle(color: AppColors.primary)),
-        trailing: const Icon(Icons.chevron_right, color: AppColors.primary),
-        onTap: onTap,
+      child: Material(
+        color: Colors.transparent,
+        child: ListTile(
+          title: Text(label, style: const TextStyle(color: AppColors.primary)),
+          trailing: const Icon(Icons.chevron_right, color: AppColors.primary),
+          onTap: onTap,
+        ),
       ),
     );
   }

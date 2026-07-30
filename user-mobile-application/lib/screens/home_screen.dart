@@ -142,59 +142,59 @@ class _HomeScreenState extends State<HomeScreen> {
                 text: context.watch<LocaleProvider>().t('no_vehicle_banner'),
                 onTap: () {},
               ),
-
-                ValueListenableBuilder<bool>(
-                  valueListenable: AppDataRepository.instance.hasActiveEmergencyNotifier,
-                  builder: (context, hasActiveEmergency, _) {
-                    if (!_hasNoVehicles && hasActiveEmergency) {
-                      return _ActionBanner(
-                        color: AppColors.accentRed,
-                        icon: Icons.fmd_bad_rounded,
-                        text: loc.t('emergency_banner'),
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const EmergencyStatusScreen(),
-                            ),
-                          );
-                        },
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-
-                if (!_hasNoVehicles && expiring != null && _showRenewalBanner)
-                  _ActionBanner(
-                    color: expiring.daysUntilExpiry <= 7
-                        ? AppColors.accentRed.withValues(alpha: 0.85)
-                        : AppColors.warningAmber,
-                    icon: Icons.warning_amber_rounded,
-                    text: loc.t('vehicle_expiring')
-                        .replaceFirst('{code}', expiring.vehicleCode)
-                        .replaceFirst('{days}', expiring.daysUntilExpiry.toString()),
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => RenewalRequestScreen(vehicle: expiring),
-                        ),
-                      );
+            if (!_hasNoVehicles)
+              ValueListenableBuilder<bool>(
+                valueListenable: AppDataRepository.instance.hasActiveEmergencyNotifier,
+                builder: (context, hasEmergency, child) {
+                  if (!hasEmergency) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: _ActionBanner(
+                      color: AppColors.accentRed,
+                      icon: Icons.fmd_bad_rounded,
+                      text: context.watch<LocaleProvider>().t('emergency_banner'),
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const EmergencyStatusScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            if (!_hasNoVehicles && expiring != null && _showRenewalBanner)
+              _ActionBanner(
+                color: expiring.daysUntilExpiry <= 7
+                    ? AppColors.accentRed.withValues(alpha: 0.85)
+                    : AppColors.warningAmber,
+                icon: Icons.warning_amber_rounded,
+                text: context.watch<LocaleProvider>().t('vehicle_expiring')
+                    .replaceFirst('{code}', expiring.vehicleCode)
+                    .replaceFirst('{days}', expiring.daysUntilExpiry.toString()),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => RenewalRequestScreen(vehicle: expiring),
+                    ),
+                  );
+                },
+                onDismiss: () => setState(() => _showRenewalBanner = false),
+              ),
+            const SizedBox(height: 8),
+            if (!_hasNoVehicles)
+              ...MockData.vehicles.map((v) => VehicleCard(
+                    vehicle: v,
+                    onLocationTap: (vehicle) {
+                      setState(() {
+                        _selectedLocationVehicle = vehicle;
+                        _tabIndex = 2;
+                      });
                     },
-                    onDismiss: () => setState(() => _showRenewalBanner = false),
-                  ),
-                const SizedBox(height: 8),
-                if (!_hasNoVehicles)
-                  ...MockData.vehicles.map((v) => VehicleCard(
-                        vehicle: v,
-                        onLocationTap: (vehicle) {
-                          setState(() {
-                            _selectedLocationVehicle = vehicle;
-                            _tabIndex = 2;
-                          });
-                        },
-                      )),
-              ],
-            );
+                  )),
+          ],
+        );
     }
   }
 

@@ -38,4 +38,7 @@ class MockData {
   static final List<EmergencyStatusUpdate> emergencyTimeline = <EmergencyStatusUpdate>[];
 
   static const String securityPhoneNumber = '+66531234567';
+
+  // Temporary local state for emergency UI demonstration until backend is ready.
+  static bool hasActiveEmergency = true;
 }

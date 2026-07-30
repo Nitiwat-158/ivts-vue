@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
+import 'two_factor_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -11,6 +12,8 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
   final _phoneController = TextEditingController();
   final _departmentController = TextEditingController();
   bool _isLoading = false;
@@ -25,24 +28,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
-      // 1. Authenticate with IAM to get user info/code
-      final user = await AuthService().signInWithIam();
+      // 1. Authenticate with IAM using proxy login
+      final result = await AuthService().signIn(
+        _usernameController.text.trim(),
+        _passwordController.text,
+      );
       
       if (!mounted) return;
-      if (user != null) {
-        // 2. TODO: Send phone and department to backend along with the code/user info
-        // POST /api/auth/register
-        // final response = await http.post(...);
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('ลงทะเบียนสำเร็จ (รอต่อ API จริง)')),
+      if (result.requires2FA && result.pendingToken != null) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => TwoFactorScreen(pendingToken: result.pendingToken!),
+          ),
         );
-        Navigator.of(context).pop();
+      } else if (!result.requires2FA && result.user != null) {
+        // 2. TODO: Send phone and department to backend
+        throw Exception('Endpoint สำหรับบันทึกข้อมูลเบอร์โทรศัพท์และหน่วยงานยังไม่พร้อมใช้งานในขณะนี้');
       }
     } catch (e) {
       if (!mounted) return;
+      String errorMsg = e.toString().replaceFirst('Exception: ', '');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+        SnackBar(content: Text(errorMsg)),
       );
     } finally {
       if (mounted) {
@@ -55,6 +62,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
     _phoneController.dispose();
     _departmentController.dispose();
     super.dispose();
@@ -74,6 +83,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                TextFormField(
+                  controller: _usernameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Username / Email',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.person),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'กรุณากรอก username';
+                    }
+                    return null;
+                  },
+                  enabled: !_isLoading,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.lock),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'กรุณากรอก password';
+                    }
+                    return null;
+                  },
+                  enabled: !_isLoading,
+                ),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
@@ -115,7 +157,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                     child: const Text(
-                      'ยืนยันตัวตนและลงทะเบียนผ่าน IAM',
+                      'ลงทะเบียน',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

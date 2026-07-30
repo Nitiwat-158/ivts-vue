@@ -25,7 +25,7 @@ Vue.prototype.moment = moment
 
 import GAuth from 'vue-google-oauth2'
 const gauthOption = {
-  clientId: process.env.VUE_APP_CLIENTID || '225788483142-8pkg8on8nh60ao83ve33ff3lflv2ccvo.apps.googleusercontent.com',
+  clientId: process.env.VUE_APP_CLIENTID || '298470872970-am1echombj03p2n223p9gavitmo811kq.apps.googleusercontent.com',
   scope: process.env.VUE_APP_SCOPE || 'profile email',
   prompt: process.env.VUE_APP_PROMPT || 'select_account'
 }

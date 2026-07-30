@@ -83,11 +83,13 @@
       <h1>Tasklist: IVTS System Progress And Readiness</h1>
     </section>
     <section class="metrics">
+      <div class="metric"><div class="label">Done</div><div class="value">13</div><div class="note">Completed task rows</div></div>
+      <div class="metric"><div class="label">Blocked</div><div class="value">3</div><div class="note">Rows needing action</div></div>
       <div class="metric"><div class="label">Done</div><div class="value">35</div><div class="note">Completed task rows</div></div>
       <div class="metric"><div class="label">Blocked</div><div class="value">7</div><div class="note">Rows needing action</div></div>
       <div class="metric"><div class="label">Verifying</div><div class="value">0</div><div class="note">Rows under validation</div></div>
       <div class="metric"><div class="label">In Progress</div><div class="value">1</div><div class="note">Discovery or active work</div></div>
-      <div class="metric"><div class="label">Pending</div><div class="value">12</div><div class="note">Not started rows</div></div>
+      <div class="metric"><div class="label">Pending</div><div class="value">9</div><div class="note">Not started rows</div></div>
     </section>
     <section class="summary-board" aria-label="Summary">
 <div class="table-wrap">
@@ -162,6 +164,7 @@
       <div class="board-panel active" data-board-panel="t3">
         <div class="board-section-title">
           <h3>T3. Active Tasklist</h3>
+          <p class="subcopy">23 task rows. Use task filters for task status; blocker details are in the T5 tab.</p>
           <p class="subcopy">48 task rows. Use task filters for task status; blocker details are in the T5 tab.</p>
         </div>
       <div class="toolbar">
@@ -173,6 +176,7 @@
           <button type="button" data-task-filter="pending">Pending</button>
           <button type="button" data-task-filter="blocked">Tasks with blocker</button>
         </div>
+        <span id="visible-count">Showing 23 tasks</span>
         <span id="visible-count">Showing 48 tasks</span>
       </div>
       <div class="table-wrap">
