@@ -76,9 +76,9 @@ class NotificationScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(n.title, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+                              Text(loc.translateNotificationTitle(n.title), style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
                               const SizedBox(height: 2),
-                              Text(n.description, style: const TextStyle(color: AppColors.textSecondary)),
+                              Text(loc.translateNotificationDescription(n.description), style: const TextStyle(color: AppColors.textSecondary)),
                             ],
                           ),
                         ),

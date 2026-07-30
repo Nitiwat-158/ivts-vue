@@ -39,6 +39,34 @@ class LocaleProvider extends ChangeNotifier {
     return dateGroup;
   }
 
+  String translateNotificationTitle(String rawTitle) {
+    if (_currentLanguage == AppLanguage.english) return rawTitle;
+    if (rawTitle.trim() == 'Emergency report update') {
+      return t('emergency_report_update');
+    }
+    return rawTitle;
+  }
+
+  String translateNotificationDescription(String rawDesc) {
+    if (_currentLanguage == AppLanguage.thai) return rawDesc;
+    
+    if (rawDesc.contains('หมดอายุทะเบียนแล้ว')) {
+      final parts = rawDesc.split(' ');
+      if (parts.length >= 3) {
+         final label = parts[1];
+         return 'Vehicle $label has expired.';
+      }
+    }
+    if (rawDesc.contains('กำลังใกล้หมดอายุใน')) {
+      final regex = RegExp(r'รถหมายเลขทะเบียน (.+) กำลังใกล้หมดอายุใน (\d+) วัน');
+      final match = regex.firstMatch(rawDesc);
+      if (match != null) {
+        return 'Vehicle ${match.group(1)} is expiring in ${match.group(2)} days.';
+      }
+    }
+    return rawDesc;
+  }
+
   static const Map<String, Map<AppLanguage, String>> _translations = {
     'home': {AppLanguage.english: 'Home', AppLanguage.thai: 'หน้าแรก'},
     'location': {AppLanguage.english: 'Location', AppLanguage.thai: 'ตำแหน่ง'},
@@ -159,6 +187,7 @@ class LocaleProvider extends ChangeNotifier {
     'status_expiring_soon': {AppLanguage.english: 'Expiring soon', AppLanguage.thai: 'ใกล้หมดอายุ'},
     'status_expired': {AppLanguage.english: 'Expired', AppLanguage.thai: 'หมดอายุ'},
     'status_pending': {AppLanguage.english: 'Pending', AppLanguage.thai: 'รอดำเนินการ'},
+    'emergency_report_update': {AppLanguage.english: 'Emergency report update', AppLanguage.thai: 'อัปเดตคำร้องฉุกเฉิน'},
   };
 }
 
