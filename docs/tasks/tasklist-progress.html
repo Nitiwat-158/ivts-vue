@@ -83,10 +83,10 @@
       <h1>Tasklist: IVTS System Progress And Readiness</h1>
     </section>
     <section class="metrics">
-      <div class="metric"><div class="label">Done</div><div class="value">14</div><div class="note">Completed task rows</div></div>
-      <div class="metric"><div class="label">Blocked</div><div class="value">4</div><div class="note">Rows needing action</div></div>
+      <div class="metric"><div class="label">Done</div><div class="value">13</div><div class="note">Completed task rows</div></div>
+      <div class="metric"><div class="label">Blocked</div><div class="value">3</div><div class="note">Rows needing action</div></div>
       <div class="metric"><div class="label">Verifying</div><div class="value">0</div><div class="note">Rows under validation</div></div>
-      <div class="metric"><div class="label">In Progress</div><div class="value">2</div><div class="note">Discovery or active work</div></div>
+      <div class="metric"><div class="label">In Progress</div><div class="value">1</div><div class="note">Discovery or active work</div></div>
       <div class="metric"><div class="label">Pending</div><div class="value">9</div><div class="note">Not started rows</div></div>
     </section>
     <section class="summary-board" aria-label="Summary">
@@ -162,7 +162,7 @@
       <div class="board-panel active" data-board-panel="t3">
         <div class="board-section-title">
           <h3>T3. Active Tasklist</h3>
-          <p class="subcopy">25 task rows. Use task filters for task status; blocker details are in the T5 tab.</p>
+          <p class="subcopy">23 task rows. Use task filters for task status; blocker details are in the T5 tab.</p>
         </div>
       <div class="toolbar">
         <div class="filters task-filters" aria-label="Task filters">
@@ -173,7 +173,7 @@
           <button type="button" data-task-filter="pending">Pending</button>
           <button type="button" data-task-filter="blocked">Tasks with blocker</button>
         </div>
-        <span id="visible-count">Showing 25 tasks</span>
+        <span id="visible-count">Showing 23 tasks</span>
       </div>
       <div class="table-wrap">
         <table class="task-table">
@@ -202,8 +202,6 @@
             <tr data-status="done" data-blocked="false"><td>ivts-MOBAPI-002</td><td>Mobile API: backend service + routes (vehicles, tracking, requests, emergency, notifications)</td><td>Backend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>—</td><td>Working mobile API</td></tr>
             <tr data-status="done" data-blocked="false"><td>ivts-MOBAPI-003</td><td>Mobile API: Flutter HTTP client + data repository, remove all mock data</td><td>Frontend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>none</td><td>Working Flutter data layer, verified live</td></tr>
             <tr data-status="done" data-blocked="false"><td>ivts-MOBAPI-004</td><td>Mobile API: doc compliance (tasklist, change record, progress, index, README)</td><td>Ops</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>none</td><td>Complete doc set</td></tr>
-            <tr data-status="done" data-blocked="false"><td>ivts-MOBAPI-005</td><td>Backend: JIT Auto-create user from IAM for mobile</td><td>Backend</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>—</td><td>Working backend JIT</td></tr>
-            <tr data-status="in_progress" data-blocked="true"><td>ivts-MOBAPI-006</td><td>Mobile API: Google OAuth flow (MFU Lamduan)</td><td>Frontend</td><td><span class="badge progress">in_progress</span></td><td><div class="small-progress"><strong>0%</strong><div class="track"><div class="fill" style="width:0%"></div></div></div></td><td><span class="badge blocker">Requires Google Cloud Console setup</span></td><td>Update flutter code</td><td>Google OAuth login</td></tr>
           </tbody>
         </table>
       </div>
@@ -217,6 +215,7 @@
 <thead><tr><th>Command / Check</th><th>Result</th><th>Evidence</th></tr></thead>
 <tbody>
 <tr><td><code>node --check</code> all 12 new backend files</td><td class="status-cell status-done"><span>PASS</span></td><td>Exit code 0 — 2026-07-14</td></tr>
+<tr><td><code>node --check</code> vehicle_request.js + vehicle.model.js + owner_vehicle.js + ivts.routes.js</td><td class="status-cell status-done"><span>PASS</span></td><td>Exit code 0 — 2026-07-27</td></tr>
 <tr><td>backend npm test</td><td class="status-cell status-muted"><span>not run</span></td><td>requires running server + DB</td></tr>
 <tr><td>frontend lint/test/build</td><td class="status-cell status-muted"><span>not run</span></td><td></td></tr>
 <tr><td>live smoke/e2e</td><td class="status-cell status-muted"><span>not run</span></td><td></td></tr>
@@ -245,6 +244,7 @@
     <section class="content">
 <h2 id="t6-decision">T6. Decision</h2>
 <p>Backend models, services, and routes are implemented and syntax-verified. System progress updated from 25% to 45% based on implementation gate completion. Live smoke tests blocked by IAM permission seeding requirement (B-001).</p>
+<p>Vehicle Management fix (2026-07-27): owner_vehicle.js + vehicle.model.js + vehicle_request.js rewritten to use vehicles+requests collections (not empty owner_vehicles). Frontend VehicleManagement.vue refactored with 2 tabs (รถทั้งหมด / คำขอเพิ่มรถ). VehicleRequestTable.vue + ConfirmRequestModal.vue added. Mobile add_vehicle_screen.dart vehicle_type → type renamed. All backend node --check PASS. Live smoke pending server restart (B-001).</p>
 <p>Mobile API (<code>docs/tasks/2026-07-24-mobile-mongodb-api.md</code>): backend <code>/api/v1/mobile</code> read-only API implemented against real MongoDB collections (live schema verified via mongosh) and smoke-tested via curl (7/7 endpoints pass). Flutter app&#39;s <code>mock_data.dart</code> fully emptied per explicit user instruction — MongoDB is now the sole data source, no mock fallback. Windows desktop build (<code>flutter create --platforms=windows .</code> + <code>flutter run -d windows</code>) verified end-to-end: real data loaded (<code>6 vehicles</code>, <code>4 notifications</code>, <code>0 trip history</code>/<code>0 requests</code> matching real empty collections). Android emulator verification remains blocked by Windows Firewall scoping (B-002); this does not block the completed feature since Windows-target verification succeeded.</p>
     </section>
   </main>

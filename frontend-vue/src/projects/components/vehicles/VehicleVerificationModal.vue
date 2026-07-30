@@ -158,7 +158,13 @@
 
     <!-- Footer Actions -->
     <CModalFooter class="bg-light border-top-0 pt-0">
-      <div v-if="!isRejecting" class="w-100 d-flex justify-content-between">
+      <div v-if="!isPending" class="w-100 d-flex justify-content-end">
+        <CButton color="secondary" variant="outline" @click="$emit('close')">
+          {{ $t('vehicleVerification.closeWindow') }}
+        </CButton>
+      </div>
+      
+      <div v-else-if="!isRejecting" class="w-100 d-flex justify-content-between">
         <CButton color="secondary" variant="outline" @click="$emit('close')">
           {{ $t('vehicleVerification.closeWindow') }}
         </CButton>
@@ -213,7 +219,11 @@ export default {
     }
   },
   computed: {
+    isPending () {
+      return this.vehicleData && this.vehicleData.document_status === 'Pending'
+    },
     predefinedRejectReasons() {
+
       return [
         this.$t('vehicleVerification.reasons.unclear'),
         this.$t('vehicleVerification.reasons.mismatchPlate'),

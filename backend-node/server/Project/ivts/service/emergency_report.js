@@ -1,6 +1,5 @@
 'use strict';
 
-const mongoose = require('mongoose');
 const EmergencyReport = require('../models/emergency_report.model');
 const Vehicle = require('../models/vehicle.model');
 const User = require('../models/user.model');
@@ -33,45 +32,23 @@ exports.getAll = async function(req, res) {
     let admins = [];
     
     if (vehicleIds.length > 0) {
-      const objectIdVehicleIds = vehicleIds
-        .map(id => {
-          try {
-            return mongoose.Types.ObjectId.isValid(id) ? mongoose.Types.ObjectId(id) : null;
-          } catch (e) {
-            return null;
-          }
-        })
-        .filter(Boolean);
-
-      const numericVehicleIds = vehicleIds
-        .map(id => Number(id))
-        .filter(num => Number.isFinite(num));
-
-      const vehicleQuery = { $or: [] };
-      if (objectIdVehicleIds.length > 0) {
-        vehicleQuery.$or.push({ _id: { $in: objectIdVehicleIds } });
-      }
-      if (numericVehicleIds.length > 0) {
-        vehicleQuery.$or.push({ vehicle_numeric_id: { $in: numericVehicleIds } });
-      }
-      if (vehicleQuery.$or.length === 0) {
-        vehicleQuery.$or.push({ _id: { $in: vehicleIds } });
-      }
-
-      vehicles = await Vehicle.find(vehicleQuery).lean();
+      // vehicle_id in emergency_report stores vehicle_code (string e.g. "CR0001"),
+      // not ObjectId — look up by vehicle_code field in the vehicles collection.
+      vehicles = await Vehicle.find({ vehicle_code: { $in: vehicleIds } }).lean();
     }
     
     if (adminIds.length > 0) {
       admins = await User.find({ _id: { $in: adminIds } }, 'username name email').lean();
     }
 
-    const vehicleMap = Object.fromEntries(vehicles.map(v => [String(v._id), v]));
+    // Key the vehicleMap by vehicle_code so it matches emergency_report.vehicle_id
+    const vehicleMap = Object.fromEntries(vehicles.map(v => [String(v.vehicle_code || v._id), v]));
     const adminMap = Object.fromEntries(admins.map(a => [String(a._id), a]));
 
     const enrichedReports = reports.map(r => ({
       ...r,
       vehicle_id: vehicleMap[String(r.vehicle_id)] || null,
-      assigned_admin_id: adminMap[String(r.assigned_admin_id)] || null,
+      assigned_admin_id: adminMap[String(r.assigned_admin_id)] || null
     }));
 
     // 🟢 คืนค่าข้อมูลในรูปแบบ Standard Response 
@@ -118,7 +95,8 @@ exports.updateStatus = async function(req, res) {
     let enrichedAdmin = null;
 
     if (report.vehicle_id) {
-      enrichedVehicle = await Vehicle.findById(report.vehicle_id).lean();
+      // vehicle_id stores vehicle_code string (e.g. "CR0001"), not ObjectId
+      enrichedVehicle = await Vehicle.findOne({ vehicle_code: report.vehicle_id }).lean();
     }
     if (report.assigned_admin_id) {
       enrichedAdmin = await User.findById(report.assigned_admin_id, 'username name email').lean();

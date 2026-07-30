@@ -18,6 +18,55 @@ class LocaleProvider extends ChangeNotifier {
     return _translations[key]?[_currentLanguage] ?? key;
   }
 
+  String translateDateGroup(String dateGroup) {
+    if (_currentLanguage == AppLanguage.english) return dateGroup;
+    
+    if (dateGroup == 'Today') return 'วันนี้';
+    if (dateGroup == 'Yesterday') return 'เมื่อวานนี้';
+    
+    final daysReg = RegExp(r'^(\d+)\s+days?\s+ago$', caseSensitive: false);
+    final match = daysReg.firstMatch(dateGroup);
+    if (match != null) {
+      return '${match.group(1)} วันก่อน';
+    }
+    
+    final monthsReg = RegExp(r'^(\d+)\s+month(?:s)?\s+ago$', caseSensitive: false);
+    final match2 = monthsReg.firstMatch(dateGroup);
+    if (match2 != null) {
+      return '${match2.group(1)} เดือนก่อน';
+    }
+    
+    return dateGroup;
+  }
+
+  String translateNotificationTitle(String rawTitle) {
+    if (_currentLanguage == AppLanguage.english) return rawTitle;
+    if (rawTitle.trim() == 'Emergency report update') {
+      return t('emergency_report_update');
+    }
+    return rawTitle;
+  }
+
+  String translateNotificationDescription(String rawDesc) {
+    if (_currentLanguage == AppLanguage.thai) return rawDesc;
+    
+    if (rawDesc.contains('หมดอายุทะเบียนแล้ว')) {
+      final parts = rawDesc.split(' ');
+      if (parts.length >= 3) {
+         final label = parts[1];
+         return 'Vehicle $label has expired.';
+      }
+    }
+    if (rawDesc.contains('กำลังใกล้หมดอายุใน')) {
+      final regex = RegExp(r'รถหมายเลขทะเบียน (.+) กำลังใกล้หมดอายุใน (\d+) วัน');
+      final match = regex.firstMatch(rawDesc);
+      if (match != null) {
+        return 'Vehicle ${match.group(1)} is expiring in ${match.group(2)} days.';
+      }
+    }
+    return rawDesc;
+  }
+
   static const Map<String, Map<AppLanguage, String>> _translations = {
     'home': {AppLanguage.english: 'Home', AppLanguage.thai: 'หน้าแรก'},
     'location': {AppLanguage.english: 'Location', AppLanguage.thai: 'ตำแหน่ง'},
@@ -107,5 +156,38 @@ class LocaleProvider extends ChangeNotifier {
     'vehicle_registration_placeholder': {AppLanguage.english: 'Vehicle registration form placeholder', AppLanguage.thai: 'ฟอร์มลงทะเบียนรถ'},
     'vehicle_expiring': {AppLanguage.english: 'Vehicle {code} is expiring in {days} days', AppLanguage.thai: 'รถ {code} ใกล้หมดอายุทะเบียนใน {days} วัน'},
     'today': {AppLanguage.english: 'Today', AppLanguage.thai: 'วันนี้'},
+    'skip_sign_in': {AppLanguage.english: 'Skip for now', AppLanguage.thai: 'ข้ามการเข้าสู่ระบบ'},
+    'confirm_logout_title': {AppLanguage.english: 'Confirm Logout', AppLanguage.thai: 'ยืนยันการออกจากระบบ'},
+    'confirm_logout_message': {AppLanguage.english: 'Are you sure you want to log out?', AppLanguage.thai: 'คุณแน่ใจหรือไม่ที่จะออกจากระบบ?'},
+    'my_vehicles': {AppLanguage.english: 'My Vehicles', AppLanguage.thai: 'ยานพาหนะของฉัน'},
+    'submitting': {AppLanguage.english: 'Submitting...', AppLanguage.thai: 'กำลังส่ง...'},
+    'car': {AppLanguage.english: 'Car', AppLanguage.thai: 'รถยนต์'},
+    'motorcycle': {AppLanguage.english: 'Motorcycle', AppLanguage.thai: 'มอเตอร์ไซค์'},
+    'add': {AppLanguage.english: 'Add', AppLanguage.thai: 'เพิ่ม'},
+    'added': {AppLanguage.english: 'Added', AppLanguage.thai: 'เพิ่มแล้ว'},
+    'fill_required_fields': {AppLanguage.english: 'Please fill in all required fields before submitting.', AppLanguage.thai: 'กรุณากรอกข้อมูลให้ครบก่อนส่ง'},
+    'vehicle_saved_success': {AppLanguage.english: 'Vehicle request submitted successfully.', AppLanguage.thai: 'ส่งคำร้องสำเร็จ'},
+    'submit_failed_prefix': {AppLanguage.english: 'Submit failed', AppLanguage.thai: 'ส่งข้อมูลไม่สำเร็จ'},
+    'docker_connected_title': {AppLanguage.english: 'Docker Connected', AppLanguage.thai: 'เชื่อมต่อ Docker สำเร็จ'},
+    'docker_connected_msg': {AppLanguage.english: 'Connected to Docker Backend Server', AppLanguage.thai: 'เชื่อมต่อกับระบบ Docker Server เรียบร้อยแล้ว'},
+    'docker_disconnected_msg': {AppLanguage.english: 'Disconnected from Docker Server', AppLanguage.thai: 'ไม่สามารถเชื่อมต่อกับ Docker Server ได้'},
+    'expires_in_days': {AppLanguage.english: 'Expires in {days} days', AppLanguage.thai: 'เหลืออีก {days} วันก่อนหมดอายุ'},
+    'mock_document': {AppLanguage.english: 'Mock Document', AppLanguage.thai: 'เอกสารจำลอง'},
+    'all_time': {AppLanguage.english: 'All Time', AppLanguage.thai: 'ทุกเวลา'},
+    'all_vehicles': {AppLanguage.english: 'All Vehicles', AppLanguage.thai: 'รถทุกคัน'},
+    'select_date': {AppLanguage.english: 'Select Date', AppLanguage.thai: 'เลือกวันที่'},
+    'select_vehicle': {AppLanguage.english: 'Select Vehicle', AppLanguage.thai: 'เลือกรถ'},
+    'date': {AppLanguage.english: 'Date', AppLanguage.thai: 'วันที่'},
+    'theft': {AppLanguage.english: 'Theft / Stolen', AppLanguage.thai: 'ถูกโจรกรรม / สูญหาย'},
+    'accident': {AppLanguage.english: 'Accident', AppLanguage.thai: 'อุบัติเหตุ'},
+    'breakdown': {AppLanguage.english: 'Vehicle Breakdown', AppLanguage.thai: 'รถเสีย'},
+    'other': {AppLanguage.english: 'Other', AppLanguage.thai: 'อื่นๆ'},
+    'case_resolved': {AppLanguage.english: 'Case resolved', AppLanguage.thai: 'เคสได้รับการแก้ไขแล้ว'},
+    'status_active': {AppLanguage.english: 'Active', AppLanguage.thai: 'ปกติ'},
+    'status_expiring_soon': {AppLanguage.english: 'Expiring soon', AppLanguage.thai: 'ใกล้หมดอายุ'},
+    'status_expired': {AppLanguage.english: 'Expired', AppLanguage.thai: 'หมดอายุ'},
+    'status_pending': {AppLanguage.english: 'Pending', AppLanguage.thai: 'รอดำเนินการ'},
+    'emergency_report_update': {AppLanguage.english: 'Emergency report update', AppLanguage.thai: 'อัปเดตคำร้องฉุกเฉิน'},
   };
 }
+

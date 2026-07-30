@@ -62,16 +62,16 @@ Adjust weights per project, but keep them evidence-backed.
 | ivts-UM-005 | Create change record T1-T20 | Ops | AI | ivts-UM-004 | pending | 0 | Not started | docs/changes/2026-07-17-user-management-db.md | — | none | Save change note | T1-T20 Markdown file |
 | ivts-MOBAPI-001 | Mobile API: source discovery + live DB schema check | Orchestrator | AI | none | done | 100 | mongosh queries against live IVTS DB revealed real field shapes diverge from Mongoose schemas | `service/mobile.js` header comments | manual mongosh verification | none | — | Source map + schema evidence |
 | ivts-MOBAPI-002 | Mobile API: backend service + routes (vehicles, tracking, requests, emergency, notifications) | Backend | AI | ivts-MOBAPI-001 | done | 100 | New `mobile.js` service + `mobile.routes.js`, mounted at `/api/v1/mobile` | `service/mobile.js`, `mobile.routes.js`, `app.routes.js` | `node --check` PASS; live curl smoke on all 7 endpoints PASS | none | — | Working mobile API |
-| ivts-MOBAPI-003 | Mobile API: Flutter HTTP client + data repository, remove all mock data | Frontend | AI | ivts-MOBAPI-002 | done | 100 | `http` dep added; service/repository layer wired; all `MockData` demo content removed per user instruction (MongoDB-only, no mock fallback); verified end-to-end on Windows desktop build | `pubspec.yaml`, `lib/services/*.dart`, `lib/data/mock_data.dart`, `lib/windows/` (new platform) | `flutter analyze lib/` PASS; `flutter run -d windows` PASS \u2014 log shows `loaded 6 vehicles`, `loaded 4 notifications from API` | none | none | Working Flutter data layer, verified live |
+| ivts-MOBAPI-003 | Mobile API: Flutter HTTP client + data repository, remove all mock data | Frontend | AI | ivts-MOBAPI-002 | done | 100 | `http` dep added; service/repository layer wired; all `MockData` demo content removed per user instruction (MongoDB-only, no mock fallback); verified end-to-end on Windows desktop build | `pubspec.yaml`, `lib/services/*.dart`, `lib/data/mock_data.dart`, `lib/windows/` (new platform) | `flutter analyze lib/` PASS; `flutter run -d windows` PASS — log shows `loaded 6 vehicles`, `loaded 4 notifications from API` | none | none | Working Flutter data layer, verified live |
 | ivts-MOBAPI-004 | Mobile API: doc compliance (tasklist, change record, progress, index, README) | Ops | AI | ivts-MOBAPI-003 | done | 100 | Tasklist + change record created; this file + AI-DOCS-INDEX.md + mobile README updated; HTML regenerated | `docs/tasks/2026-07-24-mobile-mongodb-api.md`, `docs/changes/2026-07-24-mobile-mongodb-api.md` | n/a | none | none | Complete doc set |
-| ivts-MOBAPI-005 | Backend: JIT Auto-create user from IAM for mobile | Backend | AI | ivts-MOBAPI-002 | done | 100 | Implemented JIT logic in `iam-admin-client.js` and verified syntax | `server/Project/security/service/iam-admin-client.js` | `node --check` PASS | none | — | Working backend JIT |
-| ivts-MOBAPI-006 | Mobile API: Google OAuth flow (MFU Lamduan) | Frontend | AI | ivts-MOBAPI-005 | in_progress | 0 | Added dependencies; replacing email/pass with token | `pubspec.yaml`, `sign_in_screen.dart` | n/a | Requires Google Cloud Console setup | Update flutter code | Google OAuth login |
+
 
 ## T4. Verification Log
 
 | Command / Check | Result | Evidence |
 |---|---|---|
 | `node --check` all 12 new backend files | PASS | Exit code 0 — 2026-07-14 |
+| `node --check` vehicle_request.js + vehicle.model.js + owner_vehicle.js + ivts.routes.js | PASS | Exit code 0 — 2026-07-27 |
 | backend npm test | not run | requires running server + DB |
 | frontend lint/test/build | not run | |
 | live smoke/e2e | not run | |
@@ -89,5 +89,7 @@ Adjust weights per project, but keep them evidence-backed.
 ## T6. Decision
 
 Backend models, services, and routes are implemented and syntax-verified. System progress updated from 25% to 45% based on implementation gate completion. Live smoke tests blocked by IAM permission seeding requirement (B-001).
+
+Vehicle Management fix (2026-07-27): owner_vehicle.js + vehicle.model.js + vehicle_request.js rewritten to use vehicles+requests collections (not empty owner_vehicles). Frontend VehicleManagement.vue refactored with 2 tabs (รถทั้งหมด / คำขอเพิ่มรถ). VehicleRequestTable.vue + ConfirmRequestModal.vue added. Mobile add_vehicle_screen.dart vehicle_type → type renamed. All backend node --check PASS. Live smoke pending server restart (B-001).
 
 Mobile API (`docs/tasks/2026-07-24-mobile-mongodb-api.md`): backend `/api/v1/mobile` read-only API implemented against real MongoDB collections (live schema verified via mongosh) and smoke-tested via curl (7/7 endpoints pass). Flutter app's `mock_data.dart` fully emptied per explicit user instruction — MongoDB is now the sole data source, no mock fallback. Windows desktop build (`flutter create --platforms=windows .` + `flutter run -d windows`) verified end-to-end: real data loaded (`6 vehicles`, `4 notifications`, `0 trip history`/`0 requests` matching real empty collections). Android emulator verification remains blocked by Windows Firewall scoping (B-002); this does not block the completed feature since Windows-target verification succeeded.

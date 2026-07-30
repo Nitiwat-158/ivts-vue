@@ -62,7 +62,26 @@ Do not add these unless the project has a real need and source evidence:
 | `tasks/2026-07-23-emergency-popup.md` | active | Active tasklist for Emergency Request confirmation popup. |
 | `tasks/2026-07-24-profile-password-buttons.md` | active | Active tasklist for Profile Change Password buttons. |
 | `tasks/2026-07-24-mobile-mongodb-api.md` | active | Active tasklist for mobile app MongoDB-backed API (no mock data). |
+| `tasks/2026-07-27-emergency-report-castError.md` | active | Active tasklist for Emergency Report CastError fix (vehicle_id → vehicle_code lookup). |
+| `tasks/2026-07-27-vehicle-management-fix.md` | active | Active tasklist for Vehicle Management page fix (vehicles+requests instead of empty owner_vehicles). |
+| `tasks/2026-07-28-mobile-skip-signin.md` | active | Active tasklist for mobile app Skip Sign In button. |
+| `tasks/2026-07-28-mobile-profile-logout-popup.md` | active | Active tasklist for mobile app profile logout confirmation pop-up. |
+| `tasks/2026-07-29-mobile-add-vehicle-type-field.md` | completed | Tasklist for mobile add vehicle type field standardisation in MongoDB (`vehicle_info.type`). |
+| `tasks/2026-07-29-localization-nav.md` | active | Active tasklist for Navigation Bar & AppBar title localization fix. |
+| `tasks/2026-07-29-localization-add-vehicle.md` | active | Active tasklist for Add Vehicle screen localization fix. |
+| `tasks/2026-07-29-user-mobile-docker.md` | completed | Active tasklist for user-mobile-application Docker containerization & compose integration. |
+| `tasks/2026-07-29-mobile-docker-notification.md` | completed | Active tasklist for mobile app Docker connection notification alert. |
+| `tasks/2026-07-29-mobile-docker-temporary-alert.md` | completed | Active tasklist for temporary (3-second SnackBar) Docker connection alert. |
+| `tasks/2026-07-29-localization-vehicle-details.md` | active | Active tasklist for Vehicle Details screen localization fix. |
+| `tasks/2026-07-29-localization-renewal-request.md` | active | Active tasklist for Renewal Request screen localization fix. |
+| `tasks/2026-07-29-localization-history-dropdown.md` | active | Active tasklist for History screen dropdowns localization fix. |
+| `tasks/2026-07-29-localization-date-group.md` | active | Active tasklist for translating date groups from backend. |
+| `tasks/2026-07-29-mobile-emergency-banner-conditional.md` | completed | Active tasklist for conditional Emergency Request Banner display. |
 | `tasks/2026-06-18-<topic>.md` | active as needed | One focused tasklist per work item. |
+
+
+
+
 
 ## Change Records
 
@@ -82,7 +101,20 @@ Do not add these unless the project has a real need and source evidence:
 | `changes/2026-07-23-emergency-popup.md` | active | T1-T20 change record for Emergency Request confirmation popup. |
 | `changes/2026-07-24-profile-password-buttons.md` | active | T1-T20 change record for Profile Change Password buttons. |
 | `changes/2026-07-24-mobile-mongodb-api.md` | active | T1-T20 change record for mobile app MongoDB-backed API (no mock data). |
+| `changes/2026-07-27-emergency-report-castError.md` | active | T1-T20 change record for Emergency Report CastError fix (vehicle_id → vehicle_code). |
+| `changes/2026-07-27-vehicle-management-fix.md` | active | T1-T20 change record for Vehicle Management page fix (backend service + VehicleTable.vue). |
+| `changes/2026-07-28-mobile-skip-signin.md` | active | T1-T20 change record for mobile app Skip Sign In button. |
+| `changes/2026-07-28-mobile-profile-logout-popup.md` | active | T1-T20 change record for mobile app profile logout confirmation pop-up. |
+| `changes/2026-07-29-localization-nav.md` | active | T1-T20 change record for Navigation Bar & AppBar title localization fix. |
+| `changes/2026-07-29-localization-add-vehicle.md` | active | T1-T20 change record for Add Vehicle screen localization fix. |
+| `changes/2026-07-29-user-mobile-docker.md` | completed | T1-T20 change record for user-mobile-application Docker containerization & compose integration. |
+| `changes/2026-07-29-mobile-docker-notification.md` | completed | T1-T20 change record for mobile app Docker connection notification alert. |
+| `changes/2026-07-29-mobile-docker-temporary-alert.md` | completed | T1-T20 change record for temporary (3-second SnackBar) Docker connection alert. |
 | `changes/2026-06-18-<topic>.md` | active as needed | T1-T20 handoff for each completed or handed-off work item. |
+
+
+
+
 
 ## Rule
 

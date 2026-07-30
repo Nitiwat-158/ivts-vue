@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/locale_provider.dart';
 import '../theme/app_theme.dart';
+
 
 class AppBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -13,6 +16,7 @@ class AppBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocaleProvider>();
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -42,12 +46,12 @@ class AppBottomNavBar extends StatelessWidget {
         ),
         showSelectedLabels: true,
         showUnselectedLabels: true,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.directions_car_rounded), label: 'Vehicles'),
-          BottomNavigationBarItem(icon: Icon(Icons.location_on_rounded), label: 'Location'),
-          BottomNavigationBarItem(icon: Icon(Icons.access_time_rounded), label: 'History'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profile'),
+        items: [
+          BottomNavigationBarItem(icon: const Icon(Icons.home_rounded), label: loc.t('home')),
+          BottomNavigationBarItem(icon: const Icon(Icons.directions_car_rounded), label: loc.t('vehicles')),
+          BottomNavigationBarItem(icon: const Icon(Icons.location_on_rounded), label: loc.t('location')),
+          BottomNavigationBarItem(icon: const Icon(Icons.access_time_rounded), label: loc.t('history')),
+          BottomNavigationBarItem(icon: const Icon(Icons.person_rounded), label: loc.t('profile')),
         ],
       ),
     );

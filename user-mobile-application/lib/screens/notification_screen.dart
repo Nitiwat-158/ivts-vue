@@ -39,6 +39,7 @@ class NotificationScreen extends StatelessWidget {
       grouped.putIfAbsent(n.dateGroup, () => []).add(n);
     }
 
+    final loc = context.watch<LocaleProvider>();
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -46,7 +47,7 @@ class NotificationScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: onBack ?? () => Navigator.of(context).maybePop(),
         ),
-        title: Text(context.watch<LocaleProvider>().t('notification')),
+        title: Text(loc.t('notification')),
       ),
       body: SafeArea(
         child: ListView(
@@ -54,7 +55,7 @@ class NotificationScreen extends StatelessWidget {
           children: [
             for (final group in grouped.entries) ...[
               Text(
-                group.key,
+                loc.translateDateGroup(group.key),
                 style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
@@ -75,9 +76,9 @@ class NotificationScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(n.title, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+                              Text(loc.translateNotificationTitle(n.title), style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
                               const SizedBox(height: 2),
-                              Text(n.description, style: const TextStyle(color: AppColors.textSecondary)),
+                              Text(loc.translateNotificationDescription(n.description), style: const TextStyle(color: AppColors.textSecondary)),
                             ],
                           ),
                         ),

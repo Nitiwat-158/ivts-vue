@@ -224,16 +224,9 @@ export default {
       filterSeverity: 'all',
       lastUpdated: new Date(),
       map: null,
+      mapMarkers: [],
       cameraStats: { total: 0, active: 0, inactive: 0 },
-      cameras: [
-        { id: 'CAM01_Gate_in', status: 'active', lat: 20.045121, lng: 99.889515 },
-        { id: 'CAM02_Gate_in', status: 'active', lat: 20.045117, lng: 99.889724 },
-        { id: 'CAM03_M_Tjunction', status: 'active', lat: 20.045144, lng: 99.891147 },
-        { id: 'CAM04_M_landao', status: 'active', lat: 20.045144, lng: 99.891147 },
-        { id: 'CAM05_Mgemstaion_landao', status: 'active', lat: 20.045634, lng: 99.891312 },
-        { id: 'CAM06_E1_Parking', status: 'inactive', lat: 20.045749, lng: 99.892071 },
-        { id: 'CAM07_E3_Parking', status: 'inactive', lat: 20.045764, lng: 99.892975 }
-      ],
+      cameras: [],
       alerts: [
         { type: 'unregistered', cameraId: 'CAM01_Gate_in', time: '14:23' },
         { type: 'offline', cameraId: 'CAM07_E3_Parking', duration: 120, time: '14:00' },
@@ -288,17 +281,51 @@ export default {
     },
     async fetchCameras() {
       try {
-        const response = await api.ivtsCctvs('list');
+        const response = await api.ivtsCctvs('list', { limit: 200 });
         const data = response && response.data ? response.data.data : null;
-        const rows = data && Array.isArray(data.rows) ? data.rows : [];
+        const rows = data && Array.isArray(data.rows) ? data.rows : (Array.isArray(data) ? data : []);
         
         const total = rows.length;
         const active = rows.filter(c => c.status === 'active' || c.status === 'online').length;
         const inactive = total - active;
         
         this.cameraStats = { total, active, inactive };
+
+        this.cameras = rows.map(cam => {
+          const loc = cam.location || {};
+          const lat = typeof loc.latitude === 'number' ? loc.latitude : null;
+          const lng = typeof loc.longitude === 'number' ? loc.longitude : null;
+          const isActive = cam.status === 'active' || cam.status === 'online';
+          return {
+            id: cam._id || cam.camera_name,
+            name: cam.camera_name || `Camera ${cam._id}`,
+            status: isActive ? 'active' : 'inactive',
+            lat: lat,
+            lng: lng,
+            locationDesc: loc.description || cam.camera_name || ''
+          };
+        }).filter(c => c.lat !== null && c.lng !== null);
+
+        // Group cameras by location coordinates (lat, lng)
+        const groupsMap = {};
+        this.cameras.forEach(cam => {
+          const key = `${cam.lat.toFixed(6)},${cam.lng.toFixed(6)}`;
+          if (!groupsMap[key]) {
+            groupsMap[key] = {
+              lat: cam.lat,
+              lng: cam.lng,
+              locationDesc: cam.locationDesc || cam.name,
+              cams: []
+            };
+          }
+          groupsMap[key].cams.push(cam);
+        });
+
+        this.locationGroups = Object.values(groupsMap);
+
+        this.renderMapMarkers();
       } catch (e) {
-        console.error("Failed to fetch cameras for dashboard stats", e);
+        console.error("Failed to fetch cameras for dashboard", e);
       }
     },
     async fetchAlerts() {
@@ -326,30 +353,103 @@ export default {
       }
     },
     initMap() {
-      // ตั้งค่าแผนที่เริ่มต้นที่เชียงราย (Dummy location)
-      this.map = L.map('map-container').setView([20.04489, 99.878202], 13);
+      if (this.map) return;
+
+      // Center around MFU Chiang Rai Campus
+      this.map = L.map('map-container').setView([20.0454, 99.8910], 16);
       
-      // ใช้ OpenStreetMap (ฟรี ไม่ใช้ API key)
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }).addTo(this.map);
 
-      // วาด Marker จาก Dummy Data
-      this.cameras.forEach(cam => {
-        const iconHtml = `<div class="camera-dot ${cam.status === 'active' ? 'bg-success' : 'bg-danger'}"></div>`;
-        const icon = L.divIcon({
-          className: 'custom-leaflet-icon',
-          html: iconHtml,
-          iconSize: [20, 20],
-          iconAnchor: [10, 10]
+      this.renderMapMarkers();
+    },
+    renderMapMarkers() {
+      if (!this.map) return;
+
+      if (this.mapMarkers && this.mapMarkers.length > 0) {
+        this.mapMarkers.forEach(m => m.remove());
+      }
+      this.mapMarkers = [];
+
+      const groups = this.locationGroups || [];
+      if (groups.length === 0) return;
+
+      const bounds = [];
+
+      groups.forEach(group => {
+        const cams = group.cams || [];
+        if (cams.length === 0) return;
+
+        const activeCount = cams.filter(c => c.status === 'active').length;
+        const totalCount = cams.length;
+
+        let markerColor = '#2eb85c'; // all active = green
+        if (activeCount === 0) {
+          markerColor = '#e55353'; // all inactive = red
+        } else if (activeCount < totalCount) {
+          markerColor = '#f9b115'; // mixed status = yellow
+        }
+
+        const baseRadius = totalCount > 1 ? 12 : 10;
+
+        // Vector circleMarker
+        const marker = L.circleMarker([group.lat, group.lng], {
+          radius: baseRadius,
+          fillColor: markerColor,
+          color: '#ffffff',
+          weight: 3,
+          opacity: 1,
+          fillOpacity: 0.95
+        }).addTo(this.map);
+
+        marker.on('mouseover', function () {
+          this.setStyle({ radius: baseRadius + 3, fillOpacity: 1 });
+        });
+        marker.on('mouseout', function () {
+          this.setStyle({ radius: baseRadius, fillOpacity: 0.95 });
         });
 
-        const marker = L.marker([cam.lat, cam.lng], { icon }).addTo(this.map);
-        marker.on('click', () => {
-          this.onCameraClick(cam);
-        });
-        marker.bindTooltip(cam.id);
+        const tooltipTitle = cams.length === 1
+          ? cams[0].name
+          : `${cams.map(c => c.name).join(', ')} (${cams.length} กล้อง)`;
+
+        const locationTitle = group.locationDesc || (cams.length === 1 ? cams[0].name : 'ตำแหน่งกล้อง CCTV');
+        
+        const camListHtml = cams.map(c => {
+          const isAct = c.status === 'active';
+          const badgeClass = isAct ? 'badge-success' : 'badge-danger';
+          const statusText = isAct ? 'Active (ออนไลน์)' : 'Inactive (ออฟไลน์)';
+          return `
+            <div class="py-1 border-bottom d-flex align-items-center justify-content-between" style="gap: 8px;">
+              <strong style="color: #2c3e50; font-size: 0.85rem;">${c.name}</strong>
+              <span class="badge ${badgeClass} px-2 py-1" style="font-size: 0.7rem;">${statusText}</span>
+            </div>
+          `;
+        }).join('');
+
+        const popupContent = `
+          <div style="font-size: 0.85rem; min-width: 210px; max-width: 280px; padding: 2px;">
+            <div class="d-flex align-items-center justify-content-between mb-2 pb-1 border-bottom">
+              <strong style="font-size: 0.88rem; color: #1e293b;">${locationTitle}</strong>
+              <span class="badge badge-info px-2 py-1 ml-1" style="font-size: 0.72rem;">${cams.length} กล้อง</span>
+            </div>
+            <div style="max-height: 180px; overflow-y: auto;">
+              ${camListHtml}
+            </div>
+          </div>
+        `;
+
+        marker.bindPopup(popupContent);
+        marker.bindTooltip(tooltipTitle);
+
+        this.mapMarkers.push(marker);
+        bounds.push([group.lat, group.lng]);
       });
+
+      if (bounds.length > 0) {
+        this.map.fitBounds(bounds, { padding: [40, 40], maxZoom: 17 });
+      }
     },
     onCameraClick(cam) {
       window.alert(`${this.$t('dashboard.cctvAlert')} ${cam.id}`);

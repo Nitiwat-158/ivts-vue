@@ -78,9 +78,10 @@ class _RenewalRequestScreenState extends State<RenewalRequestScreen> {
   }
 
   void _onSubmit() {
+    final loc = context.read<LocaleProvider>();
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogCtx) {
         return Dialog(
           backgroundColor: const Color(0xFFDFDFDF),
           shape: RoundedRectangleBorder(
@@ -91,10 +92,10 @@ class _RenewalRequestScreenState extends State<RenewalRequestScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'Are you sure to\nsubmit your request ?',
+                Text(
+                  loc.t('confirm_submit_request'),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.primary,
                     fontSize: 22,
                     fontWeight: FontWeight.w900,
@@ -116,10 +117,10 @@ class _RenewalRequestScreenState extends State<RenewalRequestScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text(
-                          'CANCLE',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                        onPressed: () => Navigator.of(dialogCtx).pop(),
+                        child: Text(
+                          loc.t('cancel').toUpperCase(),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
                         ),
                       ),
                     ),
@@ -136,12 +137,12 @@ class _RenewalRequestScreenState extends State<RenewalRequestScreen> {
                           ),
                         ),
                         onPressed: () {
-                          Navigator.of(context).pop(); // close dialog
+                          Navigator.of(dialogCtx).pop(); // close dialog
                           Navigator.of(context).maybePop(); // close screen
                         },
-                        child: const Text(
-                          'SUBMIT',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                        child: Text(
+                          loc.t('submit'),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
                         ),
                       ),
                     ),
@@ -157,6 +158,7 @@ class _RenewalRequestScreenState extends State<RenewalRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocaleProvider>();
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -164,7 +166,7 @@ class _RenewalRequestScreenState extends State<RenewalRequestScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: Text(context.watch<LocaleProvider>().t('renewal_request')),
+        title: Text(loc.t('renewal_request')),
       ),
       body: SafeArea(
         child: ListView(
@@ -223,18 +225,18 @@ class _RenewalRequestScreenState extends State<RenewalRequestScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  _InfoRow(label: 'Brand', value: widget.vehicle.brand),
-                  _InfoRow(label: 'Color', value: widget.vehicle.color),
-                  _InfoRow(label: 'Model', value: widget.vehicle.model),
+                  _InfoRow(label: loc.t('brand'), value: widget.vehicle.brand),
+                  _InfoRow(label: loc.t('color'), value: widget.vehicle.color),
+                  _InfoRow(label: loc.t('model'), value: widget.vehicle.model),
                 ],
               ),
             ),
             const SizedBox(height: 24),
 
             // ── Owner Section ──────────────────────────────────────────
-            const Text(
-              'Owner',
-              style: TextStyle(
+            Text(
+              loc.t('owner'),
+              style: const TextStyle(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
@@ -242,17 +244,17 @@ class _RenewalRequestScreenState extends State<RenewalRequestScreen> {
             ),
             const SizedBox(height: 12),
 
-            const _FieldLabel(label: 'Name'),
+            _FieldLabel(label: loc.t('name')),
             const SizedBox(height: 6),
             _InputField(controller: _nameController),
             const SizedBox(height: 14),
 
-            const _FieldLabel(label: 'Surname'),
+            _FieldLabel(label: loc.t('surname')),
             const SizedBox(height: 6),
             _InputField(controller: _surnameController),
             const SizedBox(height: 14),
 
-            const _FieldLabel(label: 'Citizen ID'),
+            _FieldLabel(label: loc.t('citizen_id')),
             const SizedBox(height: 6),
             _InputField(
               controller: _citizenIdController,
@@ -262,7 +264,7 @@ class _RenewalRequestScreenState extends State<RenewalRequestScreen> {
 
             // Upload Photo Row
             _UploadRow(
-              label: 'The vehicle license plate',
+              label: loc.t('photo_license_plate'),
               isAdded: _licensePlateFile != null,
               onAddTap: _showAttachOptions,
             ),
@@ -278,7 +280,7 @@ class _RenewalRequestScreenState extends State<RenewalRequestScreen> {
                 textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1),
               ),
               onPressed: _onSubmit,
-              child: Text(context.watch<LocaleProvider>().t('submit')),
+              child: Text(loc.t('submit')),
             ),
             const SizedBox(height: 24),
           ],
@@ -372,6 +374,7 @@ class _UploadRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocaleProvider>();
     return Container(
       height: 52,
       decoration: BoxDecoration(
@@ -408,7 +411,7 @@ class _UploadRow extends StatelessWidget {
                     const SizedBox(width: 4),
                   ],
                   Text(
-                    isAdded ? 'Added' : 'Add',
+                    isAdded ? loc.t('added') : loc.t('add'),
                     style: TextStyle(
                       color: isAdded ? AppColors.success : AppColors.primary,
                       fontWeight: FontWeight.w700,

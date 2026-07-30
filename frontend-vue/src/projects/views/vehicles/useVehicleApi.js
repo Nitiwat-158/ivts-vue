@@ -47,3 +47,32 @@ export async function exportVehicles(searchQuery = '', statusFilter = 'all', acc
   })
   return response.data
 }
+
+/**
+ * Fetch vehicle registration requests (add/renew).
+ * Uses GET /api/v1/ivts/requests with optional filters.
+ */
+export async function fetchRequests(filters = {}) {
+  const response = await api.ivtsRequests('get-all', filters)
+  if (response && response.data) {
+    return {
+      rows: response.data.data && response.data.data.rows ? response.data.data.rows : (response.data.data || []),
+      total: response.data.data && response.data.data.total ? response.data.data.total : 0
+    }
+  }
+  return { rows: [], total: 0 }
+}
+
+/**
+ * Approve or reject a vehicle registration request.
+ * Uses PUT /api/v1/ivts/requests/:id/review
+ * @param {string} id - request _id
+ * @param {'approved'|'rejected'} status
+ */
+export async function reviewRequest(id, status) {
+  const response = await api.ivtsRequests('review', {
+    id,
+    payload: { request_status: status }
+  })
+  return response.data
+}
