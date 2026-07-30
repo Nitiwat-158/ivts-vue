@@ -104,6 +104,7 @@ export default {
     return {
       loading: false,
       streamError: false,
+      usingFallbackProxy: false,
       timestamp: Date.now(),
       currentTime: '',
       clockInterval: null,
@@ -131,16 +132,10 @@ export default {
     },
     streamSourceUrl() {
       if (!this.camera || !this.camera.stream_urls) return null
-      // Use HLS proxy endpoint to avoid CORS issues.
-      // The backend /api/v1/ivts/cctvs/:id/stream/hls endpoint
-      // proxies requests to MediaMTX without CORS restrictions.
-      const url = this.camera.stream_urls.hls_proxy || this.camera.stream_urls.hls || null
-      if (url) {
-        console.debug('[CameraView] streamSourceUrl', url)
-      } else {
-        console.warn('[CameraView] no HLS source URL for camera', this.camera && this.camera.id)
+      if (this.usingFallbackProxy) {
+        return this.camera.stream_urls.hls_proxy || this.camera.stream_urls.hls || null
       }
-      return url
+      return this.camera.stream_urls.hls || this.camera.stream_urls.hls_proxy || null
     },
     streamSourceType() {
       if (!this.streamSourceUrl) {
@@ -172,6 +167,7 @@ export default {
     camera: {
       handler(newCam) {
         this.streamError = false
+        this.usingFallbackProxy = false
         if (newCam && newCam.status === 'online') {
           this.loading = true
           this.initHls()
@@ -245,12 +241,19 @@ export default {
               clearHlsTimeout()
               switch(data.type) {
                 case Hls.ErrorTypes.NETWORK_ERROR:
-                  console.error('Fatal network error encountered:', data)
+                  console.error('[CameraView] Fatal network error encountered:', data)
+                  if (!this.usingFallbackProxy && this.camera && this.camera.stream_urls && this.camera.stream_urls.hls_proxy) {
+                    console.info('[CameraView] Switching to backend proxy stream fallback...')
+                    this.usingFallbackProxy = true
+                    this.destroyHls()
+                    this.initHls()
+                    return
+                  }
                   this.destroyHls()
                   this.onError()
                   break
                 case Hls.ErrorTypes.MEDIA_ERROR:
-                  console.error('Fatal media error encountered:', data)
+                  console.error('[CameraView] Fatal media error encountered:', data)
                   this.hlsInstance.recoverMediaError()
                   break
                 default:
@@ -294,6 +297,13 @@ export default {
           })
           video.addEventListener('error', (event) => {
             clearHlsTimeout()
+            if (!this.usingFallbackProxy && this.camera && this.camera.stream_urls && this.camera.stream_urls.hls_proxy) {
+              console.info('[CameraView] Native video error, switching to backend proxy stream fallback...')
+              this.usingFallbackProxy = true
+              this.destroyHls()
+              this.initHls()
+              return
+            }
             console.error('[CameraView] native video element error', event)
             this.onError()
           })
@@ -306,6 +316,7 @@ export default {
     refreshStream() {
       this.loading = true
       this.streamError = false
+      this.usingFallbackProxy = false
       this.timestamp = Date.now()
       this.initHls()
     },

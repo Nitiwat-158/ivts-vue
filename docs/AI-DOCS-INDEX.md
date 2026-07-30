@@ -77,6 +77,8 @@ Do not add these unless the project has a real need and source evidence:
 | `tasks/2026-07-29-localization-history-dropdown.md` | active | Active tasklist for History screen dropdowns localization fix. |
 | `tasks/2026-07-29-localization-date-group.md` | active | Active tasklist for translating date groups from backend. |
 | `tasks/2026-07-29-mobile-emergency-banner-conditional.md` | completed | Active tasklist for conditional Emergency Request Banner display. |
+| `tasks/2026-07-30-cctv-hls-stream.md` | completed | Active tasklist for CCTV HLS Stream direct playback (`http://<STREAM_HOST>:8888/<paths>/index.m3u8`). |
+| `tasks/2026-07-30-mobile-osm-map-fix.md` | completed | Active tasklist for Mobile App OpenStreetMap 403 Tile Access Blocked fix. |
 | `tasks/2026-06-18-<topic>.md` | active as needed | One focused tasklist per work item. |
 
 
@@ -110,6 +112,8 @@ Do not add these unless the project has a real need and source evidence:
 | `changes/2026-07-29-user-mobile-docker.md` | completed | T1-T20 change record for user-mobile-application Docker containerization & compose integration. |
 | `changes/2026-07-29-mobile-docker-notification.md` | completed | T1-T20 change record for mobile app Docker connection notification alert. |
 | `changes/2026-07-29-mobile-docker-temporary-alert.md` | completed | T1-T20 change record for temporary (3-second SnackBar) Docker connection alert. |
+| `changes/2026-07-30-cctv-hls-stream.md` | completed | T1-T20 change record for CCTV HLS Stream direct playback (`http://<STREAM_HOST>:8888/<paths>/index.m3u8`). |
+| `changes/2026-07-30-mobile-osm-map-fix.md` | completed | T1-T20 change record for Mobile App OpenStreetMap 403 Tile Access Blocked fix. |
 | `changes/2026-06-18-<topic>.md` | active as needed | T1-T20 handoff for each completed or handed-off work item. |
 
 

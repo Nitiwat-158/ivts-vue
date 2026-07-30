@@ -116,12 +116,12 @@ class _LocationScreenState extends State<LocationScreen> {
             ),
             children: [
               TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.example.app',
+                urlTemplate: 'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
+                userAgentPackageName: 'th.ac.mfu.ivts',
               ),
               const RichAttributionWidget(
                 attributions: [
-                  TextSourceAttribution('OpenStreetMap contributors'),
+                  TextSourceAttribution('OpenStreetMap contributors, CARTO'),
                 ],
               ),
               MarkerLayer(
