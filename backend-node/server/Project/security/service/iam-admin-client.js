@@ -850,6 +850,7 @@ async function forwardScopedSignin(request, response) {
             const gIamId = 'google-' + (decoded.sub || decoded.email);
             const gName = decoded.given_name || '';
             const gSurname = decoded.family_name || '';
+            const gPicture = decoded.picture || '';
 
             if (!user) {
               const mongoose = require('mongoose');
@@ -859,6 +860,7 @@ async function forwardScopedSignin(request, response) {
                 email: decoded.email,
                 name: gName,
                 surname: gSurname,
+                avatar_url: gPicture,
                 role: 'user'
               });
               await user.save();
@@ -872,9 +874,10 @@ async function forwardScopedSignin(request, response) {
                 });
               }
               let needsUpdate = false;
-              if (user.name !== gName || user.surname !== gSurname) {
+              if (user.name !== gName || user.surname !== gSurname || user.avatar_url !== gPicture) {
                 user.name = gName;
                 user.surname = gSurname;
+                user.avatar_url = gPicture;
                 needsUpdate = true;
               }
               if (!user.iam_user_id) {
@@ -899,6 +902,7 @@ async function forwardScopedSignin(request, response) {
                   email: user.email,
                   firstname: user.name,
                   lastname: user.surname,
+                  avatar_url: user.avatar_url,
                   role: user.role || 'user'
                 }
               }
@@ -941,6 +945,7 @@ async function forwardScopedSignin(request, response) {
 
         const firstName = current.account.userinfo && current.account.userinfo.firstName ? current.account.userinfo.firstName : '';
         const lastName = current.account.userinfo && current.account.userinfo.lastName ? current.account.userinfo.lastName : '';
+        const pictureUrl = current.account.userinfo && current.account.userinfo.picture ? current.account.userinfo.picture : '';
 
         if (!user && iamUserId && email) {
           const mongoose = require('mongoose');
@@ -950,6 +955,7 @@ async function forwardScopedSignin(request, response) {
             email: email,
             name: firstName,
             surname: lastName,
+            avatar_url: pictureUrl,
             role: 'user'
           });
           await user.save();
@@ -964,10 +970,11 @@ async function forwardScopedSignin(request, response) {
             });
           }
           let needsUpdate = false;
-          if (user.name !== firstName || user.surname !== lastName || user.email !== email) {
+          if (user.name !== firstName || user.surname !== lastName || user.email !== email || user.avatar_url !== pictureUrl) {
             user.name = firstName;
             user.surname = lastName;
             user.email = email;
+            user.avatar_url = pictureUrl;
             needsUpdate = true;
           }
           if (!user.iam_user_id) {
@@ -990,6 +997,7 @@ async function forwardScopedSignin(request, response) {
               email: user.email,
               firstname: user.name,
               lastname: user.surname,
+              avatar_url: user.avatar_url,
               role: user.role || 'user'
             };
           }

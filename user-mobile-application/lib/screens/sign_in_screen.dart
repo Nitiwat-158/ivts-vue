@@ -50,12 +50,6 @@ class _SignInScreenState extends State<SignInScreen> {
     super.dispose();
   }
 
-  void _devLogin() {
-    _usernameController.text = 'tester01'; // Username ที่รัน seed
-    _passwordController.text = '********'; // Backdoor Password
-    _signIn();
-  }
-
   Future<void> _triggerMobileGoogleSignIn() async {
     setState(() {
       _isLoading = true;
@@ -97,6 +91,8 @@ class _SignInScreenState extends State<SignInScreen> {
           ),
         );
       } else if (!result.requires2FA && result.user != null) {
+        await AppDataRepository.instance.refresh();
+        if (!mounted) return;
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (_) => ValueListenableBuilder<int>(
@@ -140,6 +136,8 @@ class _SignInScreenState extends State<SignInScreen> {
           ),
         );
       } else if (!result.requires2FA && result.user != null) {
+        await AppDataRepository.instance.refresh();
+        if (!mounted) return;
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (_) => ValueListenableBuilder<int>(
@@ -275,28 +273,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         onPressed: _triggerMobileGoogleSignIn,
                       ),
                     ],
-                    if (kDebugMode && !_isLoading) ...[
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        onPressed: _devLogin,
-                        icon: const Icon(Icons.developer_mode, color: Colors.white),
-                        label: const Text(
-                          'Bypass Login (Dev Mode)',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.redAccent,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ],
+
                   ],
                 ),
               ),

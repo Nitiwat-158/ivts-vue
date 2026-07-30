@@ -18,6 +18,7 @@ class AuthUser {
   final String name;
   final String surname;
   final String email;
+  final String? avatarUrl;
   final String role;
 
   AuthUser({
@@ -25,16 +26,31 @@ class AuthUser {
     required this.name,
     required this.surname,
     required this.email,
+    this.avatarUrl,
     required this.role,
   });
 
-  factory AuthUser.fromJson(Map<String, dynamic> json) => AuthUser(
-        id: json['id'],
-        name: json['name'],
-        surname: json['surname'],
-        email: json['email'],
-        role: json['role'],
-      );
+  factory AuthUser.fromJson(Map<String, dynamic> json) {
+    return AuthUser(
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      surname: json['surname'] ?? '',
+      email: json['email'] ?? '',
+      avatarUrl: json['avatarUrl'],
+      role: json['role'] ?? 'user',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'surname': surname,
+      'email': email,
+      'avatarUrl': avatarUrl,
+      'role': role,
+    };
+  }
 }
 
 class AuthService {
@@ -129,12 +145,11 @@ class AuthService {
       name: account['firstname'] ?? account['name'] ?? '',
       surname: account['lastname'] ?? account['surname'] ?? '',
       email: account['email'] ?? '',
+      avatarUrl: account['avatar_url'],
       role: account['role'] ?? 'user',
     );
     
-    await _storage.write(key: 'user', value: jsonEncode({
-      'id': user.id, 'name': user.name, 'surname': user.surname, 'email': user.email, 'role': user.role,
-    }));
+    await _storage.write(key: 'user', value: jsonEncode(user.toJson()));
 
     return SignInResult(requires2FA: false, user: user);
   }
@@ -194,12 +209,11 @@ class AuthService {
       name: account['firstname'] ?? account['name'] ?? '',
       surname: account['lastname'] ?? account['surname'] ?? '',
       email: account['email'] ?? '',
+      avatarUrl: account['avatar_url'],
       role: account['role'] ?? 'user',
     );
     
-    await _storage.write(key: 'user', value: jsonEncode({
-      'id': user.id, 'name': user.name, 'surname': user.surname, 'email': user.email, 'role': user.role,
-    }));
+    await _storage.write(key: 'user', value: jsonEncode(user.toJson()));
 
     return SignInResult(requires2FA: false, user: user);
   }

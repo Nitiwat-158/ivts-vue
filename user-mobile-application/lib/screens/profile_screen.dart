@@ -159,106 +159,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _showChangePasswordDialog() {
-    final formKey = GlobalKey<FormState>();
-    final oldPasswordCtrl = TextEditingController();
-    final newPasswordCtrl = TextEditingController();
-    final confirmPasswordCtrl = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(context.watch<LocaleProvider>().t('change_password'), style: TextStyle(color: AppColors.primary)),
-          content: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: oldPasswordCtrl,
-                  obscureText: true,
-                  decoration: InputDecoration(labelText: context.watch<LocaleProvider>().t('current_password')),
-                  validator: (v) =>
-                      (v == null || v.isEmpty) ? context.read<LocaleProvider>().t('error_enter_current_password') : null,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: newPasswordCtrl,
-                  obscureText: true,
-                  decoration: InputDecoration(labelText: context.watch<LocaleProvider>().t('new_password')),
-                  validator: (v) =>
-                      (v == null || v.length < 8) ? context.read<LocaleProvider>().t('error_password_length') : null,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: confirmPasswordCtrl,
-                  obscureText: true,
-                  decoration: InputDecoration(labelText: context.watch<LocaleProvider>().t('confirm_new_password')),
-                  validator: (v) =>
-                      (v != newPasswordCtrl.text) ? context.read<LocaleProvider>().t('error_password_mismatch') : null,
-                ),
-              ],
-            ),
-          ),
-          actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-          actions: [
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFCE8B8A),
-                      foregroundColor: AppColors.primary,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () => Navigator.pop(ctx),
-                    child: Text(
-                      context.watch<LocaleProvider>().t('cancel').toUpperCase(),
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {
-                      if (formKey.currentState!.validate()) {
-                        // TODO: ต่อ API เปลี่ยนรหัสผ่านจริงตอนเชื่อม backend
-                        // (MongoDB collection: user -> field passwordHash)
-                        Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(context.watch<LocaleProvider>().t('password_changed_success'))),
-                        );
-                      }
-                    },
-                    child: Text(
-                      context.watch<LocaleProvider>().t('confirm').toUpperCase(),
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   void _showDetailDialog(String title, String value) {
     showDialog(
@@ -355,8 +255,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   CircleAvatar(
                     radius: 30,
                     backgroundColor: AppColors.cardGrey,
-                    backgroundImage: _avatarImage != null ? FileImage(_avatarImage!) : null,
-                    child: _avatarImage == null
+                    backgroundImage: _avatarImage != null 
+                        ? FileImage(_avatarImage!) as ImageProvider
+                        : (_currentUser?.avatarUrl != null && _currentUser!.avatarUrl!.isNotEmpty)
+                            ? NetworkImage(_currentUser!.avatarUrl!) as ImageProvider
+                            : null,
+                    child: (_avatarImage == null && (_currentUser?.avatarUrl == null || _currentUser!.avatarUrl!.isEmpty))
                         ? const Icon(Icons.person, size: 30, color: AppColors.primary)
                         : null,
                   ),
@@ -438,7 +342,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               MaterialPageRoute(builder: (_) => const RequestHistoryScreen()),
             ),
           ),
-          _menuTile(context, localeProvider.t('change_password'), onTap: _showChangePasswordDialog),
+
           _languageTile(context),
           const SizedBox(height: 12),
           ElevatedButton(
