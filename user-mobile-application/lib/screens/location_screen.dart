@@ -3,16 +3,94 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../data/mock_data.dart';
 import '../models/vehicle.dart';
+import '../services/app_data_repository.dart';
 import '../theme/app_theme.dart';
 
-class LocationScreen extends StatelessWidget {
+class LocationScreen extends StatefulWidget {
   final Vehicle? initialVehicle;
 
   const LocationScreen({super.key, this.initialVehicle});
 
   @override
+  State<LocationScreen> createState() => _LocationScreenState();
+}
+
+class _LocationScreenState extends State<LocationScreen> {
+  late Vehicle? _selectedVehicle;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedVehicle = widget.initialVehicle ?? MockData.mostRecentlyMoved;
+  }
+
+  void _showVehicleSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.divider,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...MockData.vehicles.map((v) => ListTile(
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: AppColors.cardGrey,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        v.type == 'Motorcycle'
+                            ? Icons.two_wheeler_rounded
+                            : Icons.directions_car_rounded,
+                        color: AppColors.primary,
+                        size: 22,
+                      ),
+                    ),
+                    title: Text(
+                      v.plateNumber,
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    subtitle: Text(
+                      'ID: ${v.vehicleCode}',
+                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                    ),
+                    trailing: _selectedVehicle?.vehicleCode == v.vehicleCode
+                        ? const Icon(Icons.check_rounded, color: AppColors.primary)
+                        : null,
+                    onTap: () {
+                      setState(() => _selectedVehicle = v);
+                      Navigator.pop(ctx);
+                    },
+                  )),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final vehicle = initialVehicle ?? MockData.mostRecentlyMoved;
+    final vehicle = _selectedVehicle;
 
     if (vehicle == null) {
       return const Center(
@@ -75,34 +153,105 @@ class LocationScreen extends StatelessWidget {
             ],
           ),
         ),
-        if (Navigator.of(context).canPop())
-          Positioned(
-            top: 0,
-            left: 0,
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.divider.withValues(alpha: 0.5),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
+
+        // Top bar: Back | Vehicle Dropdown | Refresh
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                children: [
+                  // Back button
+                  if (Navigator.of(context).canPop())
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.divider.withValues(alpha: 0.5),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                      ],
+                        child: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primary, size: 20),
+                      ),
                     ),
-                    child: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primary, size: 20),
+                  const SizedBox(width: 8),
+
+                  // Vehicle dropdown pill
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: _showVehicleSheet,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(999),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.divider.withValues(alpha: 0.5),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                vehicle.plateNumber,
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 15,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary, size: 20),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+
+                  // Refresh button
+                  GestureDetector(
+                    onTap: () => AppDataRepository.instance.refresh(),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.divider.withValues(alpha: 0.5),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(Icons.refresh_rounded, color: AppColors.primary, size: 20),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
+        ),
+
+        // Location icon button (unchanged)
         Positioned(
           top: 90,
           right: 24,
@@ -123,6 +272,8 @@ class LocationScreen extends StatelessWidget {
             child: const Icon(Icons.location_on_rounded, color: AppColors.primary, size: 28),
           ),
         ),
+
+        // Bottom card
         Positioned(
           bottom: 16,
           left: 16,
@@ -196,5 +347,3 @@ class LocationScreen extends StatelessWidget {
     );
   }
 }
-
-

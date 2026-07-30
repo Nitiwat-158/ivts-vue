@@ -85,11 +85,9 @@ Adjust weights per project, but keep them evidence-backed.
 | ivts-TASK-026 | Containerize user-mobile-application & Docker Compose | Ops/Mobile | AI | none | done | 100 | Created Dockerfile, nginx.server.conf & updated docker-compose files | `user-mobile-application/Dockerfile`, `docker-compose.yml` | `docker compose config` PASS | none | none | Dockerized user-mobile service published on port 8088 |
 | ivts-TASK-031 | Mobile App: Docker Connection Notification Alert | Mobile | AI | none | done | 100 | Added AppDataRepository notifier, LocaleProvider translations & HomeScreen banner alert | `app_data_repository.dart`, `home_screen.dart` | `flutter analyze lib/` PASS | none | none | Docker connection status banner & SnackBar alert |
 | ivts-TASK-037 | Mobile App: Temporary Docker Connection Alert (3s SnackBar) | Mobile | AI | none | done | 100 | Converted Docker connection alert to temporary 3-second floating SnackBar & removed static banner | `home_screen.dart` | `flutter analyze lib/` PASS | none | none | Temporary 3-second SnackBar alert |
-| ivts-TASK-041 | Mobile App: Conditional Emergency Request Banner Display | Mobile | AI | none | done | 100 | Added hasActiveEmergencyNotifier, showing banner on HomeScreen ONLY when active report exists | `home_screen.dart`, `emergency_request_screen.dart` | `flutter analyze lib/` PASS | none | none | Conditional emergency request banner |
-
-
-
-
+| ivts-TASK-041 | Mobile App: Conditional Emergency Request Banner Display | Mobile | AI | none | done | 100 | Added hasActiveEmergencyNotifier, showing banner on HomeScreen ONLY when active report exists | `home_screen.dart`, `emergency_request_screen.dart` | flutter analyze PASS | none | none | Conditional emergency request banner |
+| ivts-LOC-R-002 | Location Screen: Add Refresh Button (top-right) | Mobile | AI | none | done | 100 | เพิ่ม Positioned Refresh button เรียก AppDataRepository.instance.refresh(); flutter run PASS | `location_screen.dart` | flutter run PASS 2026-07-30 | none | none | ปุ่ม Refresh มุมขวาบนหน้า Location |
+| ivts-LOC-R-003 | Location Screen: Vehicle Dropdown Selector | Mobile | AI | ivts-LOC-R-002 | done | 80 | แปลง StatelessWidget → StatefulWidget; Top Bar + _showVehicleSheet() + Vehicle list; flutter run PASS; UI verify บน device ยังค้าง | `location_screen.dart` | flutter run PASS 2026-07-30 | none | รัน flutter run verify UI บน Android device | Vehicle Dropdown Selector + Top Bar |
 
 ## T4. Verification Log
 
