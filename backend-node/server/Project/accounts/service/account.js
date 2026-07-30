@@ -169,7 +169,7 @@ exports.verifyIdTokenGoogle = async function (request, response, next) {
             const audience =
                 process.env.GOOGLE_CLIENT_ID ||
                 process.env.VUE_APP_CLIENTID ||
-                '225788483142-8pkg8on8nh60ao83ve33ff3lflv2ccvo.apps.googleusercontent.com';
+                '298470872970-am1echombj03p2n223p9gavitmo811kq.apps.googleusercontent.com';
             const client = new OAuth2Client(audience || undefined);
 
             try {

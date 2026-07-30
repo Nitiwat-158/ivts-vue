@@ -73,4 +73,12 @@ docker compose down
 docker compose up -d
 ```
 
+#open mobile app in chrome
+```bash
+cd user-mobile-application/lib
+flutter run -d chrome --web-port 5000
+
+(Press R to Hot Restart clear old cache)
+```
+
 ---

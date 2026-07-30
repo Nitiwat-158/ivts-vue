@@ -96,17 +96,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 text: context.watch<LocaleProvider>().t('no_vehicle_banner'),
                 onTap: () {},
               ),
-            if (!_hasNoVehicles)
+            if (!_hasNoVehicles && MockData.hasActiveEmergency)
               _ActionBanner(
                 color: AppColors.accentRed,
                 icon: Icons.fmd_bad_rounded,
                 text: context.watch<LocaleProvider>().t('emergency_banner'),
-                onTap: () {
-                  Navigator.of(context).push(
+                onTap: () async {
+                  await Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => const EmergencyStatusScreen(),
                     ),
                   );
+                  if (mounted) setState(() {});
                 },
               ),
             if (!_hasNoVehicles && expiring != null && _showRenewalBanner)

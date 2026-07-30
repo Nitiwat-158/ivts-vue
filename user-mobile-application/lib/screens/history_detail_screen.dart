@@ -58,9 +58,10 @@ List<_ZoneSession> _groupWaypointsIntoSessions(List<TripWaypoint> waypoints) {
         // ไม่มี exit จับคู่ได้ = ยังอยู่ในพื้นที่นี้ (current)
         sessions.add(_ZoneSession(zoneName: wp.zoneName, entryTime: wp.time));
       }
+    } else if (wp.eventType == WaypointEventType.exit) {
+      // eventType == exit ที่ไม่ถูกจับคู่ (กรณีข้อมูลไม่ครบ) จะถูกข้ามไป
+      debugPrint('Warning: เจอ exit ที่ไม่มี entry คู่กันใน zone ${wp.zoneName} (อาจแปลว่าข้อมูล tracks table ขาดหาย)');
     }
-    // eventType == exit ที่ไม่ถูกจับคู่ (กรณีข้อมูลไม่ครบ) จะถูกข้ามไปเงียบๆ
-    // TODO: พิจารณาเพิ่ม log/แจ้งเตือนถ้าเจอ exit ที่ไม่มี entry คู่กัน (อาจแปลว่าข้อมูล tracks table ขาดหาย)
   }
   return sessions;
 }

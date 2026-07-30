@@ -218,9 +218,28 @@ exports.listTripHistory = async function listTripHistory(query) {
   const histories = await TrackingHistory.find(filter).sort({ timestamp: -1 }).limit(limit).lean();
   if (!histories.length) return [];
 
+  const mongoose = require('mongoose');
   const vehicleIds = [...new Set(histories.map((h) => h.vehicle_id).filter(Boolean))];
-  const vehicles = vehicleIds.length ? await Vehicle.find({ _id: { $in: vehicleIds } }).lean() : [];
-  const vehicleMap = new Map(vehicles.map((v) => [String(v._id), v]));
+  
+  const validObjectIds = vehicleIds.filter(id => mongoose.Types.ObjectId.isValid(id));
+  const stringIds = vehicleIds.filter(id => !mongoose.Types.ObjectId.isValid(id));
+  
+  let vehicles = [];
+  if (vehicleIds.length) {
+    const orQuery = [];
+    if (validObjectIds.length) orQuery.push({ _id: { $in: validObjectIds } });
+    if (stringIds.length) orQuery.push({ vehicle_code: { $in: stringIds } });
+    
+    if (orQuery.length) {
+      vehicles = await Vehicle.find({ $or: orQuery }).lean();
+    }
+  }
+  
+  const vehicleMap = new Map();
+  vehicles.forEach((v) => {
+    if (v._id) vehicleMap.set(String(v._id), v);
+    if (v.vehicle_code) vehicleMap.set(String(v.vehicle_code), v);
+  });
 
   return histories.map((h) => {
     const vehicle = vehicleMap.get(String(h.vehicle_id)) || null;
@@ -546,3 +565,4 @@ exports.listNotifications = async function listNotifications(query) {
 
   return [...emergencyNotifications, ...renewalNotifications];
 };
+

@@ -57,6 +57,7 @@ class _EmergencyStatusScreenState extends State<EmergencyStatusScreen> {
                     Navigator.pop(ctx);
                     setState(() {
                       _isResolved = true;
+                      MockData.hasActiveEmergency = false;
                       final now = DateTime.now();
                       final hour = now.hour % 12 == 0 ? 12 : now.hour % 12;
                       final minute = now.minute.toString().padLeft(2, '0');
@@ -64,7 +65,7 @@ class _EmergencyStatusScreenState extends State<EmergencyStatusScreen> {
                       _resolvedTime = '$hour:$minute $period';
                     });
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(context.watch<LocaleProvider>().t('case_marked_resolved'))),
+                      SnackBar(content: Text(context.read<LocaleProvider>().t('case_marked_resolved'))),
                     );
                   },
                   child: Text(context.watch<LocaleProvider>().t('confirm'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),

@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../providers/locale_provider.dart';
 import 'request_history_screen.dart';
+import '../services/auth_service.dart';
+import 'sign_in_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final VoidCallback onBack;
@@ -198,10 +200,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.divider),
       ),
-      child: ListTile(
-        title: Text(label, style: const TextStyle(color: AppColors.primary)),
-        trailing: const Icon(Icons.chevron_right, color: AppColors.primary),
-        onTap: onTap,
+      child: Material(
+        color: Colors.transparent,
+        child: ListTile(
+          title: Text(label, style: const TextStyle(color: AppColors.primary)),
+          trailing: const Icon(Icons.chevron_right, color: AppColors.primary),
+          onTap: onTap,
+        ),
       ),
     );
   }
@@ -355,7 +360,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               minimumSize: const Size.fromHeight(48),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            onPressed: widget.onBack,
+            onPressed: () async {
+              await AuthService().signOut();
+              if (context.mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const SignInScreen()),
+                  (route) => false,
+                );
+              }
+            },
             child: Text(localeProvider.t('logout')),
           ),
         ],

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import '../data/mock_data.dart';
 import '../models/vehicle.dart';
+import '../services/mobile_api_service.dart';
 import '../theme/app_theme.dart';
 import 'emergency_status_screen.dart';
 
@@ -37,6 +38,7 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
 
   // จับเวลาไว้ตอนกดยืนยัน SUBMIT จริง (ไม่ใช่ตอนเปิดหน้า) เพื่อให้ตรงกับเวลาที่ user กดส่งจริง
   DateTime? _submittedAt;
+  final bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -171,36 +173,53 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        onPressed: () {
+                        onPressed: _isSubmitting ? null : () async {
                           final now = DateTime.now();
                           setState(() => _submittedAt = now);
 
-                          // TODO: ต่อ API จริงตอนเชื่อม backend (MongoDB collection เดียวกับ admin)
-                          // - _id: ไม่ส่ง ให้ backend generate เอง
-                          // - incident_time: ใช้ค่าเดียวกับ submitted_at ตามที่ตกลงไว้ (auto)
-                          // - status: ตั้งต้นเป็น OPEN เสมอตอน user ส่งใหม่ (CLOSED คือสถานะที่ admin ปิดเคสแล้วเท่านั้น)
-                          // - assigned_admin_id: null เสมอฝั่ง user ให้ backend/admin เป็นคน assign
-                          // - media_urls: ตอนนี้เป็นแค่ local file path (mock) ของจริงต้อง upload
-                          //   ไฟล์ขึ้น server/object storage ก่อน แล้วค่อยเก็บ URL ที่ได้กลับมาลง field นี้
-                          // - location: ยังไม่มี GPS capture ในสโคปนี้ ปล่อย null ไว้ก่อน
+                          // ของจริงต้อง upload ไฟล์ขึ้น server/object storage ก่อน
+                          // แล้วค่อยส่ง URL ให้ API ตอนนี้ใช้ path ชั่วคราวไปก่อน
                           final reportPayload = {
-                            'vehicle_id': widget.vehicle.vehicleCode,
+                            'vehicle_id': widget.vehicle.id, // ส่ง vehicle._id จริงจาก backend
                             'request_type': _requestTypeValues[_selected] ?? 'other',
                             'incident_time': now.toIso8601String(),
-                            'submitted_at': now.toIso8601String(),
                             'description': _descriptionController.text,
                             'location': null,
                             'media_urls': _attachedImages.map((f) => f.path).toList(),
-                            'status': 'OPEN',
-                            'assigned_admin_id': null,
                           };
-                          debugPrint('Emergency report (mock): $reportPayload');
+                          
+                          try {
+                            // ปิด Dialog confirm
+                            Navigator.of(context).pop();
 
-                          Navigator.of(context).pop();
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (_) => const EmergencyStatusScreen()),
-                          );
+                            // โชว์ loading dialog
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (ctx) => const Center(
+                                child: CircularProgressIndicator(color: AppColors.primary),
+                              ),
+                            );
+
+                            await MobileApiService().createEmergencyReport(reportPayload);
+
+                            if (!context.mounted) return;
+                            // ปิด loading dialog
+                            Navigator.of(context).pop();
+
+                            MockData.hasActiveEmergency = true;
+
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (_) => const EmergencyStatusScreen()),
+                            );
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            Navigator.of(context).pop(); // ปิด loading
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Failed to submit report: $e')),
+                            );
+                          }
                         },
                         child: const Text(
                           'SUBMIT',
