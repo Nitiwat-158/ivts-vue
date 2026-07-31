@@ -29,8 +29,15 @@ class VehicleCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: AppColors.cardGrey,
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.divider.withValues(alpha: 0.35),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -42,14 +49,15 @@ class VehicleCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
+                  color: AppColors.cardGrey,
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(
                   vehicle.type == 'Motorcycle'
                       ? Icons.two_wheeler_rounded
                       : Icons.directions_car_filled_rounded,
-                  color: AppColors.textPrimary,
+                  color: AppColors.primary,
+                  size: 26,
                 ),
               ),
               const SizedBox(width: 10),

@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 /// Base URL configuration for the IVTS mobile API.
 ///
@@ -13,6 +14,8 @@ import 'dart:io' show Platform;
 /// machine's LAN IP instead; override [ApiConfig.baseUrl] or rebuild with
 /// `--dart-define=API_BASE_URL=http://<lan-ip>:8203/api/v1/mobile` in that
 /// case.
+import 'package:flutter/foundation.dart' show kReleaseMode;
+
 class ApiConfig {
   ApiConfig._();
 
@@ -20,10 +23,21 @@ class ApiConfig {
 
   static const int devPort = 8203;
 
-  static String get baseUrl {
-    if (_override.isNotEmpty) return _override;
-    if (!Platform.isAndroid) return 'http://localhost:$devPort/api/v1/mobile';
+  static String get _default {
+    if (kIsWeb) return 'http://127.0.0.1:$devPort/api/v1/mobile';
+    if (!Platform.isAndroid) return 'http://127.0.0.1:$devPort/api/v1/mobile';
     return 'http://10.0.2.2:$devPort/api/v1/mobile';
+  }
+
+  static String get baseUrl {
+    if (_override.isNotEmpty) {
+      assert(
+        !kReleaseMode || _override.startsWith('https://'),
+        'Production build ต้องใช้ HTTPS เท่านั้น: $_override',
+      );
+      return _override;
+    }
+    return _default;
   }
 
   /// Network/parse timeout for each API call before falling back to

@@ -18,6 +18,7 @@ const express = require('express');
 const router = express.Router();
 
 const mobileService = require('./service/mobile');
+const iamAdminClient = require('../security/service/iam-admin-client');
 
 function ok(response, data, status) {
   return response.status(status || 200).json({
@@ -140,6 +141,18 @@ router.get('/notifications', async function (request, response) {
   } catch (error) {
     return fail(response, error);
   }
+});
+
+/**
+ * POST /api/v1/mobile/auth/signin
+ * Proxy login directly to IAM server using web approach
+ */
+router.post('/auth/signin', function (request, response) {
+  // TODO: Before production, decide if this mobile app should only allow 'user' (car owner) role.
+  // This is a temporary, minimal-exposure decision until real mobile authentication exists.
+  // Extended to support both Admin and User fallback in this phase.
+  request.isMobileClient = true;
+  return iamAdminClient.forwardScopedSignin(request, response);
 });
 
 module.exports = router;

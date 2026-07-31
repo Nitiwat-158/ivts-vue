@@ -20,10 +20,24 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   File? _avatarImage;
   final ImagePicker _picker = ImagePicker();
+  AuthUser? _currentUser;
+  bool _isLoadingUser = true;
 
-  // TODO: mock ไว้ก่อน — เปลี่ยนเป็นค่าจริงจาก session/API ตอนต่อ backend
-  final String _fullEmail = 'Boonmee.s@gmail.com';
-  final String _fullPhone = '+66812345999';
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    final user = await AuthService().getCurrentUser();
+    if (mounted) {
+      setState(() {
+        _currentUser = user;
+        _isLoadingUser = false;
+      });
+    }
+  }
 
   void _showLogoutDialog() {
     showDialog(
@@ -145,106 +159,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _showChangePasswordDialog() {
-    final formKey = GlobalKey<FormState>();
-    final oldPasswordCtrl = TextEditingController();
-    final newPasswordCtrl = TextEditingController();
-    final confirmPasswordCtrl = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(context.watch<LocaleProvider>().t('change_password'), style: TextStyle(color: AppColors.primary)),
-          content: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: oldPasswordCtrl,
-                  obscureText: true,
-                  decoration: InputDecoration(labelText: context.watch<LocaleProvider>().t('current_password')),
-                  validator: (v) =>
-                      (v == null || v.isEmpty) ? context.read<LocaleProvider>().t('error_enter_current_password') : null,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: newPasswordCtrl,
-                  obscureText: true,
-                  decoration: InputDecoration(labelText: context.watch<LocaleProvider>().t('new_password')),
-                  validator: (v) =>
-                      (v == null || v.length < 8) ? context.read<LocaleProvider>().t('error_password_length') : null,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: confirmPasswordCtrl,
-                  obscureText: true,
-                  decoration: InputDecoration(labelText: context.watch<LocaleProvider>().t('confirm_new_password')),
-                  validator: (v) =>
-                      (v != newPasswordCtrl.text) ? context.read<LocaleProvider>().t('error_password_mismatch') : null,
-                ),
-              ],
-            ),
-          ),
-          actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-          actions: [
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFCE8B8A),
-                      foregroundColor: AppColors.primary,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () => Navigator.pop(ctx),
-                    child: Text(
-                      context.watch<LocaleProvider>().t('cancel').toUpperCase(),
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {
-                      if (formKey.currentState!.validate()) {
-                        // TODO: ต่อ API เปลี่ยนรหัสผ่านจริงตอนเชื่อม backend
-                        // (MongoDB collection: user -> field passwordHash)
-                        Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(context.watch<LocaleProvider>().t('password_changed_success'))),
-                        );
-                      }
-                    },
-                    child: Text(
-                      context.watch<LocaleProvider>().t('confirm').toUpperCase(),
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   void _showDetailDialog(String title, String value) {
     showDialog(
@@ -271,10 +185,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.divider),
       ),
-      child: ListTile(
-        title: Text(label, style: const TextStyle(color: AppColors.primary)),
-        trailing: const Icon(Icons.chevron_right, color: AppColors.primary),
-        onTap: onTap,
+      child: Material(
+        color: Colors.transparent,
+        child: ListTile(
+          title: Text(label, style: const TextStyle(color: AppColors.primary)),
+          trailing: const Icon(Icons.chevron_right, color: AppColors.primary),
+          onTap: onTap,
+        ),
       ),
     );
   }
@@ -338,8 +255,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   CircleAvatar(
                     radius: 30,
                     backgroundColor: AppColors.cardGrey,
-                    backgroundImage: _avatarImage != null ? FileImage(_avatarImage!) : null,
-                    child: _avatarImage == null
+                    backgroundImage: _avatarImage != null 
+                        ? FileImage(_avatarImage!) as ImageProvider
+                        : (_currentUser?.avatarUrl != null && _currentUser!.avatarUrl!.isNotEmpty)
+                            ? NetworkImage(_currentUser!.avatarUrl!) as ImageProvider
+                            : null,
+                    child: (_avatarImage == null && (_currentUser?.avatarUrl == null || _currentUser!.avatarUrl!.isEmpty))
                         ? const Icon(Icons.person, size: 30, color: AppColors.primary)
                         : null,
                   ),
@@ -361,14 +282,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
               const SizedBox(width: 14),
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Sodsroi Mala',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primary)),
-                  SizedBox(height: 2),
-                  Text('6631501148', style: TextStyle(color: AppColors.textSecondary)),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_isLoadingUser)
+                      const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    else ...[
+                      Text('${_currentUser?.name ?? ''} ${_currentUser?.surname ?? ''}'.trim(),
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primary)),
+                      const SizedBox(height: 2),
+                      Text(_currentUser?.role.toUpperCase() ?? 'USER', style: const TextStyle(color: AppColors.textSecondary)),
+                    ],
+                  ],
+                ),
               ),
             ],
           ),
@@ -397,15 +328,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _InfoRow(
                   icon: Icons.mail_outline,
                   label: 'Email address',
-                  value: 'B*****@gmail.com',
-                  onTap: () => _showDetailDialog('Email address', _fullEmail),
-                ),
-                const Divider(height: 24),
-                _InfoRow(
-                  icon: Icons.phone_iphone,
-                  label: 'Phone number',
-                  value: '+66*****999',
-                  onTap: () => _showDetailDialog('Phone number', _fullPhone),
+                  value: _currentUser?.email ?? '-',
+                  onTap: () => _showDetailDialog('Email address', _currentUser?.email ?? '-'),
                 ),
               ],
             ),
@@ -418,7 +342,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               MaterialPageRoute(builder: (_) => const RequestHistoryScreen()),
             ),
           ),
-          _menuTile(context, localeProvider.t('change_password'), onTap: _showChangePasswordDialog),
+
           _languageTile(context),
           const SizedBox(height: 12),
           ElevatedButton(

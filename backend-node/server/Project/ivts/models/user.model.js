@@ -14,6 +14,7 @@ const userSchema = new Schema({
   email: { type: String, trim: true, lowercase: true, default: null },
   name: { type: String, trim: true, default: null },
   surname: { type: String, trim: true, default: null },
+  avatar_url: { type: String, trim: true, default: null },
   role: {
     type: String,
     enum: ['admin', 'user'],

@@ -16,7 +16,9 @@ class LocationScreen extends StatefulWidget {
 }
 
 class _LocationScreenState extends State<LocationScreen> {
-  late Vehicle? _selectedVehicle;
+  Vehicle? _selectedVehicle;
+  final MapController _mapController = MapController();
+  final LatLng _targetLocation = const LatLng(20.04489, 99.878202);
 
   @override
   void initState() {
@@ -45,41 +47,48 @@ class _LocationScreenState extends State<LocationScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              ...MockData.vehicles.map((v) => ListTile(
-                    leading: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: AppColors.cardGrey,
-                        borderRadius: BorderRadius.circular(10),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: MockData.vehicles.map((v) => ListTile(
+                      leading: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: AppColors.cardGrey,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          v.type == 'Motorcycle'
+                              ? Icons.two_wheeler_rounded
+                              : Icons.directions_car_rounded,
+                          color: AppColors.primary,
+                          size: 22,
+                        ),
                       ),
-                      child: Icon(
-                        v.type == 'Motorcycle'
-                            ? Icons.two_wheeler_rounded
-                            : Icons.directions_car_rounded,
-                        color: AppColors.primary,
-                        size: 22,
+                      title: Text(
+                        v.plateNumber,
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
-                    title: Text(
-                      v.plateNumber,
-                      style: const TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w700,
+                      subtitle: Text(
+                        'ID: ${v.vehicleCode}',
+                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                       ),
-                    ),
-                    subtitle: Text(
-                      'ID: ${v.vehicleCode}',
-                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
-                    ),
-                    trailing: _selectedVehicle?.vehicleCode == v.vehicleCode
-                        ? const Icon(Icons.check_rounded, color: AppColors.primary)
-                        : null,
-                    onTap: () {
-                      setState(() => _selectedVehicle = v);
-                      Navigator.pop(ctx);
-                    },
-                  )),
+                      trailing: _selectedVehicle?.vehicleCode == v.vehicleCode
+                          ? const Icon(Icons.check_rounded, color: AppColors.primary)
+                          : null,
+                      onTap: () {
+                        setState(() => _selectedVehicle = v);
+                        Navigator.pop(ctx);
+                      },
+                    )).toList(),
+                  ),
+                ),
+              ),
               const SizedBox(height: 8),
             ],
           ),
@@ -110,9 +119,10 @@ class _LocationScreenState extends State<LocationScreen> {
           width: double.infinity,
           height: double.infinity,
           child: FlutterMap(
-            options: const MapOptions(
-              initialCenter: LatLng(20.04489, 99.878202),
-              initialZoom: 13.0,
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: _targetLocation,
+              initialZoom: 15.0,
             ),
             children: [
               TileLayer(
@@ -127,7 +137,7 @@ class _LocationScreenState extends State<LocationScreen> {
               MarkerLayer(
                 markers: [
                   Marker(
-                    point: const LatLng(20.04489, 99.878202),
+                    point: _targetLocation,
                     width: 40,
                     height: 40,
                     child: Container(
@@ -251,25 +261,30 @@ class _LocationScreenState extends State<LocationScreen> {
           ),
         ),
 
-        // Location icon button (unchanged)
+        // Location icon button
         Positioned(
           top: 90,
           right: 24,
-          child: Container(
-            width: 54,
-            height: 54,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.divider.withValues(alpha: 0.35),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+          child: GestureDetector(
+            onTap: () {
+              _mapController.move(_targetLocation, 15.0);
+            },
+            child: Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.divider.withValues(alpha: 0.35),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.location_on_rounded, color: AppColors.primary, size: 28),
             ),
-            child: const Icon(Icons.location_on_rounded, color: AppColors.primary, size: 28),
           ),
         ),
 

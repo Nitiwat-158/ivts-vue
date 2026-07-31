@@ -142,7 +142,7 @@
         // googleSdkLoaded(google => {
         //   google.accounts.oauth2
         //       .initCodeClient({
-        //         client_id: "225788483142-8pkg8on8nh60ao83ve33ff3lflv2ccvo.apps.googleusercontent.com",
+        //         client_id: "298470872970-am1echombj03p2n223p9gavitmo811kq.apps.googleusercontent.com",
         //         scope: "email profile openid",
         //         redirect_uri: "http://localhost:4000/auth/callback",
         //         callback: response => {
