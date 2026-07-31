@@ -1,9 +1,20 @@
-ARG FLUTTER_IMAGE=ghcr.io/cirrusci/flutter:3.27.4
 ARG NGINX_IMAGE=nginx:1.27-alpine@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10
 
-FROM ${FLUTTER_IMAGE} AS build
+FROM debian:bookworm-slim AS build
 
 WORKDIR /app
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Flutter
+RUN git clone https://github.com/flutter/flutter.git -b stable /flutter
+ENV PATH="/flutter/bin:${PATH}"
+RUN flutter config --no-analytics && flutter doctor
 
 COPY pubspec.yaml pubspec.lock ./
 RUN flutter pub get
