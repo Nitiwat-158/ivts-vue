@@ -2,13 +2,13 @@
 
 | Field | Value |
 |---|---|
-| Date | 2026-07-31 |
+| Date | 2026-08-01 |
 | Project | IVTS |
 | Module / Feature | system progress and readiness |
 | Requirement | Track actual project system progress from source and verification evidence |
-| Active Change Record | `docs/changes/2026-07-31-separate-admin-mobile-login.md` |
+| Active Change Record | `docs/changes/2026-08-01-owner-vehicles-sync-on-approval.md` |
 | Overall Status | in_progress |
-| Overall Progress | 52% |
+| Overall Progress | 55% |
 | Progress Type | Evidence-backed readiness score, not final product completion |
 
 ## T1. Source Evidence
@@ -69,6 +69,9 @@ Adjust weights per project, but keep them evidence-backed.
 | ivts-AUTH-003 | Update mobile.routes.js to use iam-mobile-client | done | 100 | `mobile.routes.js` — replaced iamAdminClient.forwardScopedSignin with iamMobileClient.forwardMobileSignin | node --check PASS | none | — | Updated routes file |
 | ivts-AUTH-004 | Create unit tests for iam-mobile-client.js | done | 100 | `iam-mobile-client.test.js` — 9 tests: JIT create/update, hijack x3, role enforcement, fallback | 9/9 PASS | none | — | Test file |
 | ivts-AUTH-005 | Document auth separation (task + change record + progress) | done | 100 | `docs/tasks/2026-07-31-separate-admin-mobile-login.md`, `docs/changes/2026-07-31-separate-admin-mobile-login.md` | n/a | none | — | Docs complete |
+| ivts-TASK-025 | Automatic owner_vehicles sync on request approval | Backend | AI | none | done | 100 | Implementation and live DB verification passed | `service/vehicle_request.js`, `service/owner_vehicle.js`, `models/owner_vehicle.model.js` | Live DB test SUCCESS | none | — | Sync owner_vehicles on approval |
+
+
 
 
 ## T4. Verification Log

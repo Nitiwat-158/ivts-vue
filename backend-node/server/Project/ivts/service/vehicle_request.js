@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 
 /**
  * Service: vehicle_request
@@ -270,7 +270,83 @@ async function _generateVehicleCode() {
 }
 
 /**
- * Internal helper: upsert Vehicle record when a request is approved.
+ * Generate a sequential owner_vehicle ID in "OV0001" format.
+ */
+async function _generateOwnerVehicleId() {
+  const count = await OwnerVehicle.countDocuments({});
+  return 'OV' + String(count + 1).padStart(4, '0');
+}
+
+/**
+ * Internal helper: upsert OwnerVehicle record when a request is approved.
+ *
+ * Source evidence (2026-08-01, MongoDB Compass, owner_vehicles collection):
+ *   _id          : String "OV0001"
+ *   vehicle_code : String "CR0001"
+ *   plate_number : String "สน 1669"
+ *   relationship : String "owner"
+ *   is_primary   : Boolean true
+ *   status       : String "active"
+ *   created_at, updated_at : Date
+ *   user_id      : String
+ */
+async function _syncOwnerVehicleOnApproval(requestDoc, vehicleCode, plateSrc, now) {
+  const userId = String(requestDoc.user_id);
+  const existingOwnerVeh = await OwnerVehicle.findOne({
+    $or: [
+      { vehicle_code: vehicleCode },
+      { vehicle_id: vehicleCode },
+      { plate_number: plateSrc, user_id: userId }
+    ]
+  });
+
+  if (existingOwnerVeh) {
+    await OwnerVehicle.findByIdAndUpdate(existingOwnerVeh._id, {
+      $set: {
+        vehicle_code: vehicleCode,
+        vehicle_id: vehicleCode,
+        plate_number: plateSrc,
+        user_id: userId,
+        relationship: 'owner',
+        is_primary: true,
+        status: 'active',
+        document_status: 'Approved',
+        account_status: 'Active',
+        updated_at: now
+      }
+    }, { runValidators: false });
+    console.log('[vehicle_request] OwnerVehicle updated: ' + existingOwnerVeh._id);
+  } else {
+    const ovId = await _generateOwnerVehicleId();
+    const newOwnerVeh = {
+      _id: ovId,
+      vehicle_code: vehicleCode,
+      vehicle_id: vehicleCode,
+      plate_number: plateSrc,
+      relationship: 'owner',
+      is_primary: true,
+      status: 'active',
+      user_id: userId,
+      document_status: 'Approved',
+      account_status: 'Active',
+      created_at: now,
+      updated_at: now
+    };
+    try {
+      await OwnerVehicle.create(newOwnerVeh);
+      console.log('[vehicle_request] OwnerVehicle created: ' + ovId + ' for vehicle: ' + vehicleCode);
+    } catch (err) {
+      if (err.code === 11000) {
+        console.warn('[vehicle_request] Duplicate OwnerVehicle ID, skipping');
+      } else {
+        throw err;
+      }
+    }
+  }
+}
+
+/**
+ * Internal helper: upsert Vehicle and OwnerVehicle records when a request is approved.
  *
  * Source evidence (2026-07-27, MongoDB Compass, vehicles collection):
  *   _id           : String "CR0001" (managed manually)
@@ -311,7 +387,10 @@ async function _syncVehicleOnApproval(requestDoc, now) {
     user_id: String(requestDoc.user_id)
   }).lean();
 
+  let resolvedVehicleCode = null;
+
   if (existing) {
+    resolvedVehicleCode = existing.vehicle_code || existing._id;
     await Vehicle.findByIdAndUpdate(existing._id, {
       $set: {
         plate_number: plateSrc,
@@ -329,6 +408,7 @@ async function _syncVehicleOnApproval(requestDoc, now) {
     console.log('[vehicle_request] Vehicle updated: ' + existing._id + ' plate: ' + plateSrc);
   } else {
     const vehicleCode = await _generateVehicleCode();
+    resolvedVehicleCode = vehicleCode;
     const newVehicle = {
       _id: vehicleCode,
       plate_number: plateSrc,
@@ -357,4 +437,12 @@ async function _syncVehicleOnApproval(requestDoc, now) {
       }
     }
   }
+
+  // Also sync owner_vehicles collection on approval
+  if (resolvedVehicleCode) {
+    await _syncOwnerVehicleOnApproval(requestDoc, resolvedVehicleCode, plateSrc, now);
+  }
 }
+
+exports._syncVehicleOnApproval = _syncVehicleOnApproval;
+

@@ -20,6 +20,7 @@
 const Vehicle = require('../models/vehicle.model');
 const Request = require('../models/request.model');
 const User = require('../models/user.model');
+const vehicleRequestService = require('./vehicle_request');
 const iamAdminClient = require('../../security/service/iam-admin-client');
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -260,9 +261,13 @@ class OwnerVehicleService {
         return fail(res, new Error('no_pending_request_for_this_vehicle'), 409);
       }
 
+      const now = new Date();
       request.request_status = 'approved';
-      request.updated_at = new Date();
+      request.updated_at = now;
       await request.save();
+
+      // Trigger automatic vehicle & owner_vehicle synchronization
+      await vehicleRequestService._syncVehicleOnApproval(request, now);
 
       const user = vehicle.user_id ? await User.findById(vehicle.user_id).lean() : null;
       return ok(res, { data: buildRow(vehicle, request.toObject(), user) });
