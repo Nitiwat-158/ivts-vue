@@ -80,8 +80,20 @@
         methods: {
           async onAuthenGoogle() {
             try {
+              if (this.$gAuth && typeof this.$gAuth.load === 'function') {
+                await this.$gAuth.load()
+              }
+
               const googleUser = await this.$gAuth.signIn();
-              const id_token = googleUser.getAuthResponse().id_token;
+              const authResponse = googleUser && typeof googleUser.getAuthResponse === 'function'
+                ? googleUser.getAuthResponse()
+                : {};
+              const id_token = authResponse && authResponse.id_token ? authResponse.id_token : '';
+
+              if (!id_token) {
+                throw new Error('missing_google_id_token')
+              }
+
               const body = {
                 token: id_token,
                 authType: "689c06d5255db4e56aea8902"
@@ -89,9 +101,13 @@
               await this.$store.dispatch("auth/signIn", body)
 
             } catch (err) {
+              console.error('Google sign-in failed:', err)
+              const backendMessage = err && err.response && err.response.data && err.response.data.message
+                ? String(err.response.data.message)
+                : '';
               this.$store.commit('dialog/showError', {
                 title: this.$t('auth.errors.title'),
-                message: this.$t('auth.signIn.errors.google'),
+                message: backendMessage || this.$t('auth.signIn.errors.google'),
                 code: "AUTH_GOOGLE_FAILED",
                 number: "1",
                 status: true

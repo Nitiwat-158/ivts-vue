@@ -814,105 +814,16 @@ async function revokeUserSession(request, accessToken) {
 
 async function forwardScopedSignin(request, response) {
   try {
-    let signinResult;
-    try {
-      signinResult = await requestUser(createUserRequestOptions(request, {
-        method: 'post',
-        path: '/signin'
-      }));
-    } catch (reqErr) {
-      console.log(`[DEBUG-TEMP] requestUser threw an error (expected if IAM is down): ${reqErr.message}`);
-      signinResult = {
-        statusCode: reqErr.response ? reqErr.response.status : 500,
-        payload: reqErr.response && reqErr.response.data ? reqErr.response.data : { error: reqErr.message }
-      };
-    }
+    const signinResult = await requestUser(createUserRequestOptions(request, {
+      method: 'post',
+      path: '/signin'
+    }));
     const payload = signinResult && signinResult.payload ? signinResult.payload : {};
     const accessToken = payload && payload.data && payload.data.xAccessToken
       ? String(payload.data.xAccessToken)
       : '';
 
-    console.log(`[DEBUG-TEMP] IAM signin result: status=${signinResult.statusCode}, hasToken=${!!accessToken}`);
-
     if (!accessToken) {
-      if (request.isMobileClient && request.body && request.body.token) {
-        try {
-          const { OAuth2Client } = require('google-auth-library');
-          const audience = '298470872970-am1echombj03p2n223p9gavitmo811kq.apps.googleusercontent.com';
-          const client = new OAuth2Client(audience);
-          const ticket = await client.verifyIdToken({ idToken: request.body.token, audience });
-          const decoded = ticket.getPayload();
-          
-          if (decoded && decoded.email) {
-            const UserModel = require('../../ivts/models/user.model');
-            let user = await UserModel.findOne({ email: decoded.email });
-            
-            const gIamId = 'google-' + (decoded.sub || decoded.email);
-            const gName = decoded.given_name || '';
-            const gSurname = decoded.family_name || '';
-            const gPicture = decoded.picture || '';
-
-            if (!user) {
-              const mongoose = require('mongoose');
-              user = new UserModel({
-                _id: new mongoose.Types.ObjectId().toString(),
-                iam_user_id: gIamId,
-                email: decoded.email,
-                name: gName,
-                surname: gSurname,
-                avatar_url: gPicture,
-                role: 'user'
-              });
-              await user.save();
-              console.log(`[DEBUG-TEMP] JIT created user from Google Token in dev bypass`);
-            } else {
-              // Security & Sync Check
-              if (user.iam_user_id && user.iam_user_id !== gIamId) {
-                return response.status(403).json({
-                  status: false,
-                  error: 'account_conflict_hijack_attempt'
-                });
-              }
-              let needsUpdate = false;
-              if (user.name !== gName || user.surname !== gSurname || user.avatar_url !== gPicture) {
-                user.name = gName;
-                user.surname = gSurname;
-                user.avatar_url = gPicture;
-                needsUpdate = true;
-              }
-              if (!user.iam_user_id) {
-                user.iam_user_id = gIamId;
-                needsUpdate = true;
-              }
-              if (needsUpdate) {
-                await user.save();
-                console.log(`[DEBUG-TEMP] JIT updated user from Google Token in dev bypass`);
-              }
-            }
-
-            console.log(`[DEBUG-TEMP] Dev bypass successful for mobile client`);
-            return response.status(200).json({
-              status: true,
-              data: {
-                xAccessToken: 'dev-bypass-token-' + decoded.email,
-                role: user.role || 'user',
-                require2FA: false,
-                account: {
-                  _id: user.id || user._id,
-                  email: user.email,
-                  firstname: user.name,
-                  lastname: user.surname,
-                  avatar_url: user.avatar_url,
-                  role: user.role || 'user'
-                }
-              }
-            });
-          }
-        } catch (bypassErr) {
-          console.error('[DEBUG-TEMP] Mobile dev bypass failed:', bypassErr.message);
-        }
-      }
-
       relaySetCookie(response, signinResult);
       return response.status(signinResult.statusCode || 200).json(payload);
     }
@@ -925,87 +836,7 @@ async function forwardScopedSignin(request, response) {
       lang: request.headers && request.headers.lang ? request.headers.lang : 'th'
     });
 
-    console.log(`[DEBUG-TEMP] Admin scope check result: ${allowed}`);
-
     if (!allowed) {
-      if (request.isMobileClient) {
-        // Fallback for mobile clients: query MongoDB users collection
-        const UserModel = require('../../ivts/models/user.model');
-        const iamUserId = current && current.account && current.account._id ? String(current.account._id) : '';
-        const email = current && current.account && current.account.email ? String(current.account.email) : '';
-        
-        let user = await UserModel.findOne({
-          $or: [
-            { iam_user_id: iamUserId },
-            { email: email }
-          ]
-        });
-
-        console.log(`[DEBUG-TEMP] Users collection lookup result: ${user ? 'found' : 'not found'}`);
-
-        const firstName = current.account.userinfo && current.account.userinfo.firstName ? current.account.userinfo.firstName : '';
-        const lastName = current.account.userinfo && current.account.userinfo.lastName ? current.account.userinfo.lastName : '';
-        const pictureUrl = current.account.userinfo && current.account.userinfo.picture ? current.account.userinfo.picture : '';
-
-        if (!user && iamUserId && email) {
-          const mongoose = require('mongoose');
-          user = new UserModel({
-            _id: new mongoose.Types.ObjectId().toString(),
-            iam_user_id: iamUserId,
-            email: email,
-            name: firstName,
-            surname: lastName,
-            avatar_url: pictureUrl,
-            role: 'user'
-          });
-          await user.save();
-          console.log(`[DEBUG-TEMP] JIT created user in collection`);
-        } else if (user) {
-          // Security & Sync Check
-          if (user.iam_user_id && user.iam_user_id !== iamUserId) {
-            await revokeUserSession(request, accessToken);
-            return response.status(403).json({
-              status: false,
-              error: 'account_conflict_hijack_attempt'
-            });
-          }
-          let needsUpdate = false;
-          if (user.name !== firstName || user.surname !== lastName || user.email !== email || user.avatar_url !== pictureUrl) {
-            user.name = firstName;
-            user.surname = lastName;
-            user.email = email;
-            user.avatar_url = pictureUrl;
-            needsUpdate = true;
-          }
-          if (!user.iam_user_id) {
-            user.iam_user_id = iamUserId;
-            needsUpdate = true;
-          }
-          if (needsUpdate) {
-            await user.save();
-            console.log(`[DEBUG-TEMP] JIT updated user profile from IAM`);
-          }
-        }
-
-        if (user) {
-          // Treat as User
-          payload.role = 'user';
-          if (payload.data) {
-            payload.data.role = 'user';
-            payload.data.account = {
-              _id: user.id || user._id,
-              email: user.email,
-              firstname: user.name,
-              lastname: user.surname,
-              avatar_url: user.avatar_url,
-              role: user.role || 'user'
-            };
-          }
-          relaySetCookie(response, signinResult);
-          return response.status(signinResult.statusCode || 200).json(payload);
-        }
-      }
-
       await revokeUserSession(request, accessToken);
       return response.status(403).json({
         status: false,
@@ -1013,14 +844,9 @@ async function forwardScopedSignin(request, response) {
       });
     }
 
-    payload.role = 'admin';
-    if (payload.data) {
-      payload.data.role = 'admin';
-    }
     relaySetCookie(response, signinResult);
     return response.status(signinResult.statusCode || 200).json(payload);
   } catch (err) {
-    console.log(`[DEBUG-TEMP] IAM signin error: ${err.message || 'unknown error'}`);
     const normalized = normalizeError(err, 'iam_user_proxy_failed');
     return response.status(normalized.statusCode).json(normalized.payload);
   }

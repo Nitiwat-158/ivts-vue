@@ -2,13 +2,13 @@
 
 | Field | Value |
 |---|---|
-| Date | 2026-07-14 |
+| Date | 2026-07-31 |
 | Project | IVTS |
 | Module / Feature | system progress and readiness |
 | Requirement | Track actual project system progress from source and verification evidence |
-| Active Change Record | `docs/changes/2026-07-14-backend-models-routes.md` |
+| Active Change Record | `docs/changes/2026-07-31-separate-admin-mobile-login.md` |
 | Overall Status | in_progress |
-| Overall Progress | 45% |
+| Overall Progress | 52% |
 | Progress Type | Evidence-backed readiness score, not final product completion |
 
 ## T1. Source Evidence
@@ -30,12 +30,12 @@ Adjust weights per project, but keep them evidence-backed.
 | Readiness Area | Weight | Earned | Basis |
 |---|---:|---:|---|
 | Backend API/services verified | 35 | 20 | 7 Mongoose models + 4 services + 10 routes written; node --check passed; live DB smoke pending. |
-| Integration/auth verified | 15 | 0 | Not verified yet. |
+| Integration/auth verified | 15 | 8 | iam-admin-client reverted; iam-mobile-client created + 9/9 unit tests PASS; 15/15 admin regression tests PASS. |
 | Frontend route/API mapped | 20 | 20 | CCTV route mapped and page implemented. |
 | Environment/static config checked | 10 | 0 | Not verified yet. |
 | Release verification | 15 | 0 | Not verified yet. |
-| Tasklist and handoff | 5 | 5 | CCTV tasks + backend models/routes handoff completed. |
-| **Total** | **100** | **45** | Backend implementation gate completed; live smoke + IAM seed pending. |
+| Tasklist and handoff | 5 | 4 | CCTV + backend models/routes + mobile API + auth separation handoff completed. |
+| **Total** | **100** | **52** | Auth separation gate completed; admin login verified clean; mobile client independently tested. |
 
 ## T3. Active Tasklist
 
@@ -64,6 +64,11 @@ Adjust weights per project, but keep them evidence-backed.
 | ivts-MOBAPI-002 | Mobile API: backend service + routes (vehicles, tracking, requests, emergency, notifications) | Backend | AI | ivts-MOBAPI-001 | done | 100 | New `mobile.js` service + `mobile.routes.js`, mounted at `/api/v1/mobile` | `service/mobile.js`, `mobile.routes.js`, `app.routes.js` | `node --check` PASS; live curl smoke on all 7 endpoints PASS | none | — | Working mobile API |
 | ivts-MOBAPI-003 | Mobile API: Flutter HTTP client + data repository, remove all mock data | Frontend | AI | ivts-MOBAPI-002 | done | 100 | `http` dep added; service/repository layer wired; all `MockData` demo content removed per user instruction (MongoDB-only, no mock fallback); verified end-to-end on Windows desktop build | `pubspec.yaml`, `lib/services/*.dart`, `lib/data/mock_data.dart`, `lib/windows/` (new platform) | `flutter analyze lib/` PASS; `flutter run -d windows` PASS — log shows `loaded 6 vehicles`, `loaded 4 notifications from API` | none | none | Working Flutter data layer, verified live |
 | ivts-MOBAPI-004 | Mobile API: doc compliance (tasklist, change record, progress, index, README) | Ops | AI | ivts-MOBAPI-003 | done | 100 | Tasklist + change record created; this file + AI-DOCS-INDEX.md + mobile README updated; HTML regenerated | `docs/tasks/2026-07-24-mobile-mongodb-api.md`, `docs/changes/2026-07-24-mobile-mongodb-api.md` | n/a | none | none | Complete doc set |
+| ivts-AUTH-001 | Revert iam-admin-client.js forwardScopedSignin to original admin-only login | done | 100 | `iam-admin-client.js` — removed isMobileClient, Google bypass, JIT logic, DEBUG logs | 15/15 admin tests PASS | none | — | Reverted source file |
+| ivts-AUTH-002 | Create iam-mobile-client.js for mobile IAM auth + JIT provisioning | done | 100 | `iam-mobile-client.js` created — MFU IAM proxy + JIT + Google fallback + hijack detection | 9/9 mobile tests PASS | none | — | New service file |
+| ivts-AUTH-003 | Update mobile.routes.js to use iam-mobile-client | done | 100 | `mobile.routes.js` — replaced iamAdminClient.forwardScopedSignin with iamMobileClient.forwardMobileSignin | node --check PASS | none | — | Updated routes file |
+| ivts-AUTH-004 | Create unit tests for iam-mobile-client.js | done | 100 | `iam-mobile-client.test.js` — 9 tests: JIT create/update, hijack x3, role enforcement, fallback | 9/9 PASS | none | — | Test file |
+| ivts-AUTH-005 | Document auth separation (task + change record + progress) | done | 100 | `docs/tasks/2026-07-31-separate-admin-mobile-login.md`, `docs/changes/2026-07-31-separate-admin-mobile-login.md` | n/a | none | — | Docs complete |
 
 
 ## T4. Verification Log
@@ -72,6 +77,9 @@ Adjust weights per project, but keep them evidence-backed.
 |---|---|---|
 | `node --check` all 12 new backend files | PASS | Exit code 0 — 2026-07-14 |
 | `node --check` vehicle_request.js + vehicle.model.js + owner_vehicle.js + ivts.routes.js | PASS | Exit code 0 — 2026-07-27 |
+| `node --check` iam-admin-client.js + iam-mobile-client.js + mobile.routes.js | PASS | Exit code 0 — 2026-07-31 |
+| `--test iam-admin-client.test.js` (15 tests) | PASS 15/15 | node:test runner — 2026-07-31 |
+| `--test iam-mobile-client.test.js` (9 tests) | PASS 9/9 | node:test runner — 2026-07-31 |
 | backend npm test | not run | requires running server + DB |
 | frontend lint/test/build | not run | |
 | live smoke/e2e | not run | |
@@ -84,7 +92,9 @@ Adjust weights per project, but keep them evidence-backed.
 | R-001 | risk | open | Vehicle _id type (ObjectId vs Number) — confirm with existing DB data | Id type mismatch on queries | Dev: inspect existing vehicles collection |
 | R-002 | risk | open | MEDIAMTX_BASE_URL env var not confirmed set | Stream URLs fall back to localhost | Ops: set MEDIAMTX_BASE_URL in .env files |
 | B-002 | blocker | open | Windows Firewall rule for Node.js is scoped to `Public` profile only; Android emulator cannot reach host `10.0.2.2:8203` (mobile API) | Mobile app cannot be verified on Android emulator until fixed | User: run elevated `netsh advfirewall firewall add rule name="IVTS Node Dev 8203 (All Profiles)" dir=in action=allow protocol=TCP localport=8203 profile=any` |
-| R-003 | risk | open | Mobile API `/api/v1/mobile/*` has no authentication (mobile app has no login/IAM session flow yet) | Read-only vehicle/tracking/request/notification data is publicly reachable | Product/Security: design and add mobile auth before production release |
+| R-003 | risk | **resolved** | `POST /api/v1/mobile/auth/signin` now implemented in `iam-mobile-client.js` (MFU IAM + JIT provisioning) | Mobile login now authenticated; all other `/mobile/*` routes remain read-only (no auth middleware — see R-004) | — |
+| R-004 | risk | open | All mobile read-only routes (`/api/v1/mobile/vehicles`, `/tracking`, etc.) have no auth middleware | Data is publicly readable | Product/Security: add token validation middleware before production release |
+| R-005 | risk | open | Google bypass token (`google-bypass-token-<email>`) is not a real IAM session token; mobile app cannot call IAM-protected endpoints with it | Development-only — do not deploy to production | Disable Google bypass in production env; integrate real MFU IAM mobile token flow |
 
 ## T6. Decision
 
@@ -93,3 +103,5 @@ Backend models, services, and routes are implemented and syntax-verified. System
 Vehicle Management fix (2026-07-27): owner_vehicle.js + vehicle.model.js + vehicle_request.js rewritten to use vehicles+requests collections (not empty owner_vehicles). Frontend VehicleManagement.vue refactored with 2 tabs (รถทั้งหมด / คำขอเพิ่มรถ). VehicleRequestTable.vue + ConfirmRequestModal.vue added. Mobile add_vehicle_screen.dart vehicle_type → type renamed. All backend node --check PASS. Live smoke pending server restart (B-001).
 
 Mobile API (`docs/tasks/2026-07-24-mobile-mongodb-api.md`): backend `/api/v1/mobile` read-only API implemented against real MongoDB collections (live schema verified via mongosh) and smoke-tested via curl (7/7 endpoints pass). Flutter app's `mock_data.dart` fully emptied per explicit user instruction — MongoDB is now the sole data source, no mock fallback. Windows desktop build (`flutter create --platforms=windows .` + `flutter run -d windows`) verified end-to-end: real data loaded (`6 vehicles`, `4 notifications`, `0 trip history`/`0 requests` matching real empty collections). Android emulator verification remains blocked by Windows Firewall scoping (B-002); this does not block the completed feature since Windows-target verification succeeded.
+
+Auth separation (2026-07-31): `iam-admin-client.js → forwardScopedSignin` reverted to original commit `9a255686` — strictly Web Admin only; no mobile logic, no DEBUG logs. New `iam-mobile-client.js` handles all mobile user authentication: MFU IAM proxy, JIT user provisioning in MongoDB `users` collection, Google ID Token fallback (dev-only), and hijack detection. `mobile.routes.js` updated to call `iamMobileClient.forwardMobileSignin`. All 15 admin regression tests + 9 new mobile unit tests PASS. Progress updated from 45% → 52%.

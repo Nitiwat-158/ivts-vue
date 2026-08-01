@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'api_config.dart';
 import 'device_id_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -61,7 +62,7 @@ class AuthService {
   Future<SignInResult> signIn(String username, String password) async {
     // DEV BYPASS: ข้ามการตรวจสอบ IAM เพื่อให้เข้าแอปได้ทันที
     if (kDebugMode && username == 'tester01' && password == '********') {
-      await _storage.write(key: 'xAccessToken', value: 'dummy_dev_token_123');
+      await _storage.write(key: 'app_token', value: 'dummy_dev_token_123'); // ต้องตรงกับ key ที่ getStoredToken() อ่าน
       final user = AuthUser(
         id: 'seed_usr_1', // ใช้ ID นี้เพื่อให้มีข้อมูลรถ (จากไฟล์ seed-owner-vehicles)
         name: 'สมชาย',
@@ -131,7 +132,7 @@ class AuthService {
       throw Exception('ไม่พบ Access Token');
     }
 
-    final bool require2FA = !(data['data']['require2FA'] == false);
+    final bool require2FA = data['data']['require2FA'] == true;
 
     if (require2FA) {
       return SignInResult(requires2FA: true, pendingToken: accessToken);
@@ -195,7 +196,7 @@ class AuthService {
       throw Exception('ไม่พบ Access Token');
     }
 
-    final bool require2FA = !(data['data']['require2FA'] == false);
+    final bool require2FA = data['data']['require2FA'] == true;
 
     if (require2FA) {
       return SignInResult(requires2FA: true, pendingToken: accessToken);
@@ -292,6 +293,13 @@ class AuthService {
       } catch (e) {
         debugPrint('revoke session error: $e');
       }
+    }
+    // ล้าง Google session ด้วยเสมอ เพื่อป้องกัน onCurrentUserChanged trigger login ซ้ำหลัง logout
+    try {
+      final googleSignIn = GoogleSignIn();
+      await googleSignIn.signOut();
+    } catch (e) {
+      debugPrint('google signOut error: $e');
     }
     await _storage.delete(key: 'app_token');
     await _storage.delete(key: 'xAccessToken');
