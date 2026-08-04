@@ -76,6 +76,8 @@ The 2FA verification code UI must allow users to paste a full OTP value or an em
 
 Frontend session bootstrap must skip silent `/auth/me` when no local token and no IAM session hint exist. When a local token or IAM session hint exists, restore must use silent auth so cross-application navigation can reuse IAM session state without creating avoidable unauthenticated 401 requests.
 
+Mobile Application authentication supports both MFU IAM proxy login and local user registration (`POST /api/v1/mobile/auth/register`). User passwords are password hashed using Node.js `crypto.scryptSync` with random salt and stored in MongoDB `users` collection. Registered credentials are authenticated locally (`POST /api/v1/mobile/auth/signin`), and user session `userId` is used to filter vehicle, trip history, request, and notification data per user.
+
 ### FR-IVTS-002 Account Directory And Lifecycle
 
 Account directory, invite/update/status/lifecycle behavior must use the project IAM scope rules and must not mutate shared IAM account state without an explicit source-backed decision.

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import '../services/app_data_repository.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
-import 'two_factor_screen.dart';
+import 'home_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -12,6 +13,8 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _surnameController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -28,22 +31,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
-      // 1. Authenticate with IAM using proxy login
-      final result = await AuthService().signIn(
-        _usernameController.text.trim(),
-        _passwordController.text,
+      final result = await AuthService().register(
+        email: _usernameController.text.trim(),
+        password: _passwordController.text,
+        name: _nameController.text.trim(),
+        surname: _surnameController.text.trim(),
+        phone: _phoneController.text.trim(),
+        department: _departmentController.text.trim(),
       );
       
       if (!mounted) return;
-      if (result.requires2FA && result.pendingToken != null) {
-        Navigator.of(context).push(
+      if (result.user != null) {
+        await AppDataRepository.instance.refresh();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ลงทะเบียนสำเร็จ')),
+        );
+        Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (_) => TwoFactorScreen(pendingToken: result.pendingToken!),
+            builder: (_) => ValueListenableBuilder<int>(
+              valueListenable: AppDataRepository.instance.refreshTick,
+              builder: (context, _, __) => const HomeScreen(),
+            ),
           ),
         );
-      } else if (!result.requires2FA && result.user != null) {
-        // 2. TODO: Send phone and department to backend
-        throw Exception('Endpoint สำหรับบันทึกข้อมูลเบอร์โทรศัพท์และหน่วยงานยังไม่พร้อมใช้งานในขณะนี้');
       }
     } catch (e) {
       if (!mounted) return;
@@ -62,6 +73,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void dispose() {
+    _nameController.dispose();
+    _surnameController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
     _phoneController.dispose();
@@ -73,10 +86,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ลงทะเบียน'),
+        title: const Text('ลงทะเบียนผู้ใช้งานใหม่'),
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Form(
             key: _formKey,
@@ -84,15 +97,51 @@ class _RegisterScreenState extends State<RegisterScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextFormField(
-                  controller: _usernameController,
+                  controller: _nameController,
                   decoration: const InputDecoration(
-                    labelText: 'Username / Email',
+                    labelText: 'ชื่อ',
                     border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person),
+                    prefixIcon: Icon(Icons.badge),
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'กรุณากรอก username';
+                    if (value == null || value.trim().isEmpty) {
+                      return 'กรุณากรอกชื่อ';
+                    }
+                    return null;
+                  },
+                  enabled: !_isLoading,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _surnameController,
+                  decoration: const InputDecoration(
+                    labelText: 'นามสกุล',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.badge_outlined),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'กรุณากรอกนามสกุล';
+                    }
+                    return null;
+                  },
+                  enabled: !_isLoading,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _usernameController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                    labelText: 'อีเมล / Username',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.email),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'กรุณากรอกอีเมล';
+                    }
+                    if (!value.contains('@')) {
+                      return 'กรุณากรอกอีเมลให้ถูกต้อง';
                     }
                     return null;
                   },
@@ -103,13 +152,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _passwordController,
                   obscureText: true,
                   decoration: const InputDecoration(
-                    labelText: 'Password',
+                    labelText: 'รหัสผ่าน',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.lock),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'กรุณากรอก password';
+                      return 'กรุณากรอกรหัสผ่าน';
+                    }
+                    if (value.length < 6) {
+                      return 'รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร';
                     }
                     return null;
                   },
@@ -122,6 +174,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   decoration: const InputDecoration(
                     labelText: 'เบอร์โทรศัพท์',
                     border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.phone),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -129,13 +182,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     }
                     return null;
                   },
+                  enabled: !_isLoading,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _departmentController,
                   decoration: const InputDecoration(
-                    labelText: 'สำนักวิชา/หน่วยงาน',
+                    labelText: 'สำนักวิชา / หน่วยงาน',
                     border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.business),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -143,6 +198,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     }
                     return null;
                   },
+                  enabled: !_isLoading,
                 ),
                 const SizedBox(height: 32),
                 if (_isLoading)

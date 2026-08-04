@@ -19,6 +19,8 @@ class AuthUser {
   final String name;
   final String surname;
   final String email;
+  final String? phone;
+  final String? department;
   final String? avatarUrl;
   final String role;
 
@@ -27,17 +29,21 @@ class AuthUser {
     required this.name,
     required this.surname,
     required this.email,
+    this.phone,
+    this.department,
     this.avatarUrl,
     required this.role,
   });
 
   factory AuthUser.fromJson(Map<String, dynamic> json) {
     return AuthUser(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
-      surname: json['surname'] ?? '',
+      id: json['id'] ?? json['_id'] ?? '',
+      name: json['name'] ?? json['firstname'] ?? '',
+      surname: json['surname'] ?? json['lastname'] ?? '',
       email: json['email'] ?? '',
-      avatarUrl: json['avatarUrl'],
+      phone: json['phone'],
+      department: json['department'],
+      avatarUrl: json['avatarUrl'] ?? json['avatar_url'],
       role: json['role'] ?? 'user',
     );
   }
@@ -48,6 +54,8 @@ class AuthUser {
       'name': name,
       'surname': surname,
       'email': email,
+      'phone': phone,
+      'department': department,
       'avatarUrl': avatarUrl,
       'role': role,
     };
@@ -58,6 +66,63 @@ class AuthService {
   static String get _backendBaseUrl => ApiConfig.baseUrl.replaceAll('/api/v1/mobile', '');
 
   static const _storage = FlutterSecureStorage();
+
+  Future<SignInResult> register({
+    required String email,
+    required String password,
+    required String name,
+    required String surname,
+    required String phone,
+    String? department,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$_backendBaseUrl/api/v1/mobile/auth/register'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'password': password,
+        'name': name,
+        'surname': surname,
+        'phone': phone,
+        'department': department ?? '',
+      }),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      try {
+        final errData = jsonDecode(response.body);
+        String errorMsg = 'การลงทะเบียนไม่สำเร็จ';
+        if (errData['error'] != null) {
+          errorMsg = errData['error'].toString();
+        } else if (errData['message'] != null) {
+          errorMsg = errData['message'].toString();
+        }
+        throw Exception(errorMsg);
+      } catch (e) {
+        if (e is Exception && !e.toString().contains('(${response.statusCode})')) {
+          rethrow;
+        }
+        throw Exception('การลงทะเบียนไม่สำเร็จ (${response.statusCode})');
+      }
+    }
+
+    final data = jsonDecode(response.body);
+    if (data['status'] != true) {
+      throw Exception(data['error'] ?? 'การลงทะเบียนไม่สำเร็จ');
+    }
+
+    final accessToken = data['data']['xAccessToken'];
+    if (accessToken != null) {
+      await _storage.write(key: 'app_token', value: accessToken);
+    }
+
+    final account = data['data']['account'] ?? {};
+    final user = AuthUser.fromJson(account);
+
+    await _storage.write(key: 'user', value: jsonEncode(user.toJson()));
+
+    return SignInResult(requires2FA: false, user: user);
+  }
 
   Future<SignInResult> signIn(String username, String password) async {
     // DEV BYPASS: ข้ามการตรวจสอบ IAM เพื่อให้เข้าแอปได้ทันที
@@ -70,9 +135,7 @@ class AuthService {
         email: 'tester@test.com',
         role: 'user',
       );
-      await _storage.write(key: 'user', value: jsonEncode({
-        'id': user.id, 'name': user.name, 'surname': user.surname, 'email': user.email, 'role': user.role,
-      }));
+      await _storage.write(key: 'user', value: jsonEncode(user.toJson()));
       return SignInResult(requires2FA: false, user: user);
     }
 
@@ -141,14 +204,7 @@ class AuthService {
     await _storage.write(key: 'app_token', value: accessToken);
     
     final account = data['data']['account'] ?? {};
-    final user = AuthUser(
-      id: account['_id'] ?? '',
-      name: account['firstname'] ?? account['name'] ?? '',
-      surname: account['lastname'] ?? account['surname'] ?? '',
-      email: account['email'] ?? '',
-      avatarUrl: account['avatar_url'],
-      role: account['role'] ?? 'user',
-    );
+    final user = AuthUser.fromJson(account);
     
     await _storage.write(key: 'user', value: jsonEncode(user.toJson()));
 

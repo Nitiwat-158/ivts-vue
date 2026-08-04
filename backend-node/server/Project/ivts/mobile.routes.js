@@ -144,10 +144,20 @@ router.get('/notifications', async function (request, response) {
 });
 
 /**
+ * POST /api/v1/mobile/auth/register
+ * Mobile-specific local user registration.
+ * Handled by iam-mobile-client.js
+ */
+router.post('/auth/register', function (request, response) {
+  return iamMobileClient.registerLocalUser(request, response);
+});
+
+/**
  * POST /api/v1/mobile/auth/signin
- * Mobile-specific login via MFU IAM.
+ * Mobile-specific login via local MongoDB users or MFU IAM.
  * Handled by iam-mobile-client.js which:
- *  - Proxies credentials to MFU IAM /signin
+ *  - Checks local user password hash first
+ *  - Proxies credentials to MFU IAM /signin if not local
  *  - JIT-provisions the user in the local MongoDB `users` collection
  *  - Falls back to Google ID Token verification when IAM is unavailable
  * Mobile users are always assigned role: 'user'.

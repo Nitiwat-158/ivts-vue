@@ -10,11 +10,16 @@ const Schema = mongoose.Schema;
  */
 const userSchema = new Schema({
   _id: { type: String, required: true }, 
-  iam_user_id: { type: String, required: true, unique: true, index: true }, 
+  user_id: { type: String, trim: true, default: null },
+  iam_user_id: { type: String, required: false, default: null, sparse: true, index: true }, 
   email: { type: String, trim: true, lowercase: true, default: null },
+  password: { type: String, default: null },
   name: { type: String, trim: true, default: null },
   surname: { type: String, trim: true, default: null },
+  phone: { type: String, trim: true, default: null },
+  department: { type: String, trim: true, default: null },
   avatar_url: { type: String, trim: true, default: null },
+  profile_image_url: { type: String, trim: true, default: null },
   role: {
     type: String,
     enum: ['admin', 'user'],

@@ -331,6 +331,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   value: _currentUser?.email ?? '-',
                   onTap: () => _showDetailDialog('Email address', _currentUser?.email ?? '-'),
                 ),
+                if (_currentUser?.phone != null && _currentUser!.phone!.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  _InfoRow(
+                    icon: Icons.phone_outlined,
+                    label: 'Telephone',
+                    value: _currentUser!.phone!,
+                    onTap: () => _showDetailDialog('Telephone', _currentUser!.phone!),
+                  ),
+                ],
+                if (_currentUser?.department != null && _currentUser!.department!.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  _InfoRow(
+                    icon: Icons.business_outlined,
+                    label: 'Department',
+                    value: _currentUser!.department!,
+                    onTap: () => _showDetailDialog('Department', _currentUser!.department!),
+                  ),
+                ],
               ],
             ),
           ),

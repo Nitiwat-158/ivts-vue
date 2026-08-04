@@ -13,11 +13,43 @@
  */
 
 const axios = require('axios');
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 const config = require('../../../../config/config');
 const UserModel = require('../../ivts/models/user.model');
 
 const USER_API_BASE_PATH = '/api/v1';
+
+// ---------------------------------------------------------------------------
+// Password Hashing & Decoding Helpers
+// ---------------------------------------------------------------------------
+
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return `scrypt:${salt}:${hash}`;
+}
+
+function verifyPassword(password, storedHash) {
+  if (!storedHash || !storedHash.startsWith('scrypt:')) return false;
+  const parts = storedHash.split(':');
+  if (parts.length !== 3) return false;
+  const salt = parts[1];
+  const originalHash = parts[2];
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(originalHash, 'hex'));
+}
+
+function decodeBase64IfNeeded(str) {
+  if (!str) return '';
+  try {
+    const decoded = Buffer.from(str, 'base64').toString('utf8');
+    if (Buffer.from(decoded, 'utf8').toString('base64') === str) {
+      return decoded;
+    }
+  } catch (_) {}
+  return str;
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -287,29 +319,144 @@ function buildMobileUserResponse(user, signinResult) {
 }
 
 // ---------------------------------------------------------------------------
+// Local User Registration & Local Password Signin
+// ---------------------------------------------------------------------------
+
+async function registerLocalUser(request, response) {
+  try {
+    const { email, password, name, surname, phone, department } = request.body || {};
+
+    const cleanEmail = email ? String(email).trim().toLowerCase() : '';
+    const cleanName = name ? String(name).trim() : '';
+    const cleanSurname = surname ? String(surname).trim() : '';
+    const cleanPhone = phone ? String(phone).trim() : '';
+    const cleanDepartment = department ? String(department).trim() : '';
+
+    if (!cleanEmail || !password || !cleanName || !cleanSurname || !cleanPhone) {
+      return response.status(400).json({
+        status: false,
+        error: 'กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน (อีเมล, รหัสผ่าน, ชื่อ, นามสกุล, เบอร์โทรศัพท์)'
+      });
+    }
+
+    const existing = await UserModel.findOne({ email: cleanEmail });
+    if (existing) {
+      return response.status(400).json({
+        status: false,
+        error: 'อีเมลนี้ถูกใช้งานแล้วในระบบ'
+      });
+    }
+
+    const userCount = await UserModel.countDocuments();
+    const nextUserId = String(userCount + 1);
+    const customId = `usr_local_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const hashedPassword = hashPassword(password);
+
+    const newUser = new UserModel({
+      _id: customId,
+      user_id: nextUserId,
+      email: cleanEmail,
+      password: hashedPassword,
+      name: cleanName,
+      surname: cleanSurname,
+      phone: cleanPhone,
+      department: cleanDepartment,
+      role: 'user',
+      created_at: new Date()
+    });
+
+    await newUser.save();
+
+    return response.status(201).json({
+      status: true,
+      code: 20000,
+      message: 'ลงทะเบียนสำเร็จ',
+      data: {
+        xAccessToken: `local-token-${newUser._id}`,
+        role: 'user',
+        require2FA: false,
+        account: {
+          _id: newUser._id,
+          user_id: newUser.user_id,
+          email: newUser.email,
+          firstname: newUser.name,
+          lastname: newUser.surname,
+          phone: newUser.phone,
+          department: newUser.department,
+          avatar_url: newUser.avatar_url,
+          role: newUser.role
+        }
+      }
+    });
+  } catch (err) {
+    return response.status(500).json({
+      status: false,
+      error: err.message || 'การลงทะเบียนล้มเหลว'
+    });
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Public: forwardMobileSignin
 // ---------------------------------------------------------------------------
 
 /**
  * POST /api/v1/mobile/auth/signin
  *
- * Authentication flow for the user-mobile-application via MFU IAM:
- *
- * 1. Forward credentials to MFU IAM `/signin`.
- * 2a. If IAM returns a valid xAccessToken → resolve account via `/auth/me`
- *     → JIT provision in MongoDB `users` collection → respond with user payload.
- * 2b. If IAM does NOT return a token (e.g. IAM unreachable / no MFU IAM account)
- *     AND the request includes a Google ID Token (`body.token`) → verify the
- *     Google token → JIT provision user from Google claims → respond with a
- *     dev-bypass token. This branch is intended for development / testing
- *     only; disable before production release.
- * 3. On any hijack-detection, the session is revoked and a 403 is returned.
- *
- * Mobile users are NEVER checked against the IVTS admin scope.
- * They are always assigned `role: 'user'`.
+ * Authentication flow for the user-mobile-application via local users or MFU IAM:
+ * 1. Check local MongoDB `users` collection for matching credentials (hashed password).
+ * 2. Forward credentials to MFU IAM `/signin` if not a local user.
+ * 3. Fallback to Google ID token verification if IAM is unreachable.
  */
 async function forwardMobileSignin(request, response) {
   try {
+    // --- Step 0: Check local registered user credentials --------------------
+    if (request.body && (request.body.username || request.body.email) && request.body.password) {
+      const rawUser = request.body.username || request.body.email;
+      const decodedUser = decodeBase64IfNeeded(rawUser).trim();
+      const decodedPass = decodeBase64IfNeeded(request.body.password);
+
+      if (decodedUser && decodedPass) {
+        const localUser = await UserModel.findOne({
+          $or: [
+            { email: decodedUser.toLowerCase() },
+            { user_id: decodedUser },
+            { _id: decodedUser }
+          ]
+        });
+
+        if (localUser && localUser.password) {
+          const isValid = verifyPassword(decodedPass, localUser.password);
+          if (isValid) {
+            return response.status(200).json({
+              status: true,
+              data: {
+                xAccessToken: `local-token-${localUser._id}`,
+                role: localUser.role || 'user',
+                require2FA: false,
+                account: {
+                  _id: localUser._id,
+                  user_id: localUser.user_id || localUser._id,
+                  email: localUser.email,
+                  firstname: localUser.name,
+                  lastname: localUser.surname,
+                  phone: localUser.phone,
+                  department: localUser.department,
+                  avatar_url: localUser.avatar_url,
+                  role: localUser.role || 'user'
+                }
+              }
+            });
+          } else {
+            return response.status(401).json({
+              status: false,
+              error: 'รหัสผ่านไม่ถูกต้อง'
+            });
+          }
+        }
+      }
+    }
+
     // --- Step 1: Try MFU IAM signin ----------------------------------------
     let signinResult;
     let iamError = null;
@@ -421,6 +568,9 @@ async function forwardMobileSignin(request, response) {
 
 module.exports = {
   forwardMobileSignin,
+  registerLocalUser,
+  hashPassword,
+  verifyPassword,
   // Exposed for testing only:
   jitProvisionFromIAMAccount,
   jitProvisionFromGoogleToken,

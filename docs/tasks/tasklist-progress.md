@@ -70,6 +70,8 @@ Adjust weights per project, but keep them evidence-backed.
 | ivts-AUTH-004 | Create unit tests for iam-mobile-client.js | done | 100 | `iam-mobile-client.test.js` — 9 tests: JIT create/update, hijack x3, role enforcement, fallback | 9/9 PASS | none | — | Test file |
 | ivts-AUTH-005 | Document auth separation (task + change record + progress) | done | 100 | `docs/tasks/2026-07-31-separate-admin-mobile-login.md`, `docs/changes/2026-07-31-separate-admin-mobile-login.md` | n/a | none | — | Docs complete |
 | ivts-TASK-025 | Automatic owner_vehicles sync on request approval | Backend | AI | none | done | 100 | Implementation and live DB verification passed | `service/vehicle_request.js`, `service/owner_vehicle.js`, `models/owner_vehicle.model.js` | Live DB test SUCCESS | none | — | Sync owner_vehicles on approval |
+| ivts-MAuth-001 | User Mobile Login & Registration with Hashed Password and Data Isolation | Mobile/Backend | AI | none | done | 100 | Implementation, 13 unit tests, flutter analyze PASS | `user.model.js`, `iam-mobile-client.js`, `mobile.routes.js`, `auth_service.dart`, `register_screen.dart`, `app_data_repository.dart` | 13/13 PASS | none | — | Mobile Local Register & Login with Data Isolation |
+
 
 
 

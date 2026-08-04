@@ -1,21 +1,11 @@
 import 'package:flutter/foundation.dart';
 
 import '../data/mock_data.dart';
+import 'auth_service.dart';
 import 'mobile_api_service.dart';
 
 /// Loads vehicles / trip history / request history / notifications from the
-/// backend mobile API (MongoDB-backed) and replaces `MockData`'s in-memory
-/// lists in place. MongoDB is the sole data source — there is no
-/// hardcoded mock/demo content anymore. If a fetch fails (network error,
-/// timeout, unreachable backend, unexpected response shape), the affected
-/// list simply keeps whatever was last successfully loaded (empty if
-/// nothing has loaded yet); it is not replaced with fake data.
-///
-/// Note: `tracking_histories` and `requests` collections are currently
-/// empty in the live database (verified via mongosh, see
-/// docs/tasks/2026-07-24-mobile-mongodb-api.md), so a successful-but-empty
-/// API response for those two resources is expected — this is real data,
-/// not a fetch failure.
+/// backend mobile API (MongoDB-backed) filtered by the logged-in user ID.
 class AppDataRepository {
   AppDataRepository._();
 
@@ -33,7 +23,6 @@ class AppDataRepository {
   /// Notifies UI whether there is an active emergency report in progress.
   final ValueNotifier<bool> hasActiveEmergencyNotifier = ValueNotifier<bool>(false);
 
-
   bool _loading = false;
 
   Future<void> refresh() async {
@@ -41,11 +30,14 @@ class AppDataRepository {
     _loading = true;
     bool success = false;
     try {
+      final currentUser = await AuthService().getCurrentUser();
+      final userId = currentUser?.id;
+
       final results = await Future.wait([
-        _refreshVehicles(),
-        _refreshTripHistory(),
-        _refreshRequestHistory(),
-        _refreshNotifications(),
+        _refreshVehicles(userId: userId),
+        _refreshTripHistory(userId: userId),
+        _refreshRequestHistory(userId: userId),
+        _refreshNotifications(userId: userId),
       ]);
       success = results.any((res) => res == true);
       dockerConnectedNotifier.value = success;
@@ -57,13 +49,13 @@ class AppDataRepository {
     }
   }
 
-  Future<bool> _refreshVehicles() async {
+  Future<bool> _refreshVehicles({String? userId}) async {
     try {
-      final vehicles = await _api.fetchVehicles();
+      final vehicles = await _api.fetchVehicles(userId: userId);
       MockData.vehicles
         ..clear()
         ..addAll(vehicles);
-      debugPrint('AppDataRepository: loaded ${vehicles.length} vehicles from API');
+      debugPrint('AppDataRepository: loaded ${vehicles.length} vehicles from API for user $userId');
       return true;
     } catch (error) {
       debugPrint('AppDataRepository: fetchVehicles failed, keeping previously loaded data ($error)');
@@ -71,13 +63,13 @@ class AppDataRepository {
     }
   }
 
-  Future<bool> _refreshTripHistory() async {
+  Future<bool> _refreshTripHistory({String? userId}) async {
     try {
-      final history = await _api.fetchTripHistory();
+      final history = await _api.fetchTripHistory(userId: userId);
       MockData.tripHistory
         ..clear()
         ..addAll(history);
-      debugPrint('AppDataRepository: loaded ${history.length} trip history entries from API');
+      debugPrint('AppDataRepository: loaded ${history.length} trip history entries from API for user $userId');
       return true;
     } catch (error) {
       debugPrint('AppDataRepository: fetchTripHistory failed, keeping previously loaded data ($error)');
@@ -85,13 +77,13 @@ class AppDataRepository {
     }
   }
 
-  Future<bool> _refreshRequestHistory() async {
+  Future<bool> _refreshRequestHistory({String? userId}) async {
     try {
-      final requests = await _api.fetchRequestHistory();
+      final requests = await _api.fetchRequestHistory(userId: userId);
       MockData.requestHistory
         ..clear()
         ..addAll(requests);
-      debugPrint('AppDataRepository: loaded ${requests.length} request history entries from API');
+      debugPrint('AppDataRepository: loaded ${requests.length} request history entries from API for user $userId');
       return true;
     } catch (error) {
       debugPrint('AppDataRepository: fetchRequestHistory failed, keeping previously loaded data ($error)');
@@ -99,13 +91,13 @@ class AppDataRepository {
     }
   }
 
-  Future<bool> _refreshNotifications() async {
+  Future<bool> _refreshNotifications({String? userId}) async {
     try {
-      final notifications = await _api.fetchNotifications();
+      final notifications = await _api.fetchNotifications(userId: userId);
       MockData.notifications
         ..clear()
         ..addAll(notifications);
-      debugPrint('AppDataRepository: loaded ${notifications.length} notifications from API');
+      debugPrint('AppDataRepository: loaded ${notifications.length} notifications from API for user $userId');
       return true;
     } catch (error) {
       debugPrint('AppDataRepository: fetchNotifications failed, keeping previously loaded data ($error)');
