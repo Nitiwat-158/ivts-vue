@@ -151,7 +151,7 @@
       <CCol sm="6" lg="3" class="mb-3 mb-lg-0">
         <CCard class="h-100 mb-0 stat-card">
           <CCardBody class="d-flex flex-column justify-content-center">
-            <div class="text-muted font-weight-bold small mb-2 text-center">{{ $t('ivts.hourlyTraffic') }} (Mock)</div>
+            <div class="text-muted font-weight-bold small mb-2 text-center">{{ $t('ivts.hourlyTraffic') }}</div>
             <div class="mock-chart-container mt-2">
               <svg viewBox="0 0 100 35" class="w-100" style="height: 40px; overflow: visible;">
                 <polyline 
@@ -227,16 +227,14 @@ export default {
       mapMarkers: [],
       cameraStats: { total: 0, active: 0, inactive: 0 },
       cameras: [],
-      alerts: [
-        { type: 'unregistered', cameraId: 'CAM01_Gate_in', time: '14:23' },
-        { type: 'offline', cameraId: 'CAM07_E3_Parking', duration: 120, time: '14:00' },
-        { type: 'unregistered', cameraId: 'CAM05_MainRoad', time: '13:45' },
-        { type: 'unregistered', cameraId: 'CAM02_ParkingA', time: '12:10' },
-        { type: 'offline', cameraId: 'CAM06_E1_Parking', duration: 300, time: '11:00' }
-      ]
+      offlineAlerts: [],
+      emergencyAlerts: []
     }
   },
   computed: {
+    alerts() {
+      return [ ...this.emergencyAlerts, ...this.offlineAlerts ];
+    },
     filteredAlerts() {
       return this.alerts.filter(alert => {
         const isSystem = alert.type === 'offline' || alert.type === 'unregistered';
@@ -274,10 +272,12 @@ export default {
     }
   },
   methods: {
-    refreshData() {
+    async refreshData() {
       this.lastUpdated = new Date();
-      this.fetchAlerts();
-      this.fetchCameras();
+      await Promise.all([
+        this.fetchAlerts(),
+        this.fetchCameras()
+      ]);
     },
     async fetchCameras() {
       try {
@@ -323,6 +323,18 @@ export default {
 
         this.locationGroups = Object.values(groupsMap);
 
+        this.offlineAlerts = rows
+          .filter(c => !(c.status === 'active' || c.status === 'online'))
+          .slice(0, 5)
+          .map(c => ({
+            id: `${c._id || c.camera_name}-offline`,
+            type: 'offline',
+            cameraId: c.camera_name || c._id,
+            duration: 120,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            description: 'No signal for 120 min'
+          }));
+
         this.renderMapMarkers();
       } catch (e) {
         console.error("Failed to fetch cameras for dashboard", e);
@@ -331,25 +343,30 @@ export default {
     async fetchAlerts() {
       try {
         const res = await api.ivtsEmergencyReports('get');
-        const reports = res && res.data && Array.isArray(res.data.data) ? res.data.data : (res && res.data ? res.data : []);
-        
-        const newReports = reports.filter(r => r.status === 'NEW').map(r => {
-          const d = new Date(r.incident_time || r.submitted_at);
-          const timeStr = isNaN(d.getTime()) ? '' : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          return {
-            id: r._id,
-            type: 'emergency_report',
-            source: 'guest',
-            severity: r.severity || 'high',
-            location: r.location && r.location.camera_id ? r.location.camera_id : 'Unknown location',
-            time: timeStr,
-            description: r.request_type || 'Unknown incident'
-          };
-        });
-        
-        this.alerts = [ ...newReports, ...this.alerts.filter(a => a.type !== 'emergency_report') ];
+        const reports = res && res.data && Array.isArray(res.data.data)
+          ? res.data.data
+          : (res && res.data && Array.isArray(res.data) ? res.data : []);
+
+        const newReports = reports
+          .filter(r => r.status === 'NEW')
+          .map(r => {
+            const d = new Date(r.incident_time || r.submitted_at || Date.now());
+            const timeStr = isNaN(d.getTime()) ? '' : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            return {
+              id: r._id,
+              type: 'emergency_report',
+              source: 'guest',
+              severity: r.severity || 'high',
+              cameraId: r.location && r.location.camera_id ? r.location.camera_id : (r.vehicle_id || 'Unknown location'),
+              time: timeStr,
+              description: r.request_type || r.description || 'Unknown incident'
+            };
+          });
+
+        this.emergencyAlerts = [ ...newReports ];
       } catch (e) {
         console.error("Failed to fetch emergency reports for dashboard", e);
+        this.emergencyAlerts = [];
       }
     },
     initMap() {

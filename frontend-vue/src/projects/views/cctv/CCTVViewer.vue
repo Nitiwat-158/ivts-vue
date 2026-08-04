@@ -62,6 +62,14 @@ export default {
       errorMessage: ''
     }
   },
+  watch: {
+    '$route.query.cameraId': {
+      handler() {
+        this.syncSelectedCameraFromRoute()
+      },
+      immediate: true
+    }
+  },
   computed: {
     activeCamerasCount() {
       return this.cameras.filter(c => c.status === 'online').length
@@ -110,15 +118,29 @@ export default {
           }
         })
 
-        if (this.cameras.length > 0 && !this.selectedCamera) {
-          this.selectedCamera = this.cameras[0]
-        }
+        this.syncSelectedCameraFromRoute()
       } catch (error) {
         console.error('Failed to load CCTV cameras:', error)
         this.errorMessage = this.$t('cctvViewer.connectionError')
       } finally {
         this.loading = false
       }
+    },
+    syncSelectedCameraFromRoute() {
+      const cameraId = String(this.$route.query.cameraId || '').trim()
+
+      if (!cameraId) {
+        if (!this.selectedCamera && this.cameras.length > 0) {
+          this.selectedCamera = this.cameras[0]
+        }
+        return
+      }
+
+      const matched = this.cameras.find((camera) => {
+        return String(camera.id || '') === cameraId || String(camera.mediamtx_path || '') === cameraId
+      })
+
+      this.selectedCamera = matched || this.cameras[0] || null
     },
     selectCamera(camera) {
       this.selectedCamera = camera

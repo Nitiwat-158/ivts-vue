@@ -11,6 +11,9 @@
         </div>
         <div class="d-flex align-items-center gap-2">
           <CBadge :color="statusColor" class="px-2 py-1">{{ camera.status.toUpperCase() }}</CBadge>
+          <CButton size="sm" color="primary" class="border" @click="openCameraWindow">
+            Open Camera
+          </CButton>
           <CButton size="sm" color="light" class="border" @click="refreshStream">
             <CIcon name="cil-reload" />
           </CButton>
@@ -118,6 +121,9 @@ export default {
       if (fromEnv) {
         return fromEnv.replace(/\/$/, '')
       }
+      if (typeof window !== 'undefined' && window.location && window.location.hostname) {
+        return `http://${window.location.hostname}:8082`
+      }
       return 'http://127.0.0.1:8082'
     },
     statusColor() {
@@ -132,10 +138,20 @@ export default {
     },
     streamSourceUrl() {
       if (!this.camera || !this.camera.stream_urls) return null
-      if (this.usingFallbackProxy) {
-        return this.camera.stream_urls.hls_proxy || this.camera.stream_urls.hls || null
+
+      const proxyUrl = this.camera.stream_urls.hls_proxy || null
+      const directUrl = this.camera.stream_urls.hls || null
+
+      if (proxyUrl) {
+        try {
+          const parsed = new URL(String(proxyUrl).trim())
+          return parsed.pathname + parsed.search
+        } catch (_) {
+          return String(proxyUrl).trim().startsWith('/') ? String(proxyUrl).trim() : `/${String(proxyUrl).trim()}`
+        }
       }
-      return this.camera.stream_urls.hls || this.camera.stream_urls.hls_proxy || null
+
+      return directUrl
     },
     streamSourceType() {
       if (!this.streamSourceUrl) {
@@ -237,9 +253,10 @@ export default {
           
           this.hlsInstance.on(Hls.Events.ERROR, (event, data) => {
             console.error('[CameraView] hls error', event, data)
+            clearHlsTimeout()
+
             if (data && data.fatal) {
-              clearHlsTimeout()
-              switch(data.type) {
+              switch (data.type) {
                 case Hls.ErrorTypes.NETWORK_ERROR:
                   console.error('[CameraView] Fatal network error encountered:', data)
                   if (!this.usingFallbackProxy && this.camera && this.camera.stream_urls && this.camera.stream_urls.hls_proxy) {
@@ -261,6 +278,8 @@ export default {
                   this.onError()
                   break
               }
+            } else {
+              this.onError()
             }
           })
 
@@ -307,18 +326,42 @@ export default {
             console.error('[CameraView] native video element error', event)
             this.onError()
           })
+          video.load()
         } else {
           clearHlsTimeout()
           this.onError()
         }
       })
     },
+    openCameraWindow() {
+      if (!this.camera) return
+
+      const cameraId = String(this.camera.id || this.camera.mediamtx_path || this.camera.name || '').trim()
+      if (!cameraId) return
+
+      const target = this.$router.resolve({
+        name: 'CCTV Viewer',
+        query: { cameraId }
+      }).href
+
+      const popup = window.open(
+        target,
+        '_blank',
+        'noopener,noreferrer,width=1400,height=900'
+      )
+
+      if (popup) {
+        popup.focus()
+      }
+    },
     refreshStream() {
       this.loading = true
       this.streamError = false
       this.usingFallbackProxy = false
       this.timestamp = Date.now()
-      this.initHls()
+      this.$nextTick(() => {
+        this.initHls()
+      })
     },
     onLoaded() {
       this.loading = false
