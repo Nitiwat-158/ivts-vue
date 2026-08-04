@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../services/auth_service.dart';
 import '../services/app_data_repository.dart';
 import '../services/mobile_api_service.dart';
 import '../theme/app_theme.dart';
@@ -131,8 +132,18 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
 
     setState(() => _submitting = true);
     try {
+      final currentUser = await AuthService().getCurrentUser();
+      if (currentUser == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('กรุณาเข้าสู่ระบบก่อนยื่นคำร้อง')),
+        );
+        return;
+      }
+      final userId = currentUser.effectiveUserId;
+
       await _api.createRequest({
-        'user_id': '1',
+        'user_id': userId,
         'request_type': 'register',
         'user_type': 'student',
         'vehicle_info': {

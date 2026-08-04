@@ -31,7 +31,7 @@ class AppDataRepository {
     bool success = false;
     try {
       final currentUser = await AuthService().getCurrentUser();
-      final userId = currentUser?.id;
+      final userId = currentUser?.effectiveUserId;
 
       final results = await Future.wait([
         _refreshVehicles(userId: userId),

@@ -16,6 +16,7 @@ class SignInResult {
 
 class AuthUser {
   final String id;
+  final String? userId;
   final String name;
   final String surname;
   final String email;
@@ -26,6 +27,7 @@ class AuthUser {
 
   AuthUser({
     required this.id,
+    this.userId,
     required this.name,
     required this.surname,
     required this.email,
@@ -35,9 +37,12 @@ class AuthUser {
     required this.role,
   });
 
+  String get effectiveUserId => (userId != null && userId!.isNotEmpty) ? userId! : id;
+
   factory AuthUser.fromJson(Map<String, dynamic> json) {
     return AuthUser(
       id: json['id'] ?? json['_id'] ?? '',
+      userId: json['user_id']?.toString() ?? json['userId']?.toString(),
       name: json['name'] ?? json['firstname'] ?? '',
       surname: json['surname'] ?? json['lastname'] ?? '',
       email: json['email'] ?? '',
@@ -51,6 +56,7 @@ class AuthUser {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'user_id': userId,
       'name': name,
       'surname': surname,
       'email': email,
