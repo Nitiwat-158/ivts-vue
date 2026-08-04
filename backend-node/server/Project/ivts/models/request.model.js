@@ -62,6 +62,7 @@ const validitySchema = new Schema({
 const requestSchema = new Schema({
   _id: { type: String },   // e.g. "req_2026_00001" — set manually or via default
   user_id: { type: String, ref: 'User', required: true, index: true },
+  users_id: { type: String, ref: 'User', index: true },
   request_type: {
     type: String,
     enum: ['register', 'renew'],

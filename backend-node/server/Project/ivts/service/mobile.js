@@ -162,17 +162,28 @@ function mapVehicle(v) {
 
 function buildVehicleFilter(query) {
   const filter = {};
-  const userId = cleanText(query.user_id);
+  const userId = cleanText(query.users_id);
   const q = cleanText(query.q);
 
-  if (userId) filter.user_id = userIdFilterValue(userId);
-  if (q) {
+  if (userId) {
     filter.$or = [
+      { users_id: userIdFilterValue(userId) },
+      { user_id: userIdFilterValue(userId) }
+    ];
+  }
+  if (q) {
+    const qMatches = [
       { plate_number: new RegExp(q, 'i') },
       { vehicle_code: new RegExp(q, 'i') },
       { brand: new RegExp(q, 'i') },
       { model: new RegExp(q, 'i') }
     ];
+    if (filter.$or) {
+      filter.$and = [{ $or: filter.$or }, { $or: qMatches }];
+      delete filter.$or;
+    } else {
+      filter.$or = qMatches;
+    }
   }
   return filter;
 }
@@ -209,9 +220,14 @@ exports.getVehicleById = async function getVehicleById(id) {
 
 exports.listTripHistory = async function listTripHistory(query) {
   const filter = {};
-  const userId = cleanText(query.user_id);
+  const userId = cleanText(query.users_id);
   const vehicleId = cleanText(query.vehicle_id);
-  if (userId) filter.user_id = userIdFilterValue(userId);
+  if (userId) {
+    filter.$or = [
+      { users_id: userIdFilterValue(userId) },
+      { user_id: userIdFilterValue(userId) }
+    ];
+  }
   if (vehicleId) filter.vehicle_id = vehicleId;
 
   const limit = Math.min(Math.max(toNumber(query.limit, DEFAULT_LIMIT), 1), MAX_LIMIT);
@@ -259,8 +275,13 @@ exports.listTripHistory = async function listTripHistory(query) {
 
 exports.listRequestHistory = async function listRequestHistory(query) {
   const filter = {};
-  const userId = cleanText(query.user_id);
-  if (userId) filter.user_id = userIdFilterValue(userId);
+  const userId = cleanText(query.users_id);
+  if (userId) {
+    filter.$or = [
+      { users_id: userIdFilterValue(userId) },
+      { user_id: userIdFilterValue(userId) }
+    ];
+  }
 
   const limit = Math.min(Math.max(toNumber(query.limit, DEFAULT_LIMIT), 1), MAX_LIMIT);
   const requests = await Request.find(filter).sort({ created_at: -1 }).limit(limit).lean();
@@ -284,7 +305,7 @@ function createRequestId() {
  * Create a new vehicle request from mobile clients.
  * Expected body:
  * {
- *   user_id: string,
+ *   users_id: string,
  *   request_type: register|renew,
  *   user_type: student|staff|outsider,
  *   vehicle_info?: { license_plate, province_license, brand, model, color, type, priority_order },
@@ -295,12 +316,12 @@ function createRequestId() {
  */
 exports.createRequest = async function createRequest(payload) {
   const body = payload || {};
-  const userId = cleanText(body.user_id);
+  const userId = cleanText(body.users_id);
   const requestType = cleanText(body.request_type);
   const userType = cleanText(body.user_type);
 
   if (!userId) {
-    const error = new Error('user_id is required');
+    const error = new Error('users_id is required');
     error.status = 400;
     throw error;
   }
@@ -342,6 +363,7 @@ exports.createRequest = async function createRequest(payload) {
   const document = {
     _id: cleanText(body._id) || createRequestId(),
     user_id: userId,
+    users_id: userId,
     request_type: normalizedRequestType,
     request_status: cleanText(body.request_status) || 'pending_review',
     user_type: normalizedUserType,
@@ -522,11 +544,16 @@ exports.createEmergencyReport = async function createEmergencyReport(payload) {
 // ─── Notifications (derived, no dedicated collection) ─────────────────────────
 
 exports.listNotifications = async function listNotifications(query) {
-  const userId = cleanText(query.user_id);
+  const userId = cleanText(query.users_id);
   const vehicleId = cleanText(query.vehicle_id);
 
   const vehicleFilter = {};
-  if (userId) vehicleFilter.user_id = userIdFilterValue(userId);
+  if (userId) {
+    vehicleFilter.$or = [
+      { users_id: userIdFilterValue(userId) },
+      { user_id: userIdFilterValue(userId) }
+    ];
+  }
   if (vehicleId) vehicleFilter._id = vehicleId;
 
   const vehicles = await Vehicle.find(vehicleFilter).lean();

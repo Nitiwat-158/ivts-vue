@@ -302,12 +302,15 @@ async function jitProvisionFromGoogleToken(decoded) {
 
 function buildMobileUserResponse(user, signinResult) {
   const payload = signinResult && signinResult.payload ? signinResult.payload : {};
+  const userId = user._id || user.id;
   return Object.assign({}, payload, {
     status: true,
     data: Object.assign({}, payload.data || {}, {
       role: user.role || 'user',
       account: {
-        _id: user.id || user._id,
+        _id: userId,
+        user_id: userId,
+        users_id: userId,
         email: user.email,
         firstname: user.name,
         lastname: user.surname,
@@ -355,6 +358,7 @@ async function registerLocalUser(request, response) {
     const newUser = new UserModel({
       _id: customId,
       user_id: nextUserId,
+      users_id: customId,
       email: cleanEmail,
       password: hashedPassword,
       name: cleanName,
@@ -377,7 +381,8 @@ async function registerLocalUser(request, response) {
         require2FA: false,
         account: {
           _id: newUser._id,
-          user_id: newUser.user_id,
+          user_id: newUser._id,
+          users_id: newUser._id,
           email: newUser.email,
           firstname: newUser.name,
           lastname: newUser.surname,
@@ -420,6 +425,7 @@ async function forwardMobileSignin(request, response) {
         const localUser = await UserModel.findOne({
           $or: [
             { email: decodedUser.toLowerCase() },
+            { users_id: decodedUser },
             { user_id: decodedUser },
             { _id: decodedUser }
           ]
@@ -436,7 +442,8 @@ async function forwardMobileSignin(request, response) {
                 require2FA: false,
                 account: {
                   _id: localUser._id,
-                  user_id: localUser.user_id || localUser._id,
+                  user_id: localUser._id,
+                  users_id: localUser._id,
                   email: localUser.email,
                   firstname: localUser.name,
                   lastname: localUser.surname,

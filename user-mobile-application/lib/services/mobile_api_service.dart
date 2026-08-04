@@ -83,7 +83,7 @@ class MobileApiService {
 
   Future<List<Map<String, dynamic>>> _getJson(String path, {String? userId}) async {
     final uri = Uri.parse('${ApiConfig.baseUrl}$path').replace(
-      queryParameters: userId != null && userId.isNotEmpty ? {'user_id': userId} : null,
+      queryParameters: userId != null && userId.isNotEmpty ? {'users_id': userId} : null,
     );
 
     final response = await _client.get(uri).timeout(ApiConfig.requestTimeout);

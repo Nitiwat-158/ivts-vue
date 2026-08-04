@@ -37,12 +37,13 @@ class AuthUser {
     required this.role,
   });
 
-  String get effectiveUserId => (userId != null && userId!.isNotEmpty) ? userId! : id;
+  String get effectiveUserId => id;
 
   factory AuthUser.fromJson(Map<String, dynamic> json) {
+    final primaryId = json['_id']?.toString() ?? json['id']?.toString() ?? json['user_id']?.toString() ?? '';
     return AuthUser(
-      id: json['id'] ?? json['_id'] ?? '',
-      userId: json['user_id']?.toString() ?? json['userId']?.toString(),
+      id: primaryId,
+      userId: primaryId,
       name: json['name'] ?? json['firstname'] ?? '',
       surname: json['surname'] ?? json['lastname'] ?? '',
       email: json['email'] ?? '',

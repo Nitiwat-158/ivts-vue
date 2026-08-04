@@ -85,6 +85,7 @@ test('registerLocalUser success creates user with hashed password', async () => 
     assert.ok(savedUser.password.startsWith('scrypt:'), 'Password should be hashed with scrypt');
     assert.equal(savedUser.name, 'สมชาย');
     assert.equal(savedUser.phone, '0812345678');
+    assert.equal(savedUser.iam_user_id, undefined, 'iam_user_id should be undefined to prevent E11000 sparse index duplicate key error');
   } finally {
     UserModel.findOne = originalFindOne;
     UserModel.countDocuments = originalCountDocuments;
