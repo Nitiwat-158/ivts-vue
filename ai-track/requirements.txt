@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+psycopg2-binary
+pgvector
+python-dotenv
+pyyaml
+opencv-python
+numpy
+torch
+torchvision
+torchreid
+ultralytics
+pillow

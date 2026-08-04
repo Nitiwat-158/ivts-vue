@@ -1,0 +1,25 @@
+# Custom ByteTrack config tuned for small/fast-moving objects (motorcycles).
+#
+# Compared to Ultralytics' default bytetrack.yaml, this:
+#   - lowers new_track_thresh / track_high_thresh: motorcycles produce lower
+#     detection confidence than cars (smaller box, more motion blur), so the
+#     default thresholds can reject them before a track is ever created.
+#   - raises track_buffer: keeps a track "alive" longer through brief
+#     occlusion/detection gaps, which happens more with fast, small objects.
+#   - slightly lowers match_thresh: a bit more lenient when matching a new
+#     detection to an existing track frame-to-frame.
+#
+# Use this on cameras where motorcycles are being missed. It also still
+# tracks cars fine - it's more permissive, not motorcycle-exclusive.
+#
+# Reference (Ultralytics default values, for comparison):
+#   track_high_thresh: 0.5   track_low_thresh: 0.1   new_track_thresh: 0.6
+#   track_buffer: 30         match_thresh: 0.8        fuse_score: True
+
+tracker_type: bytetrack
+track_high_thresh: 0.35     # was 0.5 - accept lower-confidence detections into active tracks
+track_low_thresh: 0.08      # was 0.1 - slightly more lenient second-pass matching
+new_track_thresh: 0.4       # was 0.6 - let a lower-confidence detection START a new track
+track_buffer: 45            # was 30  - survive longer gaps in detection (fast/occluded objects)
+match_thresh: 0.75          # was 0.8 - slightly more lenient IOU matching
+fuse_score: true

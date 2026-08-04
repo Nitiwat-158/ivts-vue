@@ -1,0 +1,82 @@
+# ==========================================
+# Route Segments - road-following waypoints between camera pairs
+# ==========================================
+# A straight line between two camera GPS points ignores that the real road
+# curves - this file lets you inject waypoints along the ACTUAL road path
+# between two cameras that are physically connected by a route.
+#
+# Not every camera pair needs an entry here - only pairs that are directly
+# connected by a road a vehicle would actually drive between. If a pair has
+# no entry, the API just connects them with a straight line (same as before).
+#
+# `between`: SYMMETRIC form - the same physical road, travelled either
+#   direction. Use this when CAM_A -> CAM_B and CAM_B -> CAM_A are literally
+#   the same road just driven backwards. The API automatically reverses the
+#   waypoint order when travelling the opposite way from how it's defined.
+#
+# `from` / `to`: DIRECTIONAL form - a ONE-WAY path only. Use this when the
+#   path from A to B is a DIFFERENT physical road than B to A - e.g. a
+#   one-way loop/rectangle around a building, where going one way circles
+#   around one side and coming back circles around the other side. If you
+#   use this form, you need a SEPARATE entry (with its own waypoints) for
+#   the opposite direction too - the API will NOT auto-reverse a directional
+#   segment, since that would draw the wrong physical path.
+#
+# `waypoints`: ordered [lat, lng] points along the road, in the direction
+#   implied by `between`/`from`->`to`. Use tools/waypoint_picker.html to
+#   generate these by clicking on a real map instead of typing coordinates
+#   by hand.
+
+# segments:
+  # - between: [CAM01_Gate_in, CAM02_Gate_in]
+  #   waypoints:
+  #     - [20.045158, 99.889630]
+  #     - [20.045156, 99.889665]
+      # TODO: replace with real clicked waypoints from tools/waypoint_picker.html -
+      # these are placeholder points roughly between the two gates for now.
+
+  # Example: rectangular one-way loop between CAM06 and CAM07 - going each
+  # direction takes a DIFFERENT physical path (e.g. around opposite sides of
+  # a building), so this needs TWO directional entries, not one symmetric one:
+  #
+  # - from: CAM06
+  #   to: CAM07
+  #   waypoints:
+  #     - [20.0460, 99.8920]   # along the NORTH side of the loop
+  #     - [20.0462, 99.8925]
+  #
+  # - from: CAM07
+  #   to: CAM06
+  #   waypoints:
+  #     - [20.0458, 99.8925]   # along the SOUTH side of the loop
+  #     - [20.0456, 99.8920]
+
+  # Add more connected camera pairs here as you calibrate them, e.g.:
+  # - between: [CAM02_Gate_in, CAM03]
+  #   waypoints:
+  #     - [20.0453, 99.8901]
+  #     - [20.0455, 99.8905]
+  #     - [20.0458, 99.8910]
+
+segments:
+# 20.044996, 99.889622 lat/lng of Gate
+  - from: CAM02_Gate_in
+    to: CAM03
+    waypoints:
+      - [20.045107, 99.890469]
+  
+  - from: CAM03
+    to: CAM05
+    waypoints:
+      - [20.045241, 99.891222]
+      - [20.045462, 99.891271]
+
+
+
+
+
+
+  
+
+
+

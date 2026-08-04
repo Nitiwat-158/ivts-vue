@@ -1,0 +1,29 @@
+# ==========================================
+# Camera Travel Times - minimum realistic seconds to drive between cameras
+# ==========================================
+# Used by the ReID matcher to REJECT a match that would require a vehicle to
+# have travelled impossibly fast (e.g. "seen at CAM02 2 seconds ago" can't
+# also be "seen at CAM09 now" if that's a 40-second drive minimum).
+#
+# Only list pairs you actually want a specific minimum time for. Any pair
+# NOT listed here falls back to `default_min_seconds` below.
+#
+# For ADJACENT/overlapping cameras (like CAM04/CAM05 watching the same
+# intersection), keep this LOW (near 0) - a vehicle can legitimately be seen
+# by both within the same second. This check mainly helps for cameras that
+# are actually far apart on campus.
+
+default_min_seconds: 3
+
+pairs:
+  - between: [CAM01_Gate_in, CAM02_Gate_in]
+    min_seconds: 2
+  
+  - between: [CAM02_Gate_in, CAM03]
+    min_seconds: 8
+
+  - between: [CAM03, CAM05]
+    min_seconds: 8
+  # Add more pairs as you learn real travel times for your campus, e.g.:
+  # - between: [CAM02_Gate_in, CAM09]
+  #   min_seconds: 25

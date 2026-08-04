@@ -1,0 +1,33 @@
+# ทำ route ปลอมทดสอบ polyline
+route:
+  - camera_id: CAM01_Gate_in
+    lat: 20.045159
+    lng: 99.889588
+
+  - camera_id: CAM02_Gate_in
+    lat: 20.045153
+    lng: 99.889704
+
+  - camera_id: CAM03
+    lat: 20.045148
+    lng: 99.891130
+
+  - camera_id: CAM05
+    lat: 20.045800
+    lng: 99.891429
+
+
+
+  # - camera_id: CAM08
+  #   lat: 20.044995
+  #   lng: 99.891173
+  
+  # - camera_id: CAM09
+  #   lat: 20.044997
+  #   lng: 99.889731
+
+  # - camera_id: CAM010
+  #   lat: 20.044997
+  #   lng: 99.889522
+
+  # ...add every stop, exact lat/lng, in the exact order you want the path to draw

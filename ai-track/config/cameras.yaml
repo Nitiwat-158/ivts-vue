@@ -1,0 +1,112 @@
+cameras:
+- id: CAM01_Gate_in
+  rtsp_url_env: CAM01_RTSP_URL
+  location_name: ประตูทางเข้า_ด้านนอก
+  lat: 20.045124
+  lng: 99.889505
+  mask_points:
+  - - 1440
+    - 23
+  - - 2
+    - 735
+  - - 0
+    - 2
+  - - 1452
+    - 2
+  - - 2686
+    - 2
+  - - 2686
+    - 677
+  - - 2043
+    - 583
+  - - 1833
+    - 511
+  - - 1663
+    - 438
+  - - 1839
+    - 7
+  - - 1450
+    - 7
+  - - 1438
+    - 26
+- id: CAM02_Gate_in
+  rtsp_url_env: CAM02_RTSP_URL
+  location_name: ประตูทางเข้า_ด้านใน
+  lat: 20.045121
+  lng: 99.889687
+  mask_points:
+  - - 2681
+    - 792
+  - - 1519
+    - 3
+  - - 2683
+    - 0
+  - - 2683
+    - 792
+  conf: 0.05
+  tracker: config/trackers/bytetrack_sensitive.yaml
+- id: CAM03
+  rtsp_url_env: CAM03_RTSP_URL
+  location_name: 3 แยกหน้ามอ
+  lat: 20.045127
+  lng: 99.891175
+  mask_points:
+  - - 0
+    - 2
+  - - 2540
+    - 2
+  - - 2540
+    - 1005
+  - - 1955
+    - 804
+  - - 1089
+    - 566
+  - - 130
+    - 561
+  - - 3
+    - 581
+  - - 3
+    - 3
+- id: CAM05
+  rtsp_url_env: CAM05_RTSP_URL
+  location_name: ป้ายรถเจม M Square
+  lat: 20.045691
+  lng: 99.891372
+  mask_points:
+  - - 4
+    - 2
+  - - 0
+    - 608
+  - - 689
+    - 493
+  - - 1360
+    - 410
+  - - 1797
+    - 366
+  - - 2133
+    - 342
+  - - 2196
+    - 313
+  - - 2206
+    - 291
+  - - 2558
+    - 311
+  - - 2554
+    - 2
+  - - 4
+    - 2
+reid:
+  model_name: osnet_x1_0
+  device: cuda
+  match_threshold: 0.35
+  match_window_minutes: 30
+  vector_dim: 512
+detection:
+  model_path: E:\pj_plot\mfu_vehicle_tracking\weights\best_9000.onnx
+  tracker: bytetrack.yaml
+  conf: 0.25
+  device: 0
+  frame_width: 1920
+  frame_height: 1080
+  save_cooldown_seconds: 5
+  display: true

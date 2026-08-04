@@ -1,0 +1,61 @@
+# ==========================================
+# Camera Route Graph - directed adjacency graph of legal camera-to-camera
+# transitions (one-way traffic flow lock for the ReID matcher)
+# ==========================================
+#
+# WHY THIS FILE EXISTS
+# ---------------------------------------------------------------------------
+# `camera_travel_times.yaml` only rejects a ReID match that's too FAST to be
+# physically possible - it doesn't know about DIRECTION. Two vehicles that
+# look alike but drove past each other in opposite directions (e.g. one
+# entering CAM01_Gate_in while the other exits toward it) can still slip
+# through as a false-positive match if enough time has passed.
+#
+# This file adds that missing piece: a directed graph where each camera lists
+# ONLY the camera(s) a vehicle could legally arrive at NEXT, based on the real
+# one-way flow of your campus roads. A candidate match whose
+# (previous_camera -> current_camera) pair isn't listed here gets rejected
+# and a new global_id is assigned instead, even if the OSNet vectors matched
+# and the travel-time check passed.
+#
+# If a camera key is missing entirely, it's treated as a DEAD END / EXIT
+# (no outgoing edges) - a vehicle seen there isn't expected to reappear at
+# another camera afterward.
+#
+# ---------------------------------------------------------------------------
+# ASSUMPTIONS - PLEASE VERIFY AGAINST YOUR ACTUAL ROADS BEFORE RELYING ON THIS
+# ---------------------------------------------------------------------------
+# Only CAM01_Gate_in <-> CAM02_Gate_in, CAM05 <-> CAM06, and CAM06 <-> CAM07
+# are confirmed directional segments in route_segments.yaml today. Everything
+# else below (CAM02->CAM03, CAM03->CAM04, CAM04->CAM05, CAM04->CAM08,
+# CAM08->CAM09, CAM09->CAM10) is inferred from the drive order in
+# config/manual_route.yaml, NOT yet confirmed by a calibrated route segment.
+# Each inferred edge is marked "# ASSUMPTION" below - double check it matches
+# reality on your campus, then delete the tag once confirmed.
+#
+# CAM01/CAM02 are treated as one-way ENTRANCE gates (inbound only) since
+# they're literally named "Gate_in" - if a vehicle can also legally exit
+# back out through them, add the reverse edge yourself.
+
+allowed_next:
+
+  CAM01_Gate_in:
+    - CAM02_Gate_in     
+
+  CAM02_Gate_in:
+    - CAM03                  
+ 
+  CAM03:
+    - CAM05  
+
+  CAM05:                 
+
+# ---------------------------------------------------------------------------
+# Example loader + validity check (drop into common/config.py if/when you
+# want this enforced - not wired in automatically by adding this file alone):
+#
+#   def is_valid_transition(self, previous_camera: str, current_camera: str) -> bool:
+#       if previous_camera not in self.route_graph:
+#           return False
+#       return current_camera in self.route_graph[previous_camera]
+# ---------------------------------------------------------------------------
