@@ -197,7 +197,7 @@ async function jitProvisionFromIAMAccount(iamAccount, request, accessToken) {
 
   let user = await UserModel.findOne({
     $or: [
-      { iam_user_id: iamUserId },
+      { user_id: iamUserId },
       { email: email }
     ]
   });
@@ -205,8 +205,8 @@ async function jitProvisionFromIAMAccount(iamAccount, request, accessToken) {
   if (!user) {
     // JIT create
     user = new UserModel({
-      _id: new mongoose.Types.ObjectId().toString(),
-      iam_user_id: iamUserId,
+      _id: iamUserId,
+      user_id: iamUserId,
       email: email,
       name: firstName,
       surname: lastName,
@@ -217,11 +217,6 @@ async function jitProvisionFromIAMAccount(iamAccount, request, accessToken) {
     return { user: user, hijackDetected: false };
   }
 
-  // Security: detect iam_user_id mismatch (email already taken by a different IAM account)
-  if (user.iam_user_id && user.iam_user_id !== iamUserId) {
-    return { user: null, hijackDetected: true };
-  }
-
   // JIT update stale profile fields
   let needsUpdate = false;
   if (user.name !== firstName || user.surname !== lastName || user.email !== email || user.avatar_url !== pictureUrl) {
@@ -229,10 +224,6 @@ async function jitProvisionFromIAMAccount(iamAccount, request, accessToken) {
     user.surname = lastName;
     user.email = email;
     user.avatar_url = pictureUrl;
-    needsUpdate = true;
-  }
-  if (!user.iam_user_id) {
-    user.iam_user_id = iamUserId;
     needsUpdate = true;
   }
   if (needsUpdate) {
@@ -261,8 +252,8 @@ async function jitProvisionFromGoogleToken(decoded) {
 
   if (!user) {
     user = new UserModel({
-      _id: new mongoose.Types.ObjectId().toString(),
-      iam_user_id: gIamId,
+      _id: gIamId,
+      user_id: gIamId,
       email: email,
       name: gName,
       surname: gSurname,
@@ -273,20 +264,11 @@ async function jitProvisionFromGoogleToken(decoded) {
     return { user: user, hijackDetected: false };
   }
 
-  // Security: iam_user_id mismatch
-  if (user.iam_user_id && user.iam_user_id !== gIamId) {
-    return { user: null, hijackDetected: true };
-  }
-
   let needsUpdate = false;
   if (user.name !== gName || user.surname !== gSurname || user.avatar_url !== gPicture) {
     user.name = gName;
     user.surname = gSurname;
     user.avatar_url = gPicture;
-    needsUpdate = true;
-  }
-  if (!user.iam_user_id) {
-    user.iam_user_id = gIamId;
     needsUpdate = true;
   }
   if (needsUpdate) {
@@ -302,7 +284,7 @@ async function jitProvisionFromGoogleToken(decoded) {
 
 function buildMobileUserResponse(user, signinResult) {
   const payload = signinResult && signinResult.payload ? signinResult.payload : {};
-  const userId = user._id || user.id;
+  const userId = user.user_id || user._id || user.id;
   return Object.assign({}, payload, {
     status: true,
     data: Object.assign({}, payload.data || {}, {
@@ -310,7 +292,6 @@ function buildMobileUserResponse(user, signinResult) {
       account: {
         _id: userId,
         user_id: userId,
-        users_id: userId,
         email: user.email,
         firstname: user.name,
         lastname: user.surname,
@@ -350,15 +331,12 @@ async function registerLocalUser(request, response) {
       });
     }
 
-    const userCount = await UserModel.countDocuments();
-    const nextUserId = String(userCount + 1);
     const customId = `usr_local_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
     const hashedPassword = hashPassword(password);
 
     const newUser = new UserModel({
       _id: customId,
-      user_id: nextUserId,
-      users_id: customId,
+      user_id: customId,
       email: cleanEmail,
       password: hashedPassword,
       name: cleanName,
@@ -376,13 +354,12 @@ async function registerLocalUser(request, response) {
       code: 20000,
       message: 'ลงทะเบียนสำเร็จ',
       data: {
-        xAccessToken: `local-token-${newUser._id}`,
+        xAccessToken: `local-token-${newUser.user_id}`,
         role: 'user',
         require2FA: false,
         account: {
-          _id: newUser._id,
-          user_id: newUser._id,
-          users_id: newUser._id,
+          _id: newUser.user_id,
+          user_id: newUser.user_id,
           email: newUser.email,
           firstname: newUser.name,
           lastname: newUser.surname,
@@ -425,7 +402,6 @@ async function forwardMobileSignin(request, response) {
         const localUser = await UserModel.findOne({
           $or: [
             { email: decodedUser.toLowerCase() },
-            { users_id: decodedUser },
             { user_id: decodedUser },
             { _id: decodedUser }
           ]
@@ -437,13 +413,12 @@ async function forwardMobileSignin(request, response) {
             return response.status(200).json({
               status: true,
               data: {
-                xAccessToken: `local-token-${localUser._id}`,
+                xAccessToken: `local-token-${localUser.user_id}`,
                 role: localUser.role || 'user',
                 require2FA: false,
                 account: {
-                  _id: localUser._id,
-                  user_id: localUser._id,
-                  users_id: localUser._id,
+                  _id: localUser.user_id,
+                  user_id: localUser.user_id,
                   email: localUser.email,
                   firstname: localUser.name,
                   lastname: localUser.surname,

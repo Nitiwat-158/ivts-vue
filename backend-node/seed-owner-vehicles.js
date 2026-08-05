@@ -13,16 +13,16 @@ async function run() {
 
   await OwnerVehicle.deleteMany({});
   await Vehicle.deleteMany({ license_plate: { $in: ['กท 1234', 'ขข 5678', 'จจ 9012'] } });
-  await User.deleteMany({ _id: { $in: ['seed_usr_1', 'seed_usr_2', 'seed_usr_3'] } });
+  await User.deleteMany({ user_id: { $in: ['seed_usr_1', 'seed_usr_2', 'seed_usr_3'] } });
 
   const vehicle1 = new Vehicle({ _id: veh1Id, user_id: 'seed_usr_1', license_plate: 'กท 1234', province_license: 'Bangkok', brand: 'Toyota', model: 'Camry' });
   const vehicle2 = new Vehicle({ _id: veh2Id, user_id: 'seed_usr_2', license_plate: 'ขข 5678', province_license: 'Chiang Mai', brand: 'Honda', model: 'Civic' });
   const vehicle3 = new Vehicle({ _id: veh3Id, user_id: 'seed_usr_3', license_plate: 'จจ 9012', province_license: 'Phuket', brand: 'Nissan', model: 'Almera' });
   await Vehicle.insertMany([vehicle1, vehicle2, vehicle3]);
 
-  const user1 = new User({ _id: 'seed_usr_1', iam_user_id: 'iam_1', name: 'สมชาย', surname: 'ใจดี' });
-  const user2 = new User({ _id: 'seed_usr_2', iam_user_id: 'iam_2', name: 'สมหญิง', surname: 'แก้วใส' });
-  const user3 = new User({ _id: 'seed_usr_3', iam_user_id: 'iam_3', name: 'วิทยา', surname: 'ประเสริฐ' });
+  const user1 = new User({ user_id: 'seed_usr_1', name: 'สมชาย', surname: 'ใจดี' });
+  const user2 = new User({ user_id: 'seed_usr_2', name: 'สมหญิง', surname: 'แก้วใส' });
+  const user3 = new User({ user_id: 'seed_usr_3', name: 'วิทยา', surname: 'ประเสริฐ' });
   await User.insertMany([user1, user2, user3]);
 
   const ownerVehicles = [

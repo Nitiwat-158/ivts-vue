@@ -92,11 +92,18 @@ function buildRow(vehicle, latestRequest, user) {
   const ownerDisplay = vehicle.owner_name ||
     (user ? [user.name, user.surname].filter(Boolean).join(' ') : '');
 
+  const certImgUrl = (latestRequest && latestRequest.documents && latestRequest.documents.vehicle_registration)
+    || (latestRequest && latestRequest.evidence_image_url)
+    || vehicle.certificate_image_url
+    || null;
+
   return {
     _id: String(vehicle._id),
+    certificate_image_url: certImgUrl,
     vehicle: {
       _id: String(vehicle._id),
       plate_number: plate,
+      license_plate: plate,
       vehicle_code: vehicle.vehicle_code || '',
       type: vehicle.type || '',
       brand: vehicle.brand || '',
@@ -113,9 +120,10 @@ function buildRow(vehicle, latestRequest, user) {
           _id: String(user._id),
           name: user.name || '',
           surname: user.surname || '',
+          phone: user.phone || '',
           email: user.email || ''
         }
-      : { _id: vehicle.user_id || '', name: ownerDisplay, surname: '', email: '' },
+      : { _id: vehicle.user_id || '', name: ownerDisplay, surname: '', phone: '', email: '' },
     document_status: deriveDocumentStatus(latestRequest),
     account_status: 'Active',
     pending_request_id: latestRequest && latestRequest.request_status === 'pending_review'

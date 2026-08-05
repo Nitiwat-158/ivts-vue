@@ -150,6 +150,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
       }
 
       await _api.createRequest({
+        'user_id': userId,
         'users_id': userId,
         'request_type': 'register',
         'user_type': userType,

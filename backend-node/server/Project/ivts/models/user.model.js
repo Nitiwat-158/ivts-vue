@@ -9,10 +9,9 @@ const Schema = mongoose.Schema;
  * IMPORTANT: No passwords are stored here. Credentials are owned by IAM.
  */
 const userSchema = new Schema({
-  _id: { type: String, required: true }, 
+  _id: { type: String, required: true },
   user_id: { type: String, trim: true, default: null },
-  users_id: { type: String, trim: true, default: null },
-  iam_user_id: { type: String, required: false, sparse: true, index: true }, 
+  iam_user_id: { type: String, required: false, default: null, sparse: true, index: true },
   email: { type: String, trim: true, lowercase: true, default: null },
   password: { type: String, default: null },
   name: { type: String, trim: true, default: null },
@@ -31,13 +30,13 @@ const userSchema = new Schema({
 }, {
   _id: false,
   collection: 'users',
-  timestamps: false, 
+  timestamps: false,
   toJSON: { getters: true, virtuals: true },
   toObject: { getters: true, virtuals: true }
 });
 
 // เพิ่ม Virtual field สำหรับ Full Name เพื่อให้ Frontend ดึงไปใช้ง่ายขึ้น
-userSchema.virtual('fullName').get(function() {
+userSchema.virtual('fullName').get(function () {
   return `${this.name || ''} ${this.surname || ''}`.trim();
 });
 

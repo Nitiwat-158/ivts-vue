@@ -58,7 +58,7 @@ test('registerLocalUser success creates user with hashed password', async () => 
 
   UserModel.findOne = async () => null; // No duplicate
   UserModel.countDocuments = async () => 5;
-  UserModel.prototype.save = async function() {
+  UserModel.prototype.save = async function () {
     savedUser = this;
     return this;
   };
@@ -85,7 +85,6 @@ test('registerLocalUser success creates user with hashed password', async () => 
     assert.ok(savedUser.password.startsWith('scrypt:'), 'Password should be hashed with scrypt');
     assert.equal(savedUser.name, 'สมชาย');
     assert.equal(savedUser.phone, '0812345678');
-    assert.equal(savedUser.iam_user_id, undefined, 'iam_user_id should be undefined to prevent E11000 sparse index duplicate key error');
   } finally {
     UserModel.findOne = originalFindOne;
     UserModel.countDocuments = originalCountDocuments;

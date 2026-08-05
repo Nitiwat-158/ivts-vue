@@ -225,8 +225,7 @@ test.only('accounts routes expose only ivts assigned accounts', async function (
     return {
       rows: [
         {
-          _id: 'usr-1',
-          iam_user_id: 'iam-usr-1',
+          user_id: 'usr-1',
           email: 'john.doe@example.com',
           name: 'John',
           surname: 'Doe',

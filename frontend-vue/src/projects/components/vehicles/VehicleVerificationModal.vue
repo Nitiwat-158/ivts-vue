@@ -37,8 +37,8 @@
           <!-- Image Container -->
           <div class="d-flex align-items-center justify-content-center bg-secondary rounded overflow-hidden" style="min-height: 400px; max-height: 500px; border: 1px solid #c8ced3;">
             <CImg
-              v-if="!imageError && vehicleData && vehicleData.certificate_image_url"
-              :src="vehicleData.certificate_image_url"
+              v-if="!imageError && certificateImageUrl"
+              :src="certificateImageUrl"
               alt="Evidence Document"
               fluid
               @error="imageError = true"
@@ -230,29 +230,73 @@ export default {
         this.$t('vehicleVerification.reasons.incorrectImage')
       ];
     },
+    certificateImageUrl() {
+      return (
+        this.vehicleData?.certificate_image_url ||
+        this.vehicleData?.vehicle?.certificate_image_url ||
+        this.vehicleData?.vehicle_info?.certificate_image_url ||
+        this.vehicleData?.evidence_image_url ||
+        this.vehicleData?.document_url ||
+        ''
+      );
+    },
     vehicleLicensePlate() {
-      return this.vehicleData?.vehicle?.license_plate || '-';
+      return (
+        this.vehicleData?.vehicle?.license_plate ||
+        this.vehicleData?.vehicle?.plate_number ||
+        this.vehicleData?.vehicle_info?.license_plate ||
+        this.vehicleData?.vehicle_info?.plate_number ||
+        this.vehicleData?.license_plate ||
+        this.vehicleData?.plate_number ||
+        '-'
+      );
     },
     vehicleProvince() {
-      return this.vehicleData?.vehicle?.province_license || '-';
+      return (
+        this.vehicleData?.vehicle?.province_license ||
+        this.vehicleData?.vehicle_info?.province_license ||
+        this.vehicleData?.province_license ||
+        '-'
+      );
     },
     vehicleColor() {
-      return this.vehicleData?.vehicle?.color || '-';
+      return (
+        this.vehicleData?.vehicle?.color ||
+        this.vehicleData?.vehicle_info?.color ||
+        this.vehicleData?.color ||
+        '-'
+      );
     },
     vehicleBrand() {
-      return this.vehicleData?.vehicle?.brand || '-';
+      return (
+        this.vehicleData?.vehicle?.brand ||
+        this.vehicleData?.vehicle_info?.brand ||
+        this.vehicleData?.brand ||
+        '-'
+      );
     },
     vehicleModel() {
-      return this.vehicleData?.vehicle?.model || '';
+      return (
+        this.vehicleData?.vehicle?.model ||
+        this.vehicleData?.vehicle_info?.model ||
+        this.vehicleData?.model ||
+        ''
+      );
     },
     ownerFullName() {
-      const name = this.vehicleData?.user?.name || '';
-      const surname = this.vehicleData?.user?.surname || '';
+      const u = this.vehicleData?.user || this.vehicleData?.owner_info || {};
+      const name = u.name || u.firstname || this.vehicleData?.vehicle?.owner_name || '';
+      const surname = u.surname || u.lastname || '';
       const full = `${name} ${surname}`.trim();
       return full || '-';
     },
     ownerPhone() {
-      return this.vehicleData?.user?.phone || '-';
+      return (
+        this.vehicleData?.user?.phone ||
+        this.vehicleData?.owner_info?.phone ||
+        this.vehicleData?.vehicle?.phone ||
+        '-'
+      );
     }
   },
   watch: {
