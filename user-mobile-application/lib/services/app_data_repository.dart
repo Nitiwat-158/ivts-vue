@@ -20,8 +20,8 @@ class AppDataRepository {
   /// Notifies UI when live connection to backend Docker server is established (true) or failed (false).
   final ValueNotifier<bool?> dockerConnectedNotifier = ValueNotifier<bool?>(null);
 
-  /// Notifies UI whether there is an active emergency report in progress.
-  final ValueNotifier<bool> hasActiveEmergencyNotifier = ValueNotifier<bool>(false);
+  /// Notifies UI whether there is an active emergency report in progress (holds the report ID).
+  final ValueNotifier<String?> activeEmergencyIdNotifier = ValueNotifier<String?>(null);
 
   bool _loading = false;
 

@@ -81,6 +81,7 @@ class LocaleProvider extends ChangeNotifier {
     'request_history': {AppLanguage.english: 'Request History', AppLanguage.thai: 'ประวัติการแจ้งเรื่อง'},
     'logout': {AppLanguage.english: 'LOG OUT', AppLanguage.thai: 'ออกจากระบบ'},
     'user_information': {AppLanguage.english: 'User Information', AppLanguage.thai: 'ข้อมูลผู้ใช้'},
+    'user_type': {AppLanguage.english: 'User type', AppLanguage.thai: 'ประเภทผู้ใช้งาน'},
     'email_address': {AppLanguage.english: 'Email address', AppLanguage.thai: 'อีเมล'},
     'phone_number': {AppLanguage.english: 'Phone number', AppLanguage.thai: 'เบอร์โทรศัพท์'},
     'take_photo_camera': {AppLanguage.english: 'Take Photo (Camera)', AppLanguage.thai: 'ถ่ายรูป (Camera)'},

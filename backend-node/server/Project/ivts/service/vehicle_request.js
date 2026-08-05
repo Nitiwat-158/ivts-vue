@@ -175,8 +175,8 @@ exports.submit = async function submit(body, request) {
     error.status = 400;
     throw error;
   }
-  if (!['student', 'staff', 'outsider'].includes(user_type)) {
-    const error = new Error('user_type must be "student", "staff", or "outsider"');
+  if (!['student', 'staff', 'visitor'].includes(user_type)) {
+    const error = new Error('user_type must be "student", "staff", or "visitor"');
     error.status = 400;
     throw error;
   }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/locale_provider.dart';
 import '../services/app_data_repository.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
@@ -19,6 +21,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _phoneController = TextEditingController();
   final _departmentController = TextEditingController();
+  String? _selectedDepartment;
+  final _confirmPasswordController = TextEditingController();
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   bool _isLoading = false;
 
   Future<void> _register() async {
@@ -77,6 +83,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _surnameController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     _phoneController.dispose();
     _departmentController.dispose();
     super.dispose();
@@ -150,11 +157,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
+                  obscureText: _obscurePassword,
+                  decoration: InputDecoration(
                     labelText: 'รหัสผ่าน',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock),
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.lock),
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -162,6 +177,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     }
                     if (value.length < 6) {
                       return 'รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร';
+                    }
+                    return null;
+                  },
+                  enabled: !_isLoading,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  obscureText: _obscureConfirmPassword,
+                  decoration: InputDecoration(
+                    labelText: 'ยืนยันรหัสผ่าน',
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.lock),
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                      onPressed: () {
+                        setState(() {
+                          _obscureConfirmPassword = !_obscureConfirmPassword;
+                        });
+                      },
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'กรุณายืนยันรหัสผ่าน';
+                    }
+                    if (value != _passwordController.text) {
+                      return 'รหัสผ่านไม่ตรงกัน';
                     }
                     return null;
                   },
@@ -185,20 +228,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   enabled: !_isLoading,
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  controller: _departmentController,
-                  decoration: const InputDecoration(
-                    labelText: 'สำนักวิชา / หน่วยงาน',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.business),
+                DropdownButtonFormField<String>(
+                  value: _selectedDepartment,
+                  decoration: InputDecoration(
+                    labelText: context.watch<LocaleProvider>().t('user_type'),
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.business),
                   ),
+                  items: const [
+                    DropdownMenuItem(value: 'นักศึกษา', child: Text('นักศึกษา')),
+                    DropdownMenuItem(value: 'บุคลากร', child: Text('บุคลากร')),
+                    DropdownMenuItem(value: 'บุคคลภายนอก', child: Text('บุคคลภายนอก')),
+                  ],
+                  onChanged: _isLoading ? null : (value) {
+                    setState(() {
+                      _selectedDepartment = value;
+                      _departmentController.text = value ?? '';
+                    });
+                  },
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'กรุณากรอกสำนักวิชาหรือหน่วยงาน';
+                    if (value == null || value.isEmpty) {
+                      return 'กรุณาเลือกประเภทของผู้ใช้';
                     }
                     return null;
                   },
-                  enabled: !_isLoading,
                 ),
                 const SizedBox(height: 32),
                 if (_isLoading)

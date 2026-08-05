@@ -77,7 +77,7 @@ const requestSchema = new Schema({
   },
   user_type: {
     type: String,
-    enum: ['student', 'staff', 'outsider'],
+    enum: ['student', 'staff', 'visitor'],
     required: true
   },
   vehicle_info: { type: vehicleInfoSchema, default: () => ({}) },

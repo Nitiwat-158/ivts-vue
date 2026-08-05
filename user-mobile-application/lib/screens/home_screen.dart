@@ -143,10 +143,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTap: () {},
               ),
             if (!_hasNoVehicles)
-              ValueListenableBuilder<bool>(
-                valueListenable: AppDataRepository.instance.hasActiveEmergencyNotifier,
-                builder: (context, hasEmergency, child) {
-                  if (!hasEmergency) return const SizedBox.shrink();
+              ValueListenableBuilder<String?>(
+                valueListenable: AppDataRepository.instance.activeEmergencyIdNotifier,
+                builder: (context, emergencyId, child) {
+                  if (emergencyId == null) return const SizedBox.shrink();
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: _ActionBanner(
@@ -156,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) => const EmergencyStatusScreen(),
+                            builder: (_) => EmergencyStatusScreen(emergencyId: emergencyId),
                           ),
                         );
                       },

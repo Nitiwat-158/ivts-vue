@@ -40,6 +40,7 @@ class RedisClient {
     }
 
     async get(key) {
+        if (!this.isReady()) return null;
         try {
             return await this.client.get(key);
         } catch (error) {
@@ -49,6 +50,7 @@ class RedisClient {
     }
 
     async setEx(key, ttl, value) {
+        if (!this.isReady()) return;
         try {
             await this.client.setEx(key, ttl, value);
         } catch (error) {
@@ -57,6 +59,7 @@ class RedisClient {
     }
 
     async delete(key) {
+        if (!this.isReady()) return;
         try {
             await this.client.del(key);
         } catch (error) {

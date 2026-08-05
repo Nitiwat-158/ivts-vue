@@ -110,6 +110,107 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  void _showChangePasswordDialog() {
+    final TextEditingController newPasswordController = TextEditingController();
+    final TextEditingController confirmPasswordController = TextEditingController();
+    bool obscureNew = true;
+    bool obscureConfirm = true;
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: Text(
+                context.watch<LocaleProvider>().t('change_password'),
+                style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: newPasswordController,
+                    obscureText: obscureNew,
+                    decoration: InputDecoration(
+                      labelText: context.watch<LocaleProvider>().t('new_password'),
+                      suffixIcon: IconButton(
+                        icon: Icon(obscureNew ? Icons.visibility_off : Icons.visibility),
+                        onPressed: () => setState(() => obscureNew = !obscureNew),
+                      ),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: confirmPasswordController,
+                    obscureText: obscureConfirm,
+                    decoration: InputDecoration(
+                      labelText: context.watch<LocaleProvider>().t('confirm_new_password'),
+                      suffixIcon: IconButton(
+                        icon: Icon(obscureConfirm ? Icons.visibility_off : Icons.visibility),
+                        onPressed: () => setState(() => obscureConfirm = !obscureConfirm),
+                      ),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ],
+              ),
+              actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+              actions: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFCE8B8A),
+                          foregroundColor: AppColors.primary,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(ctx),
+                        child: Text(
+                          context.watch<LocaleProvider>().t('cancel').toUpperCase(),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () {
+                          // Handle confirm logic here
+                          Navigator.pop(ctx);
+                        },
+                        child: Text(
+                          context.watch<LocaleProvider>().t('confirm').toUpperCase(),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Future<void> _pickAvatar(ImageSource source) async {
     final picked = await _picker.pickImage(source: source, imageQuality: 80);
     if (picked != null) {
@@ -327,26 +428,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 10),
                 _InfoRow(
                   icon: Icons.mail_outline,
-                  label: 'Email address',
+                  label: context.watch<LocaleProvider>().t('email_address'),
                   value: _currentUser?.email ?? '-',
-                  onTap: () => _showDetailDialog('Email address', _currentUser?.email ?? '-'),
+                  onTap: () => _showDetailDialog(context.read<LocaleProvider>().t('email_address'), _currentUser?.email ?? '-'),
                 ),
                 if (_currentUser?.phone != null && _currentUser!.phone!.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   _InfoRow(
                     icon: Icons.phone_outlined,
-                    label: 'Telephone',
+                    label: context.watch<LocaleProvider>().t('phone_number'),
                     value: _currentUser!.phone!,
-                    onTap: () => _showDetailDialog('Telephone', _currentUser!.phone!),
+                    onTap: () => _showDetailDialog(context.read<LocaleProvider>().t('phone_number'), _currentUser!.phone!),
                   ),
                 ],
                 if (_currentUser?.department != null && _currentUser!.department!.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   _InfoRow(
-                    icon: Icons.business_outlined,
-                    label: 'Department',
+                    icon: Icons.person_outline,
+                    label: context.watch<LocaleProvider>().t('user_type'),
                     value: _currentUser!.department!,
-                    onTap: () => _showDetailDialog('Department', _currentUser!.department!),
+                    onTap: () => _showDetailDialog(context.read<LocaleProvider>().t('user_type'), _currentUser!.department!),
                   ),
                 ],
               ],
@@ -359,6 +460,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const RequestHistoryScreen()),
             ),
+          ),
+          _menuTile(
+            context,
+            localeProvider.t('change_password'),
+            onTap: _showChangePasswordDialog,
           ),
 
           _languageTile(context),

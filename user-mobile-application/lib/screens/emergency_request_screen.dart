@@ -8,6 +8,7 @@ import '../data/mock_data.dart';
 import '../models/vehicle.dart';
 import '../theme/app_theme.dart';
 import '../services/app_data_repository.dart';
+import '../services/mobile_api_service.dart';
 import 'emergency_status_screen.dart';
 
 class EmergencyRequestScreen extends StatefulWidget {
@@ -39,7 +40,7 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
 
   // จับเวลาไว้ตอนกดยืนยัน SUBMIT จริง (ไม่ใช่ตอนเปิดหน้า) เพื่อให้ตรงกับเวลาที่ user กดส่งจริง
   DateTime? _submittedAt;
-  final bool _isSubmitting = false;
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -188,20 +189,33 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
                             'description': _descriptionController.text,
                             'location': null,
                             'media_urls': _attachedImages.map((f) => f.path).toList(),
-                            'status': 'OPEN',
-                            'assigned_admin_id': null,
                           };
                           debugPrint('Emergency report (mock): $reportPayload');
 
-                          AppDataRepository.instance.hasActiveEmergencyNotifier.value = true;
+                          try {
+                            final api = MobileApiService();
+                            final createdReport = await api.createEmergencyReport(reportPayload);
+                            
+                            AppDataRepository.instance.activeEmergencyIdNotifier.value = createdReport['_id'];
 
-                          Navigator.of(context).pop();
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (_) => const EmergencyStatusScreen()),
-                          );
+                            if (!mounted) return;
+                            Navigator.of(context).pop();
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (_) => EmergencyStatusScreen(emergencyId: createdReport['_id'])),
+                            );
+                          } catch (e) {
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Failed to submit emergency report: $e')),
+                            );
+                          } finally {
+                            if (mounted) setState(() => _isSubmitting = false);
+                          }
                         },
-                        child: Text(
+                        child: _isSubmitting 
+                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                          : Text(
                           loc.t('submit'),
                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
                         ),

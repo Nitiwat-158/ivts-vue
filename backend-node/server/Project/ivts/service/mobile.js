@@ -307,7 +307,7 @@ function createRequestId() {
  * {
  *   users_id: string,
  *   request_type: register|renew,
- *   user_type: student|staff|outsider,
+ *   user_type: student|staff|visitor,
  *   vehicle_info?: { license_plate, province_license, brand, model, color, type, priority_order },
  *   owner_info?: { name, surname, citizen_id, is_owner_match_user },
  *   uploaded_documents?: { registration_book_url, vehicle_photo_url, citizen_card_url },
@@ -347,8 +347,8 @@ exports.createRequest = async function createRequest(payload) {
     throw error;
   }
 
-  if (!['student', 'staff', 'outsider'].includes(normalizedUserType)) {
-    const error = new Error('user_type must be student, staff, or outsider');
+  if (!['student', 'staff', 'visitor'].includes(normalizedUserType)) {
+    const error = new Error('user_type must be student, staff, or visitor');
     error.status = 400;
     throw error;
   }
@@ -575,7 +575,7 @@ exports.listNotifications = async function listNotifications(query) {
       };
     });
 
-  const reportFilter = {};
+  const reportFilter = { status: { $ne: 'NEW' } };
   if (vehicleId) {
     reportFilter.vehicle_id = vehicleId;
   } else if (userId) {
