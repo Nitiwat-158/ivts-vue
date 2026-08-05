@@ -2,11 +2,11 @@
 
 | Field | Value |
 |---|---|
-| Date | 2026-08-04 |
+| Date | 2026-08-01 |
 | Project | IVTS |
 | Module / Feature | system progress and readiness |
 | Requirement | Track actual project system progress from source and verification evidence |
-| Active Change Record | `docs/changes/2026-08-04-user-model-user-id-refactor.md` |
+| Active Change Record | `docs/changes/2026-08-01-owner-vehicles-sync-on-approval.md` |
 | Overall Status | in_progress |
 | Overall Progress | 55% |
 | Progress Type | Evidence-backed readiness score, not final product completion |
@@ -71,11 +71,8 @@ Adjust weights per project, but keep them evidence-backed.
 | ivts-AUTH-005 | Document auth separation (task + change record + progress) | done | 100 | `docs/tasks/2026-07-31-separate-admin-mobile-login.md`, `docs/changes/2026-07-31-separate-admin-mobile-login.md` | n/a | none | — | Docs complete |
 | ivts-TASK-025 | Automatic owner_vehicles sync on request approval | Backend | AI | none | done | 100 | Implementation and live DB verification passed | `service/vehicle_request.js`, `service/owner_vehicle.js`, `models/owner_vehicle.model.js` | Live DB test SUCCESS | none | — | Sync owner_vehicles on approval |
 | ivts-MAuth-001 | User Mobile Login & Registration with Hashed Password and Data Isolation | Mobile/Backend | AI | none | done | 100 | Implementation, 13 unit tests, flutter analyze PASS | `user.model.js`, `iam-mobile-client.js`, `mobile.routes.js`, `auth_service.dart`, `register_screen.dart`, `app_data_repository.dart` | 13/13 PASS | none | — | Mobile Local Register & Login with Data Isolation |
-| ivts-FIX-001 | Drop Stale iam_user_id_1 MongoDB Index | Backend | AI | none | done | 100 | Script created & executed; initialize.js auto-drop updated; node --test PASS | `drop-stale-user-index.js`, `initialize.js`, `iam-mobile-client-local.test.js` | `node --test` 4/4 PASS, `node --check` PASS | none | — | Fix E11000 duplicate key error during user registration |
-
-
-
-
+| ivts-MAuth-002 | Mobile User IAM Decoupling & Registration E11000 Duplicate Key Error Fix | Backend | AI | none | done | 100 | `user.model.js` default null removed; `initialize.js` index cleanup added; 13 mobile + 15 admin tests PASS | `user.model.js`, `helpers/initialize.js`, `iam-mobile-client-local.test.js` | 13/13 Mobile PASS, 15/15 Admin PASS | none | — | Decouple Mobile IAM & Fix E11000 null duplicate error |
+| ivts-VM-002 | Vehicle Management License Plate View Display Fix | Frontend/Backend | AI | none | done | 100 | `VehicleVerificationModal.vue` fallbacks added; `owner_vehicle.js` buildRow updated | `VehicleVerificationModal.vue`, `owner_vehicle.js` | 25/25 PASS | none | — | Fix missing license plate display on View modal |
 
 ## T4. Verification Log
 
@@ -108,6 +105,9 @@ Backend models, services, and routes are implemented and syntax-verified. System
 
 Vehicle Management fix (2026-07-27): owner_vehicle.js + vehicle.model.js + vehicle_request.js rewritten to use vehicles+requests collections (not empty owner_vehicles). Frontend VehicleManagement.vue refactored with 2 tabs (รถทั้งหมด / คำขอเพิ่มรถ). VehicleRequestTable.vue + ConfirmRequestModal.vue added. Mobile add_vehicle_screen.dart vehicle_type → type renamed. All backend node --check PASS. Live smoke pending server restart (B-001).
 
+Mobile API (`docs/tasks/2026-07-24-mobile-mongodb-api.md`): backend `/api/v1/mobile` read-only API implemented against real MongoDB collections (live schema verified via mongosh) and smoke-tested via curl (7/7 endpoints pass). Flutter app's `mock_data.dart` fully emptied per explicit user instruction — MongoDB is now the sole data source, no mock fallback. Windows desktop build (`flutter create --platforms=windows .` + `flutter run -d windows`) verified end-to-end: real data loaded (`6 vehicles`, `4 notifications`, `0 trip history`/`0 requests` matching real empty collections). Android emulator verification remains blocked by Windows Firewall scoping (B-002); this does not block the completed feature since Windows-target verification succeeded.
+
+Auth separation (2026-07-31): `iam-admin-client.js → forwardScopedSignin` reverted to original commit `9a255686` — strictly Web Admin only; no mobile logic, no DEBUG logs. New `iam-mobile-client.js` handles all mobile user authentication: MFU IAM proxy, JIT user provisioning in MongoDB `users` collection, Google ID Token fallback (dev-only), and hijack detection. `mobile.routes.js` updated to call `iamMobileClient.forwardMobileSignin`. All 15 admin regression tests + 9 new mobile unit tests PASS. Progress updated from 45% → 52%.
 Mobile API (`docs/tasks/2026-07-24-mobile-mongodb-api.md`): backend `/api/v1/mobile` read-only API implemented against real MongoDB collections (live schema verified via mongosh) and smoke-tested via curl (7/7 endpoints pass). Flutter app's `mock_data.dart` fully emptied per explicit user instruction — MongoDB is now the sole data source, no mock fallback. Windows desktop build (`flutter create --platforms=windows .` + `flutter run -d windows`) verified end-to-end: real data loaded (`6 vehicles`, `4 notifications`, `0 trip history`/`0 requests` matching real empty collections). Android emulator verification remains blocked by Windows Firewall scoping (B-002); this does not block the completed feature since Windows-target verification succeeded.
 
 Auth separation (2026-07-31): `iam-admin-client.js → forwardScopedSignin` reverted to original commit `9a255686` — strictly Web Admin only; no mobile logic, no DEBUG logs. New `iam-mobile-client.js` handles all mobile user authentication: MFU IAM proxy, JIT user provisioning in MongoDB `users` collection, Google ID Token fallback (dev-only), and hijack detection. `mobile.routes.js` updated to call `iamMobileClient.forwardMobileSignin`. All 15 admin regression tests + 9 new mobile unit tests PASS. Progress updated from 45% → 52%.

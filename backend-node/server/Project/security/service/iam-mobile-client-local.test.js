@@ -58,7 +58,7 @@ test('registerLocalUser success creates user with hashed password', async () => 
 
   UserModel.findOne = async () => null; // No duplicate
   UserModel.countDocuments = async () => 5;
-  UserModel.prototype.save = async function() {
+  UserModel.prototype.save = async function () {
     savedUser = this;
     return this;
   };
@@ -85,7 +85,6 @@ test('registerLocalUser success creates user with hashed password', async () => 
     assert.ok(savedUser.password.startsWith('scrypt:'), 'Password should be hashed with scrypt');
     assert.equal(savedUser.name, 'สมชาย');
     assert.equal(savedUser.phone, '0812345678');
-    assert.equal(savedUser.user_id.startsWith('usr_local_'), true, 'user_id should be set with custom prefix');
   } finally {
     UserModel.findOne = originalFindOne;
     UserModel.countDocuments = originalCountDocuments;
@@ -97,7 +96,8 @@ test('forwardMobileSignin succeeds for local user with correct password', async 
   const hashedPassword = iamMobileClient.hashPassword('Secret123');
 
   UserModel.findOne = async () => ({
-    user_id: 'usr_local_123',
+    _id: 'usr_local_123',
+    user_id: '10',
     email: 'localuser@mfu.ac.th',
     password: hashedPassword,
     name: 'มานี',
