@@ -38,12 +38,12 @@ exports.getAll = async function(req, res) {
     }
     
     if (adminIds.length > 0) {
-      admins = await User.find({ _id: { $in: adminIds } }, 'username name email').lean();
+      admins = await User.find({ user_id: { $in: adminIds } }, 'username name email user_id').lean();
     }
 
     // Key the vehicleMap by vehicle_code so it matches emergency_report.vehicle_id
     const vehicleMap = Object.fromEntries(vehicles.map(v => [String(v.vehicle_code || v._id), v]));
-    const adminMap = Object.fromEntries(admins.map(a => [String(a._id), a]));
+    const adminMap = Object.fromEntries(admins.map(a => [String(a.user_id || a._id), a]));
 
     const enrichedReports = reports.map(r => ({
       ...r,
@@ -99,7 +99,7 @@ exports.updateStatus = async function(req, res) {
       enrichedVehicle = await Vehicle.findOne({ vehicle_code: report.vehicle_id }).lean();
     }
     if (report.assigned_admin_id) {
-      enrichedAdmin = await User.findById(report.assigned_admin_id, 'username name email').lean();
+      enrichedAdmin = await User.findOne({ user_id: report.assigned_admin_id }, 'username name email user_id').lean();
     }
 
     const reportObj = report.toObject();

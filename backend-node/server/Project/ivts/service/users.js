@@ -21,7 +21,7 @@ async function list(query = {}) {
       { name: searchRegex },
       { surname: searchRegex },
       { email: searchRegex },
-      { _id: searchRegex }
+      { user_id: searchRegex }
     ];
   }
 
@@ -50,7 +50,8 @@ async function list(query = {}) {
 
     return {
       ...u,
-      id: u._id,
+      id: u.user_id,
+      _id: u.user_id,
       fullName: fullName,
       full_name: fullName,
       createdAt: u.created_at,

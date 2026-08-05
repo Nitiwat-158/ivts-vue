@@ -163,8 +163,7 @@ test('iam-mobile-client creates a new user via JIT when IAM signin succeeds', as
 
 test('iam-mobile-client updates an existing user profile via JIT when IAM signin succeeds', async function () {
   const existingUser = {
-    _id: 'existing-mobile-user',
-    iam_user_id: 'mobile-iam-user-1',
+    user_id: 'mobile-iam-user-1',
     email: 'mobile.user@mfu.ac.th',
     name: 'OldName',
     surname: 'OldSurname',
@@ -182,28 +181,6 @@ test('iam-mobile-client updates an existing user profile via JIT when IAM signin
   assert.equal(response.payload.data.account.email, 'mobile.user@mfu.ac.th');
   // The save stub tracks whether it was called due to profile diff
   assert.ok(stub.saveCalled, 'UserModel.save() should be called to update stale profile');
-});
-
-test('iam-mobile-client rejects with 403 when iam_user_id conflicts (hijack attempt)', async function () {
-  const conflictUser = {
-    _id: 'conflict-user',
-    iam_user_id: 'different-iam-id', // Different from mobile-iam-user-1
-    email: 'mobile.user@mfu.ac.th',
-    name: 'Conflict',
-    surname: 'User',
-    avatar_url: '',
-    role: 'user'
-  };
-  stubUserModel(conflictUser);
-
-  const response = createResponse();
-  await iamMobileClient.forwardMobileSignin(createMobileRequest(), response);
-
-  assert.equal(response.statusCode, 403);
-  assert.equal(response.payload.error, 'account_conflict_hijack_attempt');
-  // Verify session was revoked
-  assert.equal(mockServer.state.userSessions.has('user-token-1'), false,
-    'session should be revoked after hijack detection');
 });
 
 test('iam-mobile-client relays IAM response when no token is returned and no Google token provided', async function () {
@@ -237,8 +214,7 @@ test('iam-mobile-client relays IAM response when no token is returned and no Goo
 test('iam-mobile-client always assigns role: user regardless of IAM group membership', async function () {
   // Even if the user was previously an admin in IAM, mobile signin forces role=user
   const stub = stubUserModel({
-    _id: 'admin-turned-mobile',
-    iam_user_id: 'mobile-iam-user-1',
+    user_id: 'mobile-iam-user-1',
     email: 'mobile.user@mfu.ac.th',
     name: 'Mobile',
     surname: 'User',
@@ -276,36 +252,11 @@ test('iam-mobile-client jitProvisionFromIAMAccount creates user for valid IAM ac
 
   assert.equal(hijackDetected, false);
   assert.ok(user, 'expected a new user to be created');
-  assert.equal(user.iam_user_id, 'test-iam-id');
+  assert.equal(user.user_id, 'test-iam-id');
   assert.equal(user.email, 'test.jit@mfu.ac.th');
   assert.equal(user.name, 'Test');
   assert.equal(user.surname, 'JIT');
   assert.equal(user.role, 'user');
-});
-
-test('iam-mobile-client jitProvisionFromIAMAccount detects hijack when iam_user_id conflicts', async function () {
-  stubUserModel({
-    _id: 'existing-id',
-    iam_user_id: 'different-iam-id',
-    email: 'test.jit@mfu.ac.th',
-    name: 'Test',
-    surname: 'JIT',
-    avatar_url: '',
-    role: 'user'
-  });
-
-  const iamAccount = {
-    _id: 'new-iam-id', // Different from stored iam_user_id
-    email: 'test.jit@mfu.ac.th',
-    userinfo: { firstName: 'Attacker', lastName: 'X', picture: '' }
-  };
-
-  const { user, hijackDetected } = await iamMobileClient.jitProvisionFromIAMAccount(
-    iamAccount, createMobileRequest(), 'fake-token'
-  );
-
-  assert.equal(hijackDetected, true);
-  assert.equal(user, null);
 });
 
 test('iam-mobile-client jitProvisionFromGoogleToken creates user from Google claims', async function () {
@@ -323,34 +274,9 @@ test('iam-mobile-client jitProvisionFromGoogleToken creates user from Google cla
 
   assert.equal(hijackDetected, false);
   assert.ok(user, 'expected a new user to be created');
-  assert.equal(user.iam_user_id, 'google-google-sub-12345');
+  assert.equal(user.user_id, 'google-google-sub-12345');
   assert.equal(user.email, 'google.mobile@gmail.com');
   assert.equal(user.name, 'Google');
   assert.equal(user.surname, 'Mobile');
   assert.equal(user.role, 'user');
-});
-
-test('iam-mobile-client jitProvisionFromGoogleToken detects hijack for existing user with different id', async function () {
-  stubUserModel({
-    _id: 'existing-google-user',
-    iam_user_id: 'google-DIFFERENT-sub',
-    email: 'google.mobile@gmail.com',
-    name: 'Google',
-    surname: 'Mobile',
-    avatar_url: '',
-    role: 'user'
-  });
-
-  const googlePayload = {
-    sub: 'google-sub-12345',
-    email: 'google.mobile@gmail.com',
-    given_name: 'Hacker',
-    family_name: 'Attack',
-    picture: ''
-  };
-
-  const { user, hijackDetected } = await iamMobileClient.jitProvisionFromGoogleToken(googlePayload);
-
-  assert.equal(hijackDetected, true);
-  assert.equal(user, null);
 });

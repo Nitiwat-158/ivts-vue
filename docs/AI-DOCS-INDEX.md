@@ -80,6 +80,8 @@ Do not add these unless the project has a real need and source evidence:
 | `tasks/2026-07-30-cctv-hls-stream.md` | completed | Active tasklist for CCTV HLS Stream direct playback (`http://<STREAM_HOST>:8888/<paths>/index.m3u8`). |
 | `tasks/2026-07-30-mobile-osm-map-fix.md` | completed | Active tasklist for Mobile App OpenStreetMap 403 Tile Access Blocked fix. |
 | `tasks/2026-08-04-user-mobile-auth-register.md` | completed | Tasklist for User Mobile Application login, registration with password hash, and user data isolation. |
+| `tasks/2026-08-04-user-model-user-id-refactor.md` | completed | Tasklist for user.model.js user_id schema refactor. |
+| `tasks/2026-08-05-drop-stale-user-index.md` | completed | Active tasklist for dropping stale iam_user_id_1 MongoDB index. |
 | `tasks/2026-06-18-<topic>.md` | active as needed | One focused tasklist per work item. |
 
 
@@ -116,6 +118,8 @@ Do not add these unless the project has a real need and source evidence:
 | `changes/2026-07-30-cctv-hls-stream.md` | completed | T1-T20 change record for CCTV HLS Stream direct playback (`http://<STREAM_HOST>:8888/<paths>/index.m3u8`). |
 | `changes/2026-07-30-mobile-osm-map-fix.md` | completed | T1-T20 change record for Mobile App OpenStreetMap 403 Tile Access Blocked fix. |
 | `changes/2026-08-04-user-mobile-auth-register.md` | completed | T1-T20 change record for User Mobile Application login, registration with password hash, and user data isolation. |
+| `changes/2026-08-04-user-model-user-id-refactor.md` | completed | T1-T20 change record for user.model.js user_id schema refactor. |
+| `changes/2026-08-05-drop-stale-user-index.md` | completed | T1-T20 change record for dropping stale iam_user_id_1 MongoDB index. |
 | `changes/2026-06-18-<topic>.md` | active as needed | T1-T20 handoff for each completed or handed-off work item. |
 
 

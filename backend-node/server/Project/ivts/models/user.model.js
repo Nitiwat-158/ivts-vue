@@ -9,10 +9,8 @@ const Schema = mongoose.Schema;
  * IMPORTANT: No passwords are stored here. Credentials are owned by IAM.
  */
 const userSchema = new Schema({
-  _id: { type: String, required: true }, 
-  user_id: { type: String, trim: true, default: null },
-  users_id: { type: String, trim: true, default: null },
-  iam_user_id: { type: String, required: false, sparse: true, index: true }, 
+  _id: { type: String },
+  user_id: { type: String, required: true }, 
   email: { type: String, trim: true, lowercase: true, default: null },
   password: { type: String, default: null },
   name: { type: String, trim: true, default: null },
@@ -29,7 +27,6 @@ const userSchema = new Schema({
   },
   created_at: { type: Date, default: Date.now }
 }, {
-  _id: false,
   collection: 'users',
   timestamps: false, 
   toJSON: { getters: true, virtuals: true },

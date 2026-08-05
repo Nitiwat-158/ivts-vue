@@ -2,11 +2,11 @@
 
 | Field | Value |
 |---|---|
-| Date | 2026-08-01 |
+| Date | 2026-08-04 |
 | Project | IVTS |
 | Module / Feature | system progress and readiness |
 | Requirement | Track actual project system progress from source and verification evidence |
-| Active Change Record | `docs/changes/2026-08-01-owner-vehicles-sync-on-approval.md` |
+| Active Change Record | `docs/changes/2026-08-04-user-model-user-id-refactor.md` |
 | Overall Status | in_progress |
 | Overall Progress | 55% |
 | Progress Type | Evidence-backed readiness score, not final product completion |
@@ -71,6 +71,7 @@ Adjust weights per project, but keep them evidence-backed.
 | ivts-AUTH-005 | Document auth separation (task + change record + progress) | done | 100 | `docs/tasks/2026-07-31-separate-admin-mobile-login.md`, `docs/changes/2026-07-31-separate-admin-mobile-login.md` | n/a | none | — | Docs complete |
 | ivts-TASK-025 | Automatic owner_vehicles sync on request approval | Backend | AI | none | done | 100 | Implementation and live DB verification passed | `service/vehicle_request.js`, `service/owner_vehicle.js`, `models/owner_vehicle.model.js` | Live DB test SUCCESS | none | — | Sync owner_vehicles on approval |
 | ivts-MAuth-001 | User Mobile Login & Registration with Hashed Password and Data Isolation | Mobile/Backend | AI | none | done | 100 | Implementation, 13 unit tests, flutter analyze PASS | `user.model.js`, `iam-mobile-client.js`, `mobile.routes.js`, `auth_service.dart`, `register_screen.dart`, `app_data_repository.dart` | 13/13 PASS | none | — | Mobile Local Register & Login with Data Isolation |
+| ivts-FIX-001 | Drop Stale iam_user_id_1 MongoDB Index | Backend | AI | none | done | 100 | Script created & executed; initialize.js auto-drop updated; node --test PASS | `drop-stale-user-index.js`, `initialize.js`, `iam-mobile-client-local.test.js` | `node --test` 4/4 PASS, `node --check` PASS | none | — | Fix E11000 duplicate key error during user registration |
 
 
 
