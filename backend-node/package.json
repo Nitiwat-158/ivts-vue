@@ -31,6 +31,7 @@
     "bootstrap:iam": "node -r dotenv/config scripts/bootstrap-iam-permissions.js",
     "bootstrap:iam:local": "node -r dotenv/config scripts/bootstrap-iam-permissions.js dotenv_config_path=.env.local",
     "seed:cctvs": "node -r dotenv/config scripts/seed-cctvs.js dotenv_config_path=.env.local",
+    "test:ai-track-db": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config scripts/test-ai-track-db.js",
     "template:check": "node -c config/project.config.js && node -c scripts/bootstrap-iam-permissions.js"
   },
   "keywords": [],
@@ -70,6 +71,8 @@
     "winston": "^3.19.0",
     "winston-mongodb": "^6.0.0",
     "x-xss-protection": "^2.0.0"
+    ,"pg": "^8.11.0",
+    "js-yaml": "^4.1.0"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",

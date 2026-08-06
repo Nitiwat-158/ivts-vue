@@ -353,6 +353,21 @@ export default {
     }
   },
 
+  aiTrack(method, data) {
+    switch (method) {
+      case 'cameras':
+        return instance.get('/api/v1/ai-track/cameras');
+      case 'recent-vehicles':
+        return instance.get('/api/v1/ai-track/vehicles/recent', { params: data || {} });
+      case 'full-route':
+        return instance.get('/api/v1/ai-track/vehicles/full-route', { params: data || {} });
+      case 'timeline':
+        return instance.get(`/api/v1/ai-track/vehicle/${data && (data.global_id || data.id || data)}/timeline`, { params: data && data.params ? data.params : {} });
+      default:
+        break;
+    }
+  },
+
   settings(method, data) {
     switch (method) {
       case 'groups':

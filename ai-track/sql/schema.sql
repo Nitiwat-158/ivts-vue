@@ -2,7 +2,7 @@
 -- MFU Vehicle Tracking - Database Schema
 -- ==========================================
 -- Run this once against a fresh database:
---   psql -U postgres -d mfu_reid_db -f schema.sql
+--   psql -U postgres -d mfu_vehicle_track -f schema.sql
 --
 -- Requires the pgvector extension (https://github.com/pgvector/pgvector)
 

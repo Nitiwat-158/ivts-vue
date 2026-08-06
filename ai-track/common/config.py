@@ -215,7 +215,7 @@ def load_config(yaml_path: Optional[Path] = None) -> AppConfig:
     detection = DetectionConfig(**raw["detection"])
 
     db = DbConfig(
-        dbname=os.getenv("DB_NAME", "mfu_reid_db"),
+        dbname=os.getenv("DB_NAME", "mfu_vehicle_track"),
         user=os.getenv("DB_USER", "postgres"),
         password=os.getenv("DB_PASSWORD", ""),
         host=os.getenv("DB_HOST", "localhost"),
