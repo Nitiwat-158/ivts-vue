@@ -67,6 +67,17 @@ class LocaleProvider extends ChangeNotifier {
     return rawDesc;
   }
 
+  String translateRequestTitle(String rawTitle) {
+    final title = rawTitle.trim();
+    if (title == 'Vehicle registration') {
+      return _currentLanguage == AppLanguage.thai ? 'คำร้องลงทะเบียนรถ' : 'Vehicle registration';
+    }
+    if (title == 'Renewal') {
+      return _currentLanguage == AppLanguage.thai ? 'คำร้องต่ออายุ' : 'Renewal';
+    }
+    return rawTitle;
+  }
+
   static const Map<String, Map<AppLanguage, String>> _translations = {
     'home': {AppLanguage.english: 'Home', AppLanguage.thai: 'หน้าแรก'},
     'location': {AppLanguage.english: 'Location', AppLanguage.thai: 'ตำแหน่ง'},

@@ -261,32 +261,6 @@ class _LocationScreenState extends State<LocationScreen> {
           ),
         ),
 
-        // Location icon button
-        Positioned(
-          top: 90,
-          right: 24,
-          child: GestureDetector(
-            onTap: () {
-              _mapController.move(_targetLocation, 15.0);
-            },
-            child: Container(
-              width: 54,
-              height: 54,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.divider.withValues(alpha: 0.35),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: const Icon(Icons.location_on_rounded, color: AppColors.primary, size: 28),
-            ),
-          ),
-        ),
 
         // Bottom card
         Positioned(
