@@ -20,8 +20,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _departmentController = TextEditingController();
-  String? _selectedDepartment;
+  final _userTypeController = TextEditingController();
+  String? _selectedUserType;
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -43,7 +43,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         name: _nameController.text.trim(),
         surname: _surnameController.text.trim(),
         phone: _phoneController.text.trim(),
-        department: _departmentController.text.trim(),
+        userType: _userTypeController.text.trim(),
       );
       
       if (!mounted) return;
@@ -85,7 +85,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _phoneController.dispose();
-    _departmentController.dispose();
+    _userTypeController.dispose();
     super.dispose();
   }
 
@@ -229,7 +229,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: _selectedDepartment,
+                  value: _selectedUserType,
                   decoration: InputDecoration(
                     labelText: context.watch<LocaleProvider>().t('user_type'),
                     border: const OutlineInputBorder(),
@@ -242,8 +242,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ],
                   onChanged: _isLoading ? null : (value) {
                     setState(() {
-                      _selectedDepartment = value;
-                      _departmentController.text = value ?? '';
+                      _selectedUserType = value;
+                      _userTypeController.text = value ?? '';
                     });
                   },
                   validator: (value) {

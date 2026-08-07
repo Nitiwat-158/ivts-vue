@@ -10,17 +10,22 @@
     />
 
     <CCard class="mb-3">
-      <CCardBody class="d-flex justify-content-between align-items-center flex-wrap">
-        <div class="d-flex align-items-center mb-2 mb-md-0">
-          <span class="text-muted mr-3">{{ $t('accounts.users.table.subtitle') }}</span>
-        </div>
-        <div class="d-flex align-items-center" style="gap: 15px;">
-          <CInput
-            v-model.trim="localSearch"
-            class="mb-0"
-            :placeholder="$t('accounts.users.table.searchPlaceholder')"
-            @input="onSearchInput"
-          />
+      <CCardBody class="d-flex align-items-center flex-wrap" style="gap: 15px;">
+        <CInput
+          v-model.trim="localSearch"
+          class="mb-0 flex-grow-1"
+          :placeholder="$t('accounts.users.table.searchPlaceholder')"
+          @input="onSearchInput"
+          style="max-width: 800px;"
+        />
+        <CSelect
+          class="mb-0"
+          :value.sync="localUserType"
+          :options="userTypeOptions"
+          @update:value="onUserTypeChange"
+          style="min-width: 150px;"
+        />
+        <div class="ml-auto">
           <CSelect
             class="mb-0"
             :value.sync="pagination.limit"
@@ -95,8 +100,15 @@ export default {
   data () {
     return {
       localSearch: '',
+      localUserType: '',
       searchTimer: null,
-      pageSizeOptions: [25, 50, 100]
+      pageSizeOptions: [25, 50, 100],
+      userTypeOptions: [
+        { label: 'All Users', value: '' },
+        { label: 'Student', value: 'student' },
+        { label: 'Staff', value: 'staff' },
+        { label: 'Visitor', value: 'visitor' }
+      ]
     }
   },
   computed: {
@@ -111,6 +123,7 @@ export default {
         { key: 'fullName', label: this.$t('accounts.users.table.fullName') },
         { key: 'email', label: this.$t('accounts.users.table.email') },
         { key: 'role', label: this.$t('accounts.users.table.role') },
+        { key: 'user_type', label: 'User Type' },
         { key: 'createdAt', label: this.$t('accounts.users.table.createdAt') }
       ]
     },
@@ -158,7 +171,8 @@ export default {
         await this.$store.dispatch('users/explorer', {
           page: options.page || this.pagination.page || 1,
           limit: options.limit || this.pagination.limit || 25,
-          search: options.search != null ? options.search : this.pagination.search || ''
+          search: options.search != null ? options.search : this.pagination.search || '',
+          user_type: options.user_type != null ? options.user_type : this.pagination.user_type || ''
         })
       } catch (error) {
         notifyError(this.$store, this.$t('accounts.users.messages.loadError'))
@@ -169,6 +183,10 @@ export default {
     },
     searchUsers (search) {
       return this.loadData({ page: 1, search })
+    },
+    onUserTypeChange (value) {
+      this.localUserType = value
+      return this.loadData({ page: 1, user_type: value })
     },
     changeLimit (event) {
       const limit = event && event.target ? Number(event.target.value) : Number(event)

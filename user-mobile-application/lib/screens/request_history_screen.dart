@@ -145,7 +145,7 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(request.title, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+                              Text(loc.translateRequestTitle(request.title), style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
                               const SizedBox(height: 4),
                               Text('${request.vehicleCode}   ID: ${request.vehicleId}', style: const TextStyle(color: AppColors.textSecondary)),
                               const SizedBox(height: 4),

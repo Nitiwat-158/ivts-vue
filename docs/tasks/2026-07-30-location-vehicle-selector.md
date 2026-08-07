@@ -20,3 +20,5 @@
 | ivts-LOC-R-003 | เพิ่ม Vehicle Dropdown Selector | Frontend | AI | ivts-LOC-R-002 | done | 100 | แปลง StatelessWidget → StatefulWidget; เพิ่ม Top Bar + _showVehicleSheet(); code changed | `location_screen.dart` | flutter run PASS (ไม่มี compile error) | none | ทดสอบบน device จริง | Vehicle Dropdown + Top Bar |
 | ivts-LOC-R-004 | Verification บน device | Frontend | Dev | ivts-LOC-R-003 | pending | 0 | ยังไม่ได้ verify บน device จริง | — | ยังไม่ได้รัน | none | รัน flutter run บน Android emulator/device | ผล UI verify |
 | ivts-LOC-R-005 | สร้าง Change Record T1-T20 | Ops | AI | ivts-LOC-R-003 | done | 100 | Change record created | `docs/changes/2026-07-30-location-vehicle-selector.md` | — | none | — | T1-T20 document |
+| ivts-LOC-R-006 | ลบปุ่ม Location Icon บนหน้า Location | Frontend | AI | none | done | 100 | ลบ Positioned location icon button ออกจาก location_screen.dart | `location_screen.dart` | flutter analyze PASS | none | — | ปุ่ม Location Icon ถูกลบแล้ว |
+

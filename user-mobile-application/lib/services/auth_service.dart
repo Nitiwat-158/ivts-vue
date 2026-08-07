@@ -21,7 +21,7 @@ class AuthUser {
   final String surname;
   final String email;
   final String? phone;
-  final String? department;
+  final String? userType;
   final String? avatarUrl;
   final String role;
 
@@ -32,7 +32,7 @@ class AuthUser {
     required this.surname,
     required this.email,
     this.phone,
-    this.department,
+    this.userType,
     this.avatarUrl,
     required this.role,
   });
@@ -48,7 +48,7 @@ class AuthUser {
       surname: json['surname'] ?? json['lastname'] ?? '',
       email: json['email'] ?? '',
       phone: json['phone'],
-      department: json['department'],
+      userType: json['user_type'],
       avatarUrl: json['avatarUrl'] ?? json['avatar_url'],
       role: json['role'] ?? 'user',
     );
@@ -62,7 +62,7 @@ class AuthUser {
       'surname': surname,
       'email': email,
       'phone': phone,
-      'department': department,
+      'user_type': userType,
       'avatarUrl': avatarUrl,
       'role': role,
     };
@@ -80,7 +80,7 @@ class AuthService {
     required String name,
     required String surname,
     required String phone,
-    String? department,
+    String? userType,
   }) async {
     final response = await http.post(
       Uri.parse('$_backendBaseUrl/api/v1/mobile/auth/register'),
@@ -91,7 +91,7 @@ class AuthService {
         'name': name,
         'surname': surname,
         'phone': phone,
-        'department': department ?? '',
+        'user_type': userType ?? '',
       }),
     );
 

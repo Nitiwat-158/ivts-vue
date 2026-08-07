@@ -12,7 +12,8 @@ function normalizePagination(raw, fallback) {
     total,
     totalPages,
     hasMore: !!(raw && raw.hasMore),
-    search: raw && raw.search != null ? String(raw.search || '') : String(fallback.search || '')
+    search: raw && raw.search != null ? String(raw.search || '') : String(fallback.search || ''),
+    user_type: raw && raw.user_type != null ? String(raw.user_type || '') : String(fallback.user_type || '')
   }
 }
 
@@ -26,6 +27,7 @@ function mapUser(item) {
     email: item && item.email ? String(item.email) : '-',
     role: item && item.role ? String(item.role) : '-',
     fullName: fullName || String(item && item.email ? item.email : item && item.iam_user_id ? item.iam_user_id : '-'),
+    user_type: item && item.user_type ? String(item.user_type) : (item && item.department ? String(item.department) : '-'),
     createdAt: createdAt ? createdAt.toISOString().slice(0, 10) : '-',
     createdAtLabel: createdAt ? formatDateTime24(createdAt) : '-',
     raw: item
@@ -40,7 +42,8 @@ const state = {
     total: 0,
     totalPages: 1,
     hasMore: false,
-    search: ''
+    search: '',
+    user_type: ''
   },
   loading: false,
   lastUpdatedAt: null
@@ -68,9 +71,10 @@ export default {
       const page = Number(options.page || state.pagination.page || 1) || 1
       const limit = Number(options.limit || state.pagination.limit || 25) || 25
       const search = options.search != null ? String(options.search || '') : String(state.pagination.search || '')
+      const user_type = options.user_type != null ? String(options.user_type || '') : String(state.pagination.user_type || '')
       commit('loading', true)
       try {
-        const response = await Service.users('list', { page, limit, search })
+        const response = await Service.users('list', { page, limit, search, user_type })
 
         const data = response && response.data ? response.data : {}
 
@@ -78,7 +82,7 @@ export default {
         const rawItems = Array.isArray(data.data) ? data.data : (Array.isArray(data.items) ? data.items : [])
         const items = rawItems.map(mapUser)
 
-        const pagination = normalizePagination(data.pagination, { page, limit, search })
+        const pagination = normalizePagination(data.pagination, { page, limit, search, user_type })
         commit('items', items)
         commit('pagination', pagination)
         commit('lastUpdatedAt', new Date())
