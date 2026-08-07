@@ -432,6 +432,36 @@ const en = {
                 assignedGroups: "No assigned groups.",
                 permissions: "No effective permissions found."
             }
+        },
+        aiTrack: {
+            title: "AI Track",
+            subtitle: "Live vehicle tracking and route timeline insights from the AI camera network.",
+            loading: "Loading...",
+            refresh: "Refresh",
+            camerasTitle: "Camera Network",
+            camerasSubtitle: "Locations and coordinates for the configured AI cameras.",
+            noCameras: "No camera data available.",
+            recentVehiclesTitle: "Recent Vehicles",
+            recentVehiclesSubtitle: "Recently detected vehicles and camera visits.",
+            noRecentVehicles: "No recent vehicle activity found.",
+            detailTitle: "Selected Vehicle",
+            detailSubtitle: "Timeline details for the selected vehicle.",
+            refreshTimeline: "Refresh Timeline",
+            noTimeline: "No timeline data available.",
+            unknownCamera: "Unknown camera",
+            routePoints: "Route points ({count})",
+            routeHint: "Polyline coordinates assembled from configured route segments.",
+            fullRouteTitle: "Vehicles Visiting All Cameras",
+            fullRouteCountLabel: "vehicles",
+            fullRouteMore: "and {count} more vehicles",
+            errorLoading: "Unable to load AI track data.",
+            errorLoadingTimeline: "Unable to load vehicle timeline.",
+            table: {
+                globalId: "Global ID",
+                camerasVisited: "Cameras Visited",
+                firstSeen: "First Seen",
+                lastSeen: "Last Seen"
+            }
         }
     },
     setting: {

@@ -195,7 +195,31 @@ exports.listVehicles = async function listVehicles(query) {
   const filter = buildVehicleFilter(query || {});
 
   const vehicles = await Vehicle.find(filter).sort({ _id: 1 }).skip(skip).limit(limit).lean();
-  return vehicles.map(mapVehicle);
+
+  // Attempt to enrich vehicles with ai-track global_id via the optional
+  // `ai_track_mappings` collection. If the collection does not exist or no
+  // mappings are present, the property will simply be `null`.
+  let mappingMap = new Map();
+  try {
+    const AiTrackMapping = require('../models/ai_track_mapping.model');
+    const ids = vehicles.map((v) => String(v._id));
+    if (ids.length) {
+      const mappings = await AiTrackMapping.find({ vehicle_id: { $in: ids } }).lean();
+      mappings.forEach((m) => {
+        if (m && m.vehicle_id) mappingMap.set(String(m.vehicle_id), m.global_id);
+      });
+    }
+  } catch (err) {
+    // If the model or collection is not available, ignore and continue.
+    // This keeps the mobile API backward-compatible.
+    // eslint-disable-next-line no-console
+    console.debug('ai-track mapping lookup skipped:', err && err.message ? err.message : err);
+  }
+
+  return vehicles.map((v) => {
+    const base = mapVehicle(v);
+    return Object.assign({}, base, { ai_track_global_id: mappingMap.get(String(v._id)) || null });
+  });
 };
 
 exports.getVehicleById = async function getVehicleById(id) {

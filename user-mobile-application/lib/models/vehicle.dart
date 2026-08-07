@@ -15,6 +15,7 @@ class Vehicle {
   final VehicleStatus status;
   final String lastLocation;
   final String lastUpdatedTime;
+  final int? aiTrackGlobalId;
 
   const Vehicle({
     required this.id,
@@ -31,5 +32,6 @@ class Vehicle {
     required this.status,
     required this.lastLocation,
     required this.lastUpdatedTime,
+    this.aiTrackGlobalId,
   });
 }

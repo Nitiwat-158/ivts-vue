@@ -15,6 +15,7 @@ const AccountDirectory = () => import('@/projects/views/accounts/Management')
 const UserManagement = () => import('@/projects/views/accounts/UserManagement')
 const VehicleManagement = () => import('@/projects/views/vehicles/VehicleManagement')
 const BusinessOperations = () => import('@/projects/views/operations/BusinessOperations')
+const AITrack = () => import('@/projects/views/operations/AITrack')
 const EmergencyReportManagement = () => import('@/projects/views/operations/EmergencyReportManagement')
 const CreateMenu = () => import('@/projects/views/security/CreateMenu')
 const CreateGroup = () => import('@/projects/views/security/CreateGroup')
@@ -68,6 +69,12 @@ const router = new Router({
           name: 'Business Operations',
           meta: { permission: { path: '/operations/business', action: 'view' } },
           component: BusinessOperations
+        },
+        {
+          path: 'operations/ai-track',
+          name: 'AI Track',
+          meta: { permission: { path: '/ivts/tracking', action: 'view' } },
+          component: AITrack
         },
         {
           path: 'operations/emergency-reports',

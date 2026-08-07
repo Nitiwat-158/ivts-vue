@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../models/vehicle.dart';
 import '../theme/app_theme.dart';
 import 'renewal_request_screen.dart';
+import '../services/mobile_api_service.dart';
 
 class VehicleDetailsScreen extends StatelessWidget {
   final Vehicle vehicle;
@@ -136,6 +137,92 @@ class VehicleDetailsScreen extends StatelessWidget {
                 ),
               );
             }),
+            const SizedBox(height: 12),
+            GestureDetector(
+              onTap: () async {
+                final scaffold = ScaffoldMessenger.of(context);
+                try {
+                  scaffold.showSnackBar(const SnackBar(content: Text('Loading timeline...')));
+                  final api = MobileApiService();
+                  final globalId = vehicle.aiTrackGlobalId ?? int.tryParse(vehicle.vehicleCode);
+                  if (globalId == null) {
+                    scaffold.hideCurrentSnackBar();
+                    scaffold.showSnackBar(const SnackBar(content: Text('No AI-Track ID available for this vehicle')));
+                    return;
+                  }
+                  final data = await api.fetchAiTrackVehicleTimeline(globalId);
+                  scaffold.hideCurrentSnackBar();
+                  showDialog(
+                    context: context,
+                    builder: (ctx) => Dialog(
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        width: double.infinity,
+                        height: 360,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'AI-Track Timeline',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                            const SizedBox(height: 8),
+                            Expanded(
+                              child: data['timeline'] != null && (data['timeline'] as List).isNotEmpty
+                                  ? ListView.builder(
+                                      itemCount: (data['timeline'] as List).length,
+                                      itemBuilder: (c, i) {
+                                        final item = (data['timeline'] as List)[i] as Map<String, dynamic>;
+                                        final ts = item['timestamp'] ?? item['time'] ?? '';
+                                        final camera = item['camera_id'] ?? item['location_name'] ?? '';
+                                        final cls = item['predicted_class'] ?? '';
+                                        final lat = item['lat']?.toString() ?? '';
+                                        final lng = item['lng']?.toString() ?? '';
+                                        return ListTile(
+                                          title: Text('$camera — $cls'),
+                                          subtitle: Text('$ts\n$lat, $lng'),
+                                        );
+                                      },
+                                    )
+                                  : const Center(child: Text('No timeline data')),
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(),
+                                child: const Text('Close'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                } catch (err) {
+                  scaffold.showSnackBar(SnackBar(content: Text('Failed to load timeline: $err')));
+                }
+              },
+              child: Container(
+                height: 56,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        'Show Tracking Timeline',
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                      ),
+                    ),
+                    const Icon(Icons.timeline, color: Colors.white),
+                    const SizedBox(width: 16),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),

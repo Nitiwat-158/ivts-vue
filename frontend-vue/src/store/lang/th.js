@@ -414,6 +414,36 @@ const th = {
                 assignedGroups: "ไม่พบกลุ่มที่ได้รับมอบหมาย",
                 permissions: "ไม่พบสิทธิ์ที่มีผลจริง"
             }
+        },
+        aiTrack: {
+            title: "AI Track",
+            subtitle: "การติดตามยานพาหนะแบบเรียลไทม์จากกล้อง AI พร้อมข้อมูลเส้นทาง.",
+            loading: "กำลังโหลด...",
+            refresh: "รีเฟรช",
+            camerasTitle: "เครือข่ายกล้อง",
+            camerasSubtitle: "ตำแหน่งและพิกัดของกล้อง AI ที่ตั้งค่าไว้.",
+            noCameras: "ไม่มีข้อมูลกล้อง.",
+            recentVehiclesTitle: "ยานพาหนะล่าสุด",
+            recentVehiclesSubtitle: "ยานพาหนะที่ตรวจพบล่าสุดและการเข้าเยี่ยมชมกล้อง.",
+            noRecentVehicles: "ไม่พบกิจกรรมยานพาหนะล่าสุด.",
+            detailTitle: "ยานพาหนะที่เลือก",
+            detailSubtitle: "รายละเอียดไทม์ไลน์ของยานพาหนะที่เลือก.",
+            refreshTimeline: "รีเฟรชไทม์ไลน์",
+            noTimeline: "ไม่มีข้อมูลไทม์ไลน์.",
+            unknownCamera: "ไม่ทราบกล้อง",
+            routePoints: "จุดเส้นทาง ({count})",
+            routeHint: "พิกัดเส้นทางที่สร้างจากส่วนเส้นทางที่กำหนด.",
+            fullRouteTitle: "ยานพาหนะที่ผ่านทุกกล้อง",
+            fullRouteCountLabel: "คัน",
+            fullRouteMore: "และอีก {count} คัน",
+            errorLoading: "ไม่สามารถโหลดข้อมูล AI Track ได้.",
+            errorLoadingTimeline: "ไม่สามารถโหลดไทม์ไลน์ยานพาหนะได้.",
+            table: {
+                globalId: "Global ID",
+                camerasVisited: "จำนวนกล้อง",
+                firstSeen: "เห็นครั้งแรก",
+                lastSeen: "เห็นครั้งล่าสุด"
+            }
         }
     },
     setting: {

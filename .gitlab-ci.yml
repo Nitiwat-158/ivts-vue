@@ -1,4 +1,4 @@
-stages: [build, deploy]
+stages: [build, smoke, deploy]
 
 variables:
   HARBOR_HOST: "hub-registry.mfu.ac.th"
@@ -39,6 +39,22 @@ build-and-push:
     - docker push "$FRONTEND_IMAGE:latest"
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $HARBOR_USERNAME && $HARBOR_PASSWORD'
+
+smoke-ai-track:
+  stage: smoke
+  image: node:22-bullseye
+  cache:
+    key: ${CI_JOB_NAME}-${CI_COMMIT_REF_SLUG}
+    paths:
+      - backend-node/node_modules/
+  before_script:
+    - cd backend-node
+    - npm ci --silent
+  script:
+    - npm run smoke:ai-track
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $HARBOR_USERNAME && $HARBOR_PASSWORD && $X_ACCESS_TOKEN'
+      when: manual
 
 deploy-production:
   stage: deploy

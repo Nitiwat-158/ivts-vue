@@ -1,0 +1,4 @@
+vehicle_id,existing_global_id,new_global_id,status
+ABC123,8325,8325,unchanged
+DEF456,9001,9001,unchanged
+GHI789,12003,12003,unchanged

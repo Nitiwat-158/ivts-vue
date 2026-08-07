@@ -72,7 +72,7 @@ function registerAiTrackRoutes(app, opts) {
   // opts: { pool, cameraYamlPath, requireAuthMiddleware }
   if (!app) throw new Error('Express app instance required');
   const handlers = makeRouteHandlers(opts);
-  const base = '/api/v1/ai-track';
+  const base = (opts && opts.basePath) || '/api/v1/ai-track';
   const router = (opts && opts.expressRouter) || (app && app.Router ? app.Router() : null);
   // If Router not available, attach directly to app
   if (router) {

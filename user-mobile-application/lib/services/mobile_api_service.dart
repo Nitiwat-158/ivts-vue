@@ -97,6 +97,55 @@ class MobileApiService {
     return json.map(_notificationFromJson).toList();
   }
 
+  Future<List<Map<String, dynamic>>> fetchAiTrackCameras({String? userId}) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}/ai-track/cameras').replace(
+      queryParameters: userId != null && userId.isNotEmpty ? {'user_id': userId, 'users_id': userId} : null,
+    );
+    final response = await _client.get(uri).timeout(ApiConfig.requestTimeout);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('GET $uri failed with status ${response.statusCode}');
+    }
+    final decoded = jsonDecode(response.body);
+    if (decoded is! Map<String, dynamic>) {
+      throw const FormatException('Unexpected mobile API response shape');
+    }
+    return (decoded['data'] as Map<String, dynamic>).entries
+        .map((entry) => {'id': entry.key, ...entry.value as Map<String, dynamic>})
+        .toList();
+  }
+
+  Future<List<Map<String, dynamic>>> fetchAiTrackRecentVehicles({String? userId, int? limit}) async {
+    final queryParameters = <String, String>{};
+    if (userId != null && userId.isNotEmpty) {
+      queryParameters['user_id'] = userId;
+      queryParameters['users_id'] = userId;
+    }
+    if (limit != null) queryParameters['limit'] = limit.toString();
+    final uri = Uri.parse('${ApiConfig.baseUrl}/ai-track/vehicles/recent').replace(queryParameters: queryParameters.isEmpty ? null : queryParameters);
+    final response = await _client.get(uri).timeout(ApiConfig.requestTimeout);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('GET $uri failed with status ${response.statusCode}');
+    }
+    final decoded = jsonDecode(response.body);
+    if (decoded is! Map<String, dynamic> || decoded['data'] is! Map<String, dynamic>) {
+      throw const FormatException('Unexpected mobile API response shape');
+    }
+    return (decoded['data']['vehicles'] as List).cast<Map<String, dynamic>>();
+  }
+
+  Future<Map<String, dynamic>> fetchAiTrackVehicleTimeline(int globalId) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}/ai-track/vehicle/$globalId/timeline');
+    final response = await _client.get(uri).timeout(ApiConfig.requestTimeout);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('GET $uri failed with status ${response.statusCode}');
+    }
+    final decoded = jsonDecode(response.body);
+    if (decoded is! Map<String, dynamic> || decoded['data'] is! Map<String, dynamic>) {
+      throw const FormatException('Unexpected mobile API response shape');
+    }
+    return decoded['data'] as Map<String, dynamic>;
+  }
+
   Future<List<Map<String, dynamic>>> _getJson(String path, {String? userId}) async {
     final uri = Uri.parse('${ApiConfig.baseUrl}$path').replace(
       queryParameters: userId != null && userId.isNotEmpty
@@ -133,6 +182,17 @@ class MobileApiService {
       status: _statusFromString(json['status'] as String?),
       lastLocation: json['lastLocation'] as String? ?? '',
       lastUpdatedTime: json['lastUpdatedTime'] as String? ?? '',
+      aiTrackGlobalId: (() {
+        // Accept several possible shapes from backend: aiTrackGlobalId, ai_track_global_id, global_id
+        final candidate = json['aiTrackGlobalId'] ?? json['ai_track_global_id'] ?? json['global_id'];
+        if (candidate == null) return null;
+        if (candidate is int) return candidate;
+        if (candidate is String) {
+          final parsed = int.tryParse(candidate);
+          return parsed;
+        }
+        return null;
+      })(),
     );
   }
 
