@@ -2,12 +2,25 @@ services:
   mongodb:
     image: mongo:7
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:27017:27017" 
     volumes:
       - mongodb-data:/data/db
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: mfu_vehicle_track
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mfu_vehicle_track"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -40,10 +53,13 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       MONGODB: mongodb://mongodb:27017
+      AI_TRACK_DATABASE_URL: postgresql://postgres:1234@postgres:5432/mfu_vehicle_track
     depends_on:
       redis:
         condition: service_healthy
       mongodb:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
     ports:
       - "${BACKEND_BIND_IP:-127.0.0.1}:${BACKEND_PORT:-8095}:8082"
@@ -118,3 +134,4 @@ services:
 volumes:
   redis-data:
   mongodb-data:
+  postgres-data:
