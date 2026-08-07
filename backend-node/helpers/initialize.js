@@ -20,9 +20,17 @@ exports.init = function (callback) {
         // we're connected!
         global.mongodb = db;
         console.log('----- Connect To Mongodb Status[' + JSON.stringify(resMsg.getMsg(20000)) + '] -----');
+
+        // Safely drop stale iam_user_id_1 index if present
+        db.collection('users').dropIndex('iam_user_id_1').then(function () {
+            console.log('----- Dropped stale iam_user_id_1 index from users collection -----');
+        }).catch(function (err) {
+            // Ignore index not found error
+        });
+
         return callback(true);
     });
 
-    db.on('connected', console.info.bind(console, "MongoDB connection is connected:"))
+    db.on('connected',console.info.bind(console,"MongoDB connection is connected:"))
 };
 //db.createUser({user:"securitys",pwd:"Zk8K3BE3k8ASEr4A",roles:[{role:"readWrite",db:"securitys"}]})

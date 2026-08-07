@@ -441,13 +441,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onTap: () => _showDetailDialog(context.read<LocaleProvider>().t('phone_number'), _currentUser!.phone!),
                   ),
                 ],
-                if (_currentUser?.department != null && _currentUser!.department!.isNotEmpty) ...[
+                if (_currentUser?.userType != null && _currentUser!.userType!.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   _InfoRow(
                     icon: Icons.person_outline,
                     label: context.watch<LocaleProvider>().t('user_type'),
-                    value: _currentUser!.department!,
-                    onTap: () => _showDetailDialog(context.read<LocaleProvider>().t('user_type'), _currentUser!.department!),
+                    value: _currentUser!.userType!,
+                    onTap: () => _showDetailDialog(context.read<LocaleProvider>().t('user_type'), _currentUser!.userType!),
                   ),
                 ],
               ],

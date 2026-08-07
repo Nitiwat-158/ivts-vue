@@ -142,18 +142,11 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
       }
       final userId = currentUser.effectiveUserId;
 
-      String userType = 'student';
-      if (currentUser.department == 'บุคลากร') {
-        userType = 'staff';
-      } else if (currentUser.department == 'บุคคลภายนอก') {
-        userType = 'visitor';
-      }
-
       await _api.createRequest({
         'user_id': userId,
         'users_id': userId,
         'request_type': 'register',
-        'user_type': userType,
+        'user_type': 'student',
         'vehicle_info': {
           'license_plate': licensePlate,
           'province_license': province,

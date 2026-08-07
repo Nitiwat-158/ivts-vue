@@ -295,6 +295,8 @@ function buildMobileUserResponse(user, signinResult) {
         email: user.email,
         firstname: user.name,
         lastname: user.surname,
+        phone: user.phone,
+        user_type: user.user_type,
         avatar_url: user.avatar_url,
         role: user.role || 'user'
       }
@@ -308,13 +310,13 @@ function buildMobileUserResponse(user, signinResult) {
 
 async function registerLocalUser(request, response) {
   try {
-    const { email, password, name, surname, phone, department } = request.body || {};
+    const { email, password, name, surname, phone, user_type } = request.body || {};
 
     const cleanEmail = email ? String(email).trim().toLowerCase() : '';
     const cleanName = name ? String(name).trim() : '';
     const cleanSurname = surname ? String(surname).trim() : '';
     const cleanPhone = phone ? String(phone).trim() : '';
-    const cleanDepartment = department ? String(department).trim() : '';
+    const cleanUserType = user_type ? String(user_type).trim() : '';
 
     if (!cleanEmail || !password || !cleanName || !cleanSurname || !cleanPhone) {
       return response.status(400).json({
@@ -342,7 +344,7 @@ async function registerLocalUser(request, response) {
       name: cleanName,
       surname: cleanSurname,
       phone: cleanPhone,
-      department: cleanDepartment,
+      user_type: cleanUserType,
       role: 'user',
       created_at: new Date()
     });
@@ -364,7 +366,7 @@ async function registerLocalUser(request, response) {
           firstname: newUser.name,
           lastname: newUser.surname,
           phone: newUser.phone,
-          department: newUser.department,
+          user_type: newUser.user_type,
           avatar_url: newUser.avatar_url,
           role: newUser.role
         }
@@ -423,7 +425,7 @@ async function forwardMobileSignin(request, response) {
                   firstname: localUser.name,
                   lastname: localUser.surname,
                   phone: localUser.phone,
-                  department: localUser.department,
+                  user_type: localUser.user_type,
                   avatar_url: localUser.avatar_url,
                   role: localUser.role || 'user'
                 }

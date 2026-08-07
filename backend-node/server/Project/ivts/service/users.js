@@ -24,6 +24,9 @@ async function list(query = {}) {
       { user_id: searchRegex }
     ];
   }
+  if (query.user_type) {
+    filter.user_type = query.user_type;
+  }
 
   // 1. นับจำนวนทั้งหมด
   const total = await User.countDocuments(filter);
