@@ -76,6 +76,19 @@ class MobileApiService {
     return decoded['data'] as Map<String, dynamic>;
   }
 
+  Future<Map<String, dynamic>> fetchEmergencyReportById(String id) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}/emergency-reports/$id');
+    final response = await _client.get(uri).timeout(ApiConfig.requestTimeout);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('GET $uri failed with status ${response.statusCode}');
+    }
+    final decoded = jsonDecode(response.body);
+    if (decoded is! Map<String, dynamic> || decoded['data'] is! Map<String, dynamic>) {
+      throw const FormatException('Unexpected mobile API response shape');
+    }
+    return decoded['data'] as Map<String, dynamic>;
+  }
+
   Future<List<NotificationItem>> fetchNotifications({String? userId}) async {
     final json = await _getJson('/notifications', userId: userId);
     return json.map(_notificationFromJson).toList();
