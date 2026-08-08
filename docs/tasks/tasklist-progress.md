@@ -74,6 +74,8 @@ Adjust weights per project, but keep them evidence-backed.
 | ivts-MAuth-002 | Mobile User IAM Decoupling & Registration E11000 Duplicate Key Error Fix | Backend | AI | none | done | 100 | `user.model.js` default null removed; `initialize.js` index cleanup added; 13 mobile + 15 admin tests PASS | `user.model.js`, `helpers/initialize.js`, `iam-mobile-client-local.test.js` | 13/13 Mobile PASS, 15/15 Admin PASS | none | — | Decouple Mobile IAM & Fix E11000 null duplicate error |
 | ivts-VM-002 | Vehicle Management License Plate View Display Fix | Frontend/Backend | AI | none | done | 100 | `VehicleVerificationModal.vue` fallbacks added; `owner_vehicle.js` buildRow updated | `VehicleVerificationModal.vue`, `owner_vehicle.js` | 25/25 PASS | none | — | Fix missing license plate display on View modal |
 | ivts-LOC-RHT-001 | Request History Title Translation | Mobile | AI | none | done | 100 | `translateRequestTitle()` added to `locale_provider.dart`, used in `request_history_screen.dart` | `locale_provider.dart`, `request_history_screen.dart` | flutter analyze PASS | none | — | Localized Request History item titles |
+| ivts-VA-001 | Fix Vehicle Request Approval MongoDB Sync | Backend | AI | none | done | 100 | Refactored vehicle approval sync in `vehicle_request.js` & ran data repair script | `vehicle_request.js`, `owner_vehicle.js`, `fix-approved-requests-vehicles.js` | 2/2 unit tests PASS; live MongoDB repair PASS | none | — | Repaired MongoDB collections & fixed sync logic |
+
 
 
 ## T4. Verification Log
