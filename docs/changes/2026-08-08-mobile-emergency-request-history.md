@@ -89,6 +89,8 @@ Out of scope:
 | `backend-node/scripts/fix-emergency-reports-users.js` | Executed repair script to update `user_id` / `users_id` on existing MongoDB `emergency_report` documents |
 | `user-mobile-application/lib/screens/emergency_request_screen.dart` | Passed user IDs in payload and refreshed `AppDataRepository` after submission |
 | `user-mobile-application/lib/providers/locale_provider.dart` | Added emergency request title localization in `translateRequestTitle()` |
+| `user-mobile-application/lib/screens/request_history_screen.dart` | Made the request-history screen listen to repository refreshes so emergency items appear immediately after live data refresh |
+| `user-mobile-application/test/request_history_screen_test.dart` | Added a widget test that verifies the screen updates when request-history data is refreshed |
 
 ## T16 Tests Run / Evidence
 
@@ -98,6 +100,7 @@ Out of scope:
 | `node --check server/Project/ivts/service/mobile.js` | PASS | Exit code 0 |
 | `node scripts/fix-emergency-reports-users.js` | PASS | Successfully updated 2 existing MongoDB `emergency_report` docs -> `user_id: "usr_local_1786181712848_718"` |
 | `flutter analyze lib/` | PASS | 0 errors / 0 warnings in edited files |
+| `flutter test test/request_history_screen_test.dart` | PASS | Widget test confirmed the request-history screen reflects refreshed repository data |
 
 ## T17 PRD / Docs Update
 

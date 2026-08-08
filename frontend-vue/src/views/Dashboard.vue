@@ -296,13 +296,15 @@ export default {
           const lat = typeof loc.latitude === 'number' ? loc.latitude : null;
           const lng = typeof loc.longitude === 'number' ? loc.longitude : null;
           const isActive = cam.status === 'active' || cam.status === 'online';
+          const cameraName = this.toNonEmptyText(cam.camera_name) || this.toNonEmptyText(cam._id) || 'Unknown camera';
+          const locationDesc = this.toNonEmptyText(loc.description) || cameraName;
           return {
-            id: cam._id || cam.camera_name,
-            name: cam.camera_name || `Camera ${cam._id}`,
+            id: this.toNonEmptyText(cam._id) || cameraName,
+            name: cameraName,
             status: isActive ? 'active' : 'inactive',
             lat: lat,
             lng: lng,
-            locationDesc: loc.description || cam.camera_name || ''
+            locationDesc
           };
         }).filter(c => c.lat !== null && c.lng !== null);
 
@@ -327,9 +329,9 @@ export default {
           .filter(c => !(c.status === 'active' || c.status === 'online'))
           .slice(0, 5)
           .map(c => ({
-            id: `${c._id || c.camera_name}-offline`,
+            id: `${this.toNonEmptyText(c._id) || this.toNonEmptyText(c.camera_name) || 'camera'}-offline`,
             type: 'offline',
-            cameraId: c.camera_name || c._id,
+            cameraId: this.toNonEmptyText(c.camera_name) || this.toNonEmptyText(c._id) || 'Unknown camera',
             duration: 120,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             description: 'No signal for 120 min'
@@ -357,9 +359,9 @@ export default {
               type: 'emergency_report',
               source: 'guest',
               severity: r.severity || 'high',
-              cameraId: r.location && r.location.camera_id ? r.location.camera_id : (r.vehicle_id || 'Unknown location'),
+              cameraId: this.getAlertLocationLabel(r),
               time: timeStr,
-              description: r.request_type || r.description || 'Unknown incident'
+              description: this.getAlertDescription(r)
             };
           });
 
@@ -477,6 +479,57 @@ export default {
       } else {
         window.alert(`${this.$t('dashboard.eventAlert')} ${alert.cameraId || alert.id}`);
       }
+    },
+    isPlainObject(value) {
+      return typeof value === 'object' && value !== null && !Array.isArray(value);
+    },
+    toNonEmptyText(value) {
+      if (typeof value === 'string') {
+        const trimmed = value.trim();
+        return trimmed || null;
+      }
+      if (typeof value === 'number' || typeof value === 'boolean') {
+        return String(value);
+      }
+      return null;
+    },
+    getVehicleLabelFromAny(vehicleValue) {
+      const asText = this.toNonEmptyText(vehicleValue);
+      if (asText) return asText;
+
+      if (!this.isPlainObject(vehicleValue)) return null;
+
+      const plate = this.toNonEmptyText(vehicleValue.plate_number)
+        || this.toNonEmptyText(vehicleValue.license_plate)
+        || this.toNonEmptyText(vehicleValue.plateNumber);
+      if (plate) return `ทะเบียน ${plate}`;
+
+      return this.toNonEmptyText(vehicleValue.vehicle_code)
+        || this.toNonEmptyText(vehicleValue.vehicleCode)
+        || this.toNonEmptyText(vehicleValue._id)
+        || null;
+    },
+    getAlertLocationLabel(report) {
+      if (!this.isPlainObject(report)) return 'Unknown location';
+
+      const locationValue = this.isPlainObject(report.location)
+        ? this.toNonEmptyText(report.location.camera_id) || this.toNonEmptyText(report.location.cameraId)
+        : null;
+      if (locationValue) return locationValue;
+
+      const vehicleLabel = this.getVehicleLabelFromAny(report.vehicle_id);
+      return vehicleLabel || 'Unknown location';
+    },
+    getAlertDescription(report) {
+      if (!this.isPlainObject(report)) return 'Unknown incident';
+
+      const description = this.toNonEmptyText(report.description);
+      if (description) return description;
+
+      const requestType = this.toNonEmptyText(report.request_type);
+      if (requestType) return `ประเภท: ${requestType}`;
+
+      return 'Unknown incident';
     },
     getAlertColorClass(alert, isBackground) {
       if (alert.type === 'offline') return isBackground ? 'bg-danger' : 'text-danger';

@@ -8,7 +8,7 @@
 | Requirement | Track actual project system progress from source and verification evidence |
 | Active Change Record | `docs/changes/2026-08-08-mobile-emergency-request-history.md` |
 | Overall Status | in_progress |
-| Overall Progress | 57% |
+| Overall Progress | 60% |
 | Progress Type | Evidence-backed readiness score, not final product completion |
 
 ## T1. Source Evidence
@@ -76,6 +76,7 @@ Adjust weights per project, but keep them evidence-backed.
 | ivts-LOC-RHT-001 | Request History Title Translation | Mobile | AI | none | done | 100 | `translateRequestTitle()` added to `locale_provider.dart`, used in `request_history_screen.dart` | `locale_provider.dart`, `request_history_screen.dart` | flutter analyze PASS | none | — | Localized Request History item titles |
 | ivts-VA-001 | Fix Vehicle Request Approval MongoDB Sync | Backend | AI | none | done | 100 | Refactored vehicle approval sync in `vehicle_request.js` & ran data repair script | `vehicle_request.js`, `owner_vehicle.js`, `fix-approved-requests-vehicles.js` | 2/2 unit tests PASS; live MongoDB repair PASS | none | — | Repaired MongoDB collections & fixed sync logic |
 | ivts-MERH-001 | User Mobile Emergency Request History Integration | Mobile/Backend | AI | none | done | 100 | Saved user ID on emergency report, merged in listRequestHistory & updated Flutter app | `emergency_report.model.js`, `service/mobile.js`, `emergency_request_screen.dart`, `locale_provider.dart` | node --check PASS; flutter analyze 0 errors | none | — | Included emergency requests in Request History |
+| ivts-DASH-001 | Dashboard alert safe text rendering (avoid raw JSON in alert line) | Frontend | AI | none | done | 100 | Added reusable type guards + location/description helpers in Dashboard alert mapper to support string/object payloads | `frontend-vue/src/views/Dashboard.vue` | `npm --prefix frontend-vue run lint -- src/views/Dashboard.vue` PASS; manual cases documented for `vehicle_id` string/object | none | — | Human-readable dashboard alerts |
 
 
 
@@ -88,6 +89,7 @@ Adjust weights per project, but keep them evidence-backed.
 | `node --check` iam-admin-client.js + iam-mobile-client.js + mobile.routes.js | PASS | Exit code 0 — 2026-07-31 |
 | `--test iam-admin-client.test.js` (15 tests) | PASS 15/15 | node:test runner — 2026-07-31 |
 | `--test iam-mobile-client.test.js` (9 tests) | PASS 9/9 | node:test runner — 2026-07-31 |
+| `npm --prefix frontend-vue run lint -- src/views/Dashboard.vue` | PASS | No lint errors — 2026-08-08 |
 | backend npm test | not run | requires running server + DB |
 | frontend lint/test/build | not run | |
 | live smoke/e2e | not run | |
@@ -113,6 +115,7 @@ Vehicle Management fix (2026-07-27): owner_vehicle.js + vehicle.model.js + vehic
 Mobile API (`docs/tasks/2026-07-24-mobile-mongodb-api.md`): backend `/api/v1/mobile` read-only API implemented against real MongoDB collections (live schema verified via mongosh) and smoke-tested via curl (7/7 endpoints pass). Flutter app's `mock_data.dart` fully emptied per explicit user instruction — MongoDB is now the sole data source, no mock fallback. Windows desktop build (`flutter create --platforms=windows .` + `flutter run -d windows`) verified end-to-end: real data loaded (`6 vehicles`, `4 notifications`, `0 trip history`/`0 requests` matching real empty collections). Android emulator verification remains blocked by Windows Firewall scoping (B-002); this does not block the completed feature since Windows-target verification succeeded.
 
 Auth separation (2026-07-31): `iam-admin-client.js → forwardScopedSignin` reverted to original commit `9a255686` — strictly Web Admin only; no mobile logic, no DEBUG logs. New `iam-mobile-client.js` handles all mobile user authentication: MFU IAM proxy, JIT user provisioning in MongoDB `users` collection, Google ID Token fallback (dev-only), and hijack detection. `mobile.routes.js` updated to call `iamMobileClient.forwardMobileSignin`. All 15 admin regression tests + 9 new mobile unit tests PASS. Progress updated from 45% → 52%.
+Dashboard alert rendering fix (2026-08-08): `frontend-vue/src/views/Dashboard.vue` now guards enriched object fields and maps emergency alert location/description to safe concise strings. This prevents raw object JSON from being rendered in Alerts when `vehicle_id` arrives as an enriched object.
 Mobile API (`docs/tasks/2026-07-24-mobile-mongodb-api.md`): backend `/api/v1/mobile` read-only API implemented against real MongoDB collections (live schema verified via mongosh) and smoke-tested via curl (7/7 endpoints pass). Flutter app's `mock_data.dart` fully emptied per explicit user instruction — MongoDB is now the sole data source, no mock fallback. Windows desktop build (`flutter create --platforms=windows .` + `flutter run -d windows`) verified end-to-end: real data loaded (`6 vehicles`, `4 notifications`, `0 trip history`/`0 requests` matching real empty collections). Android emulator verification remains blocked by Windows Firewall scoping (B-002); this does not block the completed feature since Windows-target verification succeeded.
 
 Auth separation (2026-07-31): `iam-admin-client.js → forwardScopedSignin` reverted to original commit `9a255686` — strictly Web Admin only; no mobile logic, no DEBUG logs. New `iam-mobile-client.js` handles all mobile user authentication: MFU IAM proxy, JIT user provisioning in MongoDB `users` collection, Google ID Token fallback (dev-only), and hijack detection. `mobile.routes.js` updated to call `iamMobileClient.forwardMobileSignin`. All 15 admin regression tests + 9 new mobile unit tests PASS. Progress updated from 45% → 52%.
