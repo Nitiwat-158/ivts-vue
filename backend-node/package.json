@@ -31,9 +31,10 @@
     "bootstrap:iam": "node -r dotenv/config scripts/bootstrap-iam-permissions.js",
     "bootstrap:iam:local": "node -r dotenv/config scripts/bootstrap-iam-permissions.js dotenv_config_path=.env.local",
     "seed:cctvs": "node -r dotenv/config scripts/seed-cctvs.js dotenv_config_path=.env.local",
-    "smoke:ai-track": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config scripts/smoke-ai-track.js",
-    "test:ai-track-db": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config scripts/test-ai-track-db.js",
-    "seed:ai-track-mappings": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config scripts/seed-ai-track-mappings.js",
+    "smoke:ai-track": "cross-env DOTENV_CONFIG_PATH=.env.local node -r dotenv/config scripts/smoke-ai-track.js",
+    "test:ai-track-db": "cross-env DOTENV_CONFIG_PATH=.env.local node -r dotenv/config scripts/test-ai-track-db.js",
+    "init:ai-track-schema": "cross-env DOTENV_CONFIG_PATH=.env.local node -r dotenv/config scripts/init-ai-track-schema.js",
+    "seed:ai-track-mappings": "cross-env DOTENV_CONFIG_PATH=.env.local node -r dotenv/config scripts/seed-ai-track-mappings.js",
     "template:check": "node -c config/project.config.js && node -c scripts/bootstrap-iam-permissions.js"
   },
   "keywords": [],

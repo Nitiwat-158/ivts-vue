@@ -49,7 +49,7 @@ function makeRouteHandlers({ pool, cameraYamlPath, requireAuth }) {
       if (!rows || rows.length === 0) return res.status(404).json({ error: 'not found' });
 
       const camMap = adapter.loadCamerasFromYaml(cameraYamlPath);
-      const routeSegmentsPath = pathLib.resolve(__dirname, '../../..', 'ai-track', 'config', 'route_segments.yaml');
+      const routeSegmentsPath = adapter.resolveAiTrackPath('config/route_segments.yaml');
       const routeSegments = adapter.loadRouteSegmentsFromYaml(routeSegmentsPath);
       const formattedTimeline = adapter.formatTimeline(rows, camMap);
       const route = adapter.buildRoutePolyline(formattedTimeline, routeSegments);

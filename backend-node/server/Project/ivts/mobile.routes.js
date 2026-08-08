@@ -57,11 +57,11 @@ try {
 }
 
 function aiTrackCameraYamlPath() {
-  return pathLib.resolve(__dirname, '../../../../ai-track/config/cameras.yaml');
+  return aiTrackAdapter.resolveAiTrackPath('config/cameras.yaml');
 }
 
 function aiTrackRouteSegmentsYamlPath() {
-  return pathLib.resolve(__dirname, '../../../../ai-track/config/route_segments.yaml');
+  return aiTrackAdapter.resolveAiTrackPath('config/route_segments.yaml');
 }
 
 /**

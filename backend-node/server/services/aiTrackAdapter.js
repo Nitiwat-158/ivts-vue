@@ -26,6 +26,19 @@ function formatTimestamp(value) {
   return String(value);
 }
 
+function resolveAiTrackPath(relativePath) {
+  const envRoot = process.env.AI_TRACK_ROOT || process.env.AI_TRACK_CONFIG_ROOT;
+  const candidates = [];
+  if (envRoot) candidates.push(path.resolve(envRoot, relativePath));
+  candidates.push(path.resolve('/app/ai-track', relativePath));
+  candidates.push(path.resolve(process.cwd(), 'ai-track', relativePath));
+  candidates.push(path.resolve(process.cwd(), '..', 'ai-track', relativePath));
+  candidates.push(path.resolve(__dirname, '../../..', 'ai-track', relativePath));
+  candidates.push(path.resolve('/ai-track', relativePath));
+  const existing = candidates.find((candidate) => fs.existsSync(candidate));
+  return existing || candidates[0] || path.resolve(process.cwd(), 'ai-track', relativePath);
+}
+
 function sqlRecentVehicles() {
   return `SELECT vi.global_id, vi.first_seen, vi.last_seen, COUNT(DISTINCT vl.camera_id) AS cameras_visited
     FROM vehicle_identities vi
@@ -160,6 +173,7 @@ module.exports = {
   // camera/route loaders
   loadCamerasFromYaml,
   loadRouteSegmentsFromYaml,
+  resolveAiTrackPath,
   // timeline helpers
   formatTimeline,
   buildRoutePolyline,

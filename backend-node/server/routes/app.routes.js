@@ -9,7 +9,7 @@ const authorization = require('../Project/security/service/authorization');
 
 // ai-track integration
 const aiTrackRoutes = require("../routes/aiTrack.routes");
-const pathLib = require('path');
+const aiTrackAdapter = require('../services/aiTrackAdapter');
 let aiTrackPool = null;
 try {
   const { Pool } = require('pg');
@@ -29,15 +29,38 @@ try {
   console.warn('ai-track: pg Pool not created:', e && e.message ? e.message : e);
 }
 
+function createAiTrackDevAuthMiddleware() {
+  const bypassEnabled = String(process.env.AI_TRACK_DEV_BYPASS_AUTH || '').toLowerCase() === 'true';
+  const isLocalDev = String(process.env.NODE_ENV || '').toLowerCase() === 'development' || String(process.env.PROJECT_ENV || '').toLowerCase() === 'local';
+
+  return async function aiTrackDevAuthMiddleware(request, response, next) {
+    if (bypassEnabled && isLocalDev) {
+      request.body = request.body || {};
+      request.body.accounts = 'local-dev-ai-track';
+      request.authAccount = { _id: 'local-dev-ai-track', email: 'local-dev@example.com' };
+      request.authSession = { source: 'local-dev' };
+      request.permissionCheck = { action: 'view', paths: ['/ivts/tracking'], source: 'local-dev' };
+      return next();
+    }
+    return accountService.onCheckAuthorization(request, response, next);
+  };
+}
+
 module.exports = function (app) {
   const path = "/api/v1";
 
   app.use(path + '/ivts', ivtsRoutes);
   // Mount ai-track routes under /api/v1/ai-track, protected by IAM admin auth and tracking permission.
   try {
-    const cameraYamlPath = pathLib.resolve(__dirname, '../../..', 'ai-track', 'config', 'cameras.yaml');
+    const cameraYamlPath = aiTrackAdapter.resolveAiTrackPath('config/cameras.yaml');
     const canViewAiTrack = authorization.requirePermission('/ivts/tracking', 'view');
-    app.use('/api/v1/ai-track', accountService.onCheckAuthorization, canViewAiTrack);
+    const aiTrackAuthMiddleware = createAiTrackDevAuthMiddleware();
+    const bypassEnabled = String(process.env.AI_TRACK_DEV_BYPASS_AUTH || '').toLowerCase() === 'true';
+    const isLocalDev = String(process.env.NODE_ENV || '').toLowerCase() === 'development' || String(process.env.PROJECT_ENV || '').toLowerCase() === 'local';
+    app.use('/api/v1/ai-track', aiTrackAuthMiddleware);
+    if (!(bypassEnabled && isLocalDev)) {
+      app.use('/api/v1/ai-track', canViewAiTrack);
+    }
     aiTrackRoutes.registerAiTrackRoutes(app, { pool: aiTrackPool, cameraYamlPath });
   } catch (err) {
     console.warn('ai-track: failed to register routes', err && err.message ? err.message : err);
