@@ -9,6 +9,8 @@ const Schema = mongoose.Schema;
 const emergencyReportSchema = new Schema({
   _id: { type: String, required: true }, // The string ID from MongoDB
   vehicle_id: { type: String, default: null }, // Usually string ID format in this repo
+  user_id: { type: String, default: null },
+  users_id: { type: String, default: null },
   request_type: { type: String, trim: true, required: true },
   severity: { type: String, enum: ['low', 'medium', 'high', 'critical'], default: 'medium' },
   incident_time: { type: Date, required: true },

@@ -75,6 +75,9 @@ class LocaleProvider extends ChangeNotifier {
     if (title == 'Renewal') {
       return _currentLanguage == AppLanguage.thai ? 'คำร้องต่ออายุ' : 'Renewal';
     }
+    if (title == 'Emergency request' || title == 'emergency_request' || title == 'คำร้องฉุกเฉิน') {
+      return _currentLanguage == AppLanguage.thai ? 'คำร้องฉุกเฉิน' : 'Emergency request';
+    }
     return rawTitle;
   }
 

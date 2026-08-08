@@ -8,6 +8,7 @@ import '../data/mock_data.dart';
 import '../models/vehicle.dart';
 import '../theme/app_theme.dart';
 import '../services/app_data_repository.dart';
+import '../services/auth_service.dart';
 import '../services/mobile_api_service.dart';
 import 'emergency_status_screen.dart';
 
@@ -180,9 +181,14 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
                           final now = DateTime.now();
                           setState(() => _submittedAt = now);
 
+                          final currentUser = await AuthService().getCurrentUser();
+                          final userId = currentUser?.effectiveUserId;
+
                           // ของจริงต้อง upload ไฟล์ขึ้น server/object storage ก่อน
                           // แล้วค่อยส่ง URL ให้ API ตอนนี้ใช้ path ชั่วคราวไปก่อน
                           final reportPayload = {
+                            'user_id': userId,
+                            'users_id': userId,
                             'vehicle_id': widget.vehicle.id, // ส่ง vehicle._id จริงจาก backend
                             'request_type': _requestTypeValues[_selected] ?? 'other',
                             'incident_time': now.toIso8601String(),
@@ -190,13 +196,14 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
                             'location': null,
                             'media_urls': _attachedImages.map((f) => f.path).toList(),
                           };
-                          debugPrint('Emergency report (mock): $reportPayload');
+                          debugPrint('Emergency report: $reportPayload');
 
                           try {
                             final api = MobileApiService();
                             final createdReport = await api.createEmergencyReport(reportPayload);
                             
                             AppDataRepository.instance.activeEmergencyIdNotifier.value = createdReport['_id'];
+                            await AppDataRepository.instance.refresh();
 
                             if (!mounted) return;
                             Navigator.of(context).pop();

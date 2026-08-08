@@ -298,8 +298,8 @@ exports.listTripHistory = async function listTripHistory(query) {
 // legitimately returns [] until registration/renewal requests are submitted.
 
 exports.listRequestHistory = async function listRequestHistory(query) {
+  const userId = cleanText(query.users_id || query.user_id);
   const filter = {};
-  const userId = cleanText(query.users_id);
   if (userId) {
     filter.$or = [
       { users_id: userIdFilterValue(userId) },
@@ -310,13 +310,71 @@ exports.listRequestHistory = async function listRequestHistory(query) {
   const limit = Math.min(Math.max(toNumber(query.limit, DEFAULT_LIMIT), 1), MAX_LIMIT);
   const requests = await Request.find(filter).sort({ created_at: -1 }).limit(limit).lean();
 
-  return requests.map((r) => ({
-    title: r.request_type === 'renew' ? 'Renewal' : 'Vehicle registration',
-    vehicleCode: (r.vehicle_info && r.vehicle_info.license_plate) || '',
-    vehicleId: r._id,
-    date: formatDateBE(r.created_at) || '',
-    dateGroup: dateGroupLabel(r.created_at) || ''
-  }));
+  const requestItems = requests.map((r) => {
+    const rawDate = r.created_at || new Date();
+    return {
+      title: r.request_type === 'renew' ? 'Renewal' : 'Vehicle registration',
+      vehicleCode: (r.vehicle_info && r.vehicle_info.license_plate) || '',
+      vehicleId: r._id,
+      date: formatDateBE(rawDate) || '',
+      dateGroup: dateGroupLabel(rawDate) || '',
+      _timestamp: new Date(rawDate).getTime()
+    };
+  });
+
+  // Query user emergency reports matching users_id, user_id, or user's vehicles
+  let emergencyFilter = {};
+  if (userId) {
+    const userVehicles = await Vehicle.find(filter).lean();
+    const userVehicleIds = userVehicles.map((v) => String(v._id));
+    const userVehicleCodes = userVehicles.map((v) => String(v.vehicle_code)).filter(Boolean);
+
+    emergencyFilter = {
+      $or: [
+        { users_id: userIdFilterValue(userId) },
+        { user_id: userIdFilterValue(userId) },
+        { vehicle_id: { $in: [...userVehicleIds, ...userVehicleCodes] } }
+      ]
+    };
+  }
+
+  const emergencyReports = await EmergencyReport.find(emergencyFilter).sort({ submitted_at: -1 }).limit(limit).lean();
+
+  // Look up vehicle license plate / code info for emergency reports
+  const emgVehicleIds = [...new Set(emergencyReports.map((e) => e.vehicle_id).filter(Boolean))];
+  let emgVehicles = [];
+  if (emgVehicleIds.length) {
+    emgVehicles = await Vehicle.find({
+      $or: [
+        { _id: { $in: emgVehicleIds } },
+        { vehicle_code: { $in: emgVehicleIds } }
+      ]
+    }).lean();
+  }
+  const vehicleMap = new Map();
+  emgVehicles.forEach((v) => {
+    if (v._id) vehicleMap.set(String(v._id), v);
+    if (v.vehicle_code) vehicleMap.set(String(v.vehicle_code), v);
+  });
+
+  const emergencyItems = emergencyReports.map((r) => {
+    const v = vehicleMap.get(String(r.vehicle_id)) || null;
+    const plateOrCode = v ? (v.plate_number || v.vehicle_code || String(v._id)) : (r.vehicle_id || '');
+    const rawDate = r.submitted_at || r.incident_time || new Date();
+    return {
+      title: 'Emergency request',
+      vehicleCode: plateOrCode,
+      vehicleId: r._id,
+      date: formatDateBE(rawDate) || '',
+      dateGroup: dateGroupLabel(rawDate) || '',
+      _timestamp: new Date(rawDate).getTime()
+    };
+  });
+
+  // Merge and sort by timestamp descending
+  const combined = [...requestItems, ...emergencyItems].sort((a, b) => b._timestamp - a._timestamp);
+
+  return combined.slice(0, limit).map(({ _timestamp, ...item }) => item);
 };
 
 function createRequestId() {
@@ -513,6 +571,7 @@ exports.createEmergencyReport = async function createEmergencyReport(payload) {
   const body = payload || {};
   const requestType = cleanText(body.request_type);
   const incidentTime = toDate(body.incident_time);
+  const userId = cleanText(body.users_id || body.user_id);
 
   if (!requestType) {
     const error = new Error('request_type is required');
@@ -529,6 +588,8 @@ exports.createEmergencyReport = async function createEmergencyReport(payload) {
   const document = {
     _id: cleanText(body._id) || createEmergencyId(),
     vehicle_id: cleanText(body.vehicle_id),
+    user_id: userId,
+    users_id: userId,
     request_type: requestType,
     severity: cleanText(body.severity) || 'medium',
     incident_time: incidentTime,

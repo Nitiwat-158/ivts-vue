@@ -2,13 +2,13 @@
 
 | Field | Value |
 |---|---|
-| Date | 2026-08-01 |
+| Date | 2026-08-08 |
 | Project | IVTS |
 | Module / Feature | system progress and readiness |
 | Requirement | Track actual project system progress from source and verification evidence |
-| Active Change Record | `docs/changes/2026-08-01-owner-vehicles-sync-on-approval.md` |
+| Active Change Record | `docs/changes/2026-08-08-mobile-emergency-request-history.md` |
 | Overall Status | in_progress |
-| Overall Progress | 55% |
+| Overall Progress | 57% |
 | Progress Type | Evidence-backed readiness score, not final product completion |
 
 ## T1. Source Evidence
@@ -75,6 +75,7 @@ Adjust weights per project, but keep them evidence-backed.
 | ivts-VM-002 | Vehicle Management License Plate View Display Fix | Frontend/Backend | AI | none | done | 100 | `VehicleVerificationModal.vue` fallbacks added; `owner_vehicle.js` buildRow updated | `VehicleVerificationModal.vue`, `owner_vehicle.js` | 25/25 PASS | none | — | Fix missing license plate display on View modal |
 | ivts-LOC-RHT-001 | Request History Title Translation | Mobile | AI | none | done | 100 | `translateRequestTitle()` added to `locale_provider.dart`, used in `request_history_screen.dart` | `locale_provider.dart`, `request_history_screen.dart` | flutter analyze PASS | none | — | Localized Request History item titles |
 | ivts-VA-001 | Fix Vehicle Request Approval MongoDB Sync | Backend | AI | none | done | 100 | Refactored vehicle approval sync in `vehicle_request.js` & ran data repair script | `vehicle_request.js`, `owner_vehicle.js`, `fix-approved-requests-vehicles.js` | 2/2 unit tests PASS; live MongoDB repair PASS | none | — | Repaired MongoDB collections & fixed sync logic |
+| ivts-MERH-001 | User Mobile Emergency Request History Integration | Mobile/Backend | AI | none | done | 100 | Saved user ID on emergency report, merged in listRequestHistory & updated Flutter app | `emergency_report.model.js`, `service/mobile.js`, `emergency_request_screen.dart`, `locale_provider.dart` | node --check PASS; flutter analyze 0 errors | none | — | Included emergency requests in Request History |
 
 
 
