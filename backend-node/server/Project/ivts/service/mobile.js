@@ -571,7 +571,21 @@ exports.createEmergencyReport = async function createEmergencyReport(payload) {
   const body = payload || {};
   const requestType = cleanText(body.request_type);
   const incidentTime = toDate(body.incident_time);
-  const userId = cleanText(body.users_id || body.user_id);
+  let userId = cleanText(body.users_id || body.user_id);
+  const vehicleId = cleanText(body.vehicle_id);
+
+  if (!userId && vehicleId) {
+    try {
+      const vehicle = await Vehicle.collection.findOne({
+        $or: [{ _id: vehicleId }, { vehicle_code: vehicleId }]
+      });
+      if (vehicle) {
+        userId = cleanText(vehicle.users_id || vehicle.user_id);
+      }
+    } catch (err) {
+      console.warn('vehicle lookup for emergency user_id failed:', err && err.message ? err.message : err);
+    }
+  }
 
   if (!requestType) {
     const error = new Error('request_type is required');
@@ -587,7 +601,7 @@ exports.createEmergencyReport = async function createEmergencyReport(payload) {
 
   const document = {
     _id: cleanText(body._id) || createEmergencyId(),
-    vehicle_id: cleanText(body.vehicle_id),
+    vehicle_id: vehicleId,
     user_id: userId,
     users_id: userId,
     request_type: requestType,

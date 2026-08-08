@@ -85,7 +85,8 @@ Out of scope:
 | File | Change |
 |---|---|
 | `backend-node/server/Project/ivts/models/emergency_report.model.js` | Added `user_id` and `users_id` to schema |
-| `backend-node/server/Project/ivts/service/mobile.js` | Saved user IDs in `createEmergencyReport` and merged `EmergencyReport` into `listRequestHistory` |
+| `backend-node/server/Project/ivts/service/mobile.js` | Saved user IDs in `createEmergencyReport` (with vehicle auto-lookup fallback) and merged `EmergencyReport` into `listRequestHistory` |
+| `backend-node/scripts/fix-emergency-reports-users.js` | Executed repair script to update `user_id` / `users_id` on existing MongoDB `emergency_report` documents |
 | `user-mobile-application/lib/screens/emergency_request_screen.dart` | Passed user IDs in payload and refreshed `AppDataRepository` after submission |
 | `user-mobile-application/lib/providers/locale_provider.dart` | Added emergency request title localization in `translateRequestTitle()` |
 
@@ -95,6 +96,7 @@ Out of scope:
 |---|---|---|
 | `node --check server/Project/ivts/models/emergency_report.model.js` | PASS | Exit code 0 |
 | `node --check server/Project/ivts/service/mobile.js` | PASS | Exit code 0 |
+| `node scripts/fix-emergency-reports-users.js` | PASS | Successfully updated 2 existing MongoDB `emergency_report` docs -> `user_id: "usr_local_1786181712848_718"` |
 | `flutter analyze lib/` | PASS | 0 errors / 0 warnings in edited files |
 
 ## T17 PRD / Docs Update
