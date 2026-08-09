@@ -203,6 +203,7 @@ class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
                             final createdReport = await api.createEmergencyReport(reportPayload);
                             
                             AppDataRepository.instance.activeEmergencyIdNotifier.value = createdReport['_id'];
+                            AppDataRepository.instance.activeEmergencyReportNotifier.value = createdReport;
                             await AppDataRepository.instance.refresh();
 
                             if (!mounted) return;

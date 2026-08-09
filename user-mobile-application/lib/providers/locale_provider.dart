@@ -39,6 +39,16 @@ class LocaleProvider extends ChangeNotifier {
     return dateGroup;
   }
 
+  String getEmergencyBannerText(String? requestType) {
+    final typeKey = requestType?.toLowerCase().trim() ?? 'theft';
+    final translatedType = t(typeKey);
+    if (_currentLanguage == AppLanguage.thai) {
+      return 'มีคำร้องฉุกเฉิน ($translatedType) กำลังดำเนินการ — แตะเพื่อดู';
+    } else {
+      return 'Emergency request ($translatedType) in progress — Tap to view';
+    }
+  }
+
   String translateNotificationTitle(String rawTitle) {
     if (_currentLanguage == AppLanguage.english) return rawTitle;
     if (rawTitle.trim() == 'Emergency report update') {

@@ -537,7 +537,38 @@ function createEmergencyId() {
 exports.listEmergencyReports = async function listEmergencyReports(query) {
   const filter = {};
   const vehicleId = cleanText(query.vehicle_id);
+  const userId = cleanText(query.users_id || query.user_id);
+
   if (vehicleId) filter.vehicle_id = vehicleId;
+  if (userId) {
+    const vehicleFilter = {
+      $or: [
+        { users_id: userIdFilterValue(userId) },
+        { user_id: userIdFilterValue(userId) }
+      ]
+    };
+    const userVehicles = await Vehicle.find(vehicleFilter).lean();
+    const userVehicleIds = userVehicles.map((v) => String(v._id));
+    const userVehicleCodes = userVehicles.map((v) => String(v.vehicle_code)).filter(Boolean);
+
+    const userOr = [
+      { users_id: userIdFilterValue(userId) },
+      { user_id: userIdFilterValue(userId) }
+    ];
+    if (userVehicleIds.length || userVehicleCodes.length) {
+      userOr.push({ vehicle_id: { $in: [...userVehicleIds, ...userVehicleCodes] } });
+    }
+
+    if (filter.vehicle_id) {
+      filter.$and = [
+        { vehicle_id: filter.vehicle_id },
+        { $or: userOr }
+      ];
+      delete filter.vehicle_id;
+    } else {
+      filter.$or = userOr;
+    }
+  }
 
   const limit = Math.min(Math.max(toNumber(query.limit, DEFAULT_LIMIT), 1), MAX_LIMIT);
   const reports = await EmergencyReport.find(filter).sort({ incident_time: -1 }).limit(limit).lean();
@@ -638,6 +669,31 @@ exports.createEmergencyReport = async function createEmergencyReport(payload) {
 
   const plain = created.toObject();
   return Object.assign({}, plain, { timeline: buildEmergencyTimeline(plain) });
+};
+
+exports.updateEmergencyReportStatus = async function updateEmergencyReportStatus(id, payload) {
+  const reportId = cleanText(id);
+  const status = cleanText(payload && payload.status) || 'RESOLVED';
+
+  if (!reportId) {
+    const error = new Error('Emergency report id is required');
+    error.status = 400;
+    throw error;
+  }
+
+  const updatedReport = await EmergencyReport.findOneAndUpdate(
+    { _id: reportId },
+    { $set: { status: status, updated_at: new Date() } },
+    { new: true }
+  ).lean();
+
+  if (!updatedReport) {
+    const error = new Error('Emergency report not found');
+    error.status = 404;
+    throw error;
+  }
+
+  return Object.assign({}, updatedReport, { timeline: buildEmergencyTimeline(updatedReport) });
 };
 
 // ─── Notifications (derived, no dedicated collection) ─────────────────────────

@@ -78,13 +78,24 @@ class _EmergencyStatusScreenState extends State<EmergencyStatusScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     Navigator.pop(ctx);
-                    AppDataRepository.instance.activeEmergencyIdNotifier.value = null;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(context.watch<LocaleProvider>().t('case_marked_resolved'))),
-                    );
-                    Navigator.of(context).maybePop();
+                    final messenger = ScaffoldMessenger.of(context);
+                    final loc = context.read<LocaleProvider>();
+                    try {
+                      await MobileApiService().updateEmergencyReportStatus(widget.emergencyId, status: 'RESOLVED');
+                      AppDataRepository.instance.activeEmergencyIdNotifier.value = null;
+                      AppDataRepository.instance.activeEmergencyReportNotifier.value = null;
+                      await AppDataRepository.instance.refresh();
+                      messenger.showSnackBar(
+                        SnackBar(content: Text(loc.t('case_marked_resolved'))),
+                      );
+                      if (mounted) Navigator.of(context).maybePop();
+                    } catch (e) {
+                      messenger.showSnackBar(
+                        SnackBar(content: Text('Failed to update case status: $e')),
+                      );
+                    }
                   },
                   child: Text(context.watch<LocaleProvider>().t('confirm'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
                 ),

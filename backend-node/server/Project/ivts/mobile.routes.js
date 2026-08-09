@@ -159,6 +159,18 @@ router.get('/emergency-reports/:id', async function (request, response) {
 });
 
 /**
+ * PATCH /api/v1/mobile/emergency-reports/:id
+ * Update emergency report status (e.g. mark RESOLVED from mobile client).
+ */
+router.patch('/emergency-reports/:id', async function (request, response) {
+  try {
+    return ok(response, await mobileService.updateEmergencyReportStatus(request.params.id, request.body || {}));
+  } catch (error) {
+    return fail(response, error);
+  }
+});
+
+/**
  * GET /api/v1/mobile/notifications?user_id=&vehicle_id=
  * Derived from vehicles nearing/past expiry and emergency_report documents
  * (no dedicated notifications collection exists — see service/mobile.js).

@@ -229,7 +229,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: _selectedUserType,
+                  initialValue: _selectedUserType,
                   decoration: InputDecoration(
                     labelText: context.watch<LocaleProvider>().t('user_type'),
                     border: const OutlineInputBorder(),

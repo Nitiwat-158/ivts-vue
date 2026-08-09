@@ -23,6 +23,9 @@ class AppDataRepository {
   /// Notifies UI whether there is an active emergency report in progress (holds the report ID).
   final ValueNotifier<String?> activeEmergencyIdNotifier = ValueNotifier<String?>(null);
 
+  /// Notifies UI whether there is an active emergency report in progress (holds the report object).
+  final ValueNotifier<Map<String, dynamic>?> activeEmergencyReportNotifier = ValueNotifier<Map<String, dynamic>?>(null);
+
   bool _loading = false;
 
   Future<void> refresh() async {
@@ -38,6 +41,7 @@ class AppDataRepository {
         _refreshTripHistory(userId: userId),
         _refreshRequestHistory(userId: userId),
         _refreshNotifications(userId: userId),
+        _refreshEmergencyReports(userId: userId),
       ]);
       success = results.any((res) => res == true);
       dockerConnectedNotifier.value = success;
@@ -101,6 +105,32 @@ class AppDataRepository {
       return true;
     } catch (error) {
       debugPrint('AppDataRepository: fetchNotifications failed, keeping previously loaded data ($error)');
+      return false;
+    }
+  }
+
+  Future<bool> _refreshEmergencyReports({String? userId}) async {
+    try {
+      final reports = await _api.fetchEmergencyReports(userId: userId);
+      final activeReport = reports.cast<Map<String, dynamic>?>().firstWhere(
+        (r) {
+          if (r == null) return false;
+          final status = (r['status'] as String? ?? '').toUpperCase();
+          return status != 'RESOLVED' && status != 'CLOSED';
+        },
+        orElse: () => null,
+      );
+
+      if (activeReport != null) {
+        activeEmergencyReportNotifier.value = activeReport;
+        activeEmergencyIdNotifier.value = activeReport['_id'] as String?;
+      } else {
+        activeEmergencyReportNotifier.value = null;
+        activeEmergencyIdNotifier.value = null;
+      }
+      return true;
+    } catch (error) {
+      debugPrint('AppDataRepository: fetchEmergencyReports failed ($error)');
       return false;
     }
   }

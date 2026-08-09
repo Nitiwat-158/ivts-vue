@@ -80,6 +80,10 @@ Mobile Application authentication supports both MFU IAM proxy login and local us
 
 Mobile Application User Request History ("ประวัติการแจ้งเรื่อง", `GET /api/v1/mobile/requests?users_id=...`) includes both vehicle registration/renewal requests (`Request` collection) and emergency reports (`EmergencyReport` collection) submitted by the logged-in user or matching user's registered vehicles. Emergency items are titled "คำร้องฉุกเฉิน" (TH) / "Emergency request" (EN) and sorted by submission timestamp alongside registration requests.
 
+Mobile Application Active Emergency Banner (`HomeScreen`) displays a dynamic red action banner formatted by request type (`theft`, `accident`, `breakdown`, `other`) when an active emergency report (`NEW`, `IN_PROGRESS`, `ACKNOWLEDGED`, `PENDING`) exists for the user (e.g. `มีคำร้องฉุกเฉิน (อุบัติเหตุ) กำลังดำเนินการ — แตะเพื่อดู`). When the case status is `RESOLVED` or `CLOSED` (or marked resolved by user), the banner automatically disappears.
+
+Mobile Application Emergency Resolution (`EmergencyStatusScreen`, `PATCH /api/v1/mobile/emergency-reports/:id`) updates the emergency report document status to `RESOLVED` directly in MongoDB (`emergency_reports` collection), updating audit timestamp and refreshing mobile app state.
+
 ### FR-IVTS-002 Account Directory And Lifecycle
 
 Account directory, invite/update/status/lifecycle behavior must use the project IAM scope rules and must not mutate shared IAM account state without an explicit source-backed decision.
