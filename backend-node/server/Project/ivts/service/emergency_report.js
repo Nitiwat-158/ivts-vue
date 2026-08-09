@@ -51,7 +51,7 @@ exports.getAll = async function(req, res) {
     }
     
     if (adminIds.length > 0) {
-      admins = await User.find({ user_id: { $in: adminIds } }, 'username name email user_id').lean();
+      admins = await User.find({ $or: [{ user_id: { $in: adminIds } }, { _id: { $in: adminIds } }] }, 'username name email user_id _id').lean();
     }
 
     // Key the vehicleMap by vehicle_code so it matches emergency_report.vehicle_id
@@ -60,8 +60,8 @@ exports.getAll = async function(req, res) {
 
     const enrichedReports = reports.map(r => ({
       ...r,
-      vehicle_id: vehicleMap[String(r.vehicle_id)] || null,
-      assigned_admin_id: adminMap[String(r.assigned_admin_id)] || null
+      vehicle_id: vehicleMap[String(r.vehicle_id)] || r.vehicle_id,
+      assigned_admin_id: adminMap[String(r.assigned_admin_id)] || r.assigned_admin_id
     }));
 
     // 🟢 คืนค่าข้อมูลในรูปแบบ Standard Response 
@@ -192,12 +192,12 @@ exports.updateStatus = async function(req, res) {
       enrichedVehicle = await Vehicle.findOne({ vehicle_code: persistedReport.vehicle_id }).lean();
     }
     if (persistedReport && persistedReport.assigned_admin_id) {
-      enrichedAdmin = await User.findOne({ user_id: persistedReport.assigned_admin_id }, 'username name email user_id').lean();
+      enrichedAdmin = await User.findOne({ $or: [{ user_id: persistedReport.assigned_admin_id }, { _id: persistedReport.assigned_admin_id }] }, 'username name email user_id _id').lean();
     }
 
     const reportObj = Object.assign({}, persistedReport);
-    reportObj.vehicle_id = enrichedVehicle || null;
-    reportObj.assigned_admin_id = enrichedAdmin || null;
+    reportObj.vehicle_id = enrichedVehicle || persistedReport.vehicle_id;
+    reportObj.assigned_admin_id = enrichedAdmin || persistedReport.assigned_admin_id;
 
     return res.status(200).json({
       code: 20000,
