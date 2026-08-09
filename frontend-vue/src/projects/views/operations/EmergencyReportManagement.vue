@@ -295,7 +295,6 @@ export default {
       filterType: '',
       selectedCase: null,
       editStatus: '',
-      currentAdminName: 'Admin_Mock',
       isAcceptingCase: false
     };
   },
@@ -305,6 +304,27 @@ export default {
       if (!profile || typeof profile !== 'object') return '';
       const rawId = profile.user_id || profile._id || profile.id || '';
       return String(rawId || '').trim();
+    },
+    currentAdminName() {
+      const profile = this.$store && this.$store.getters ? this.$store.getters['auth/profile'] : null;
+      if (!profile || typeof profile !== 'object') return '';
+      
+      const userinfo = profile.userinfo || {};
+      const lang = (this.$store && this.$store.getters ? this.$store.getters['setting/lang'] : 'en') || 'en';
+      
+      const getVal = (items) => {
+        if (!Array.isArray(items)) return '';
+        const pref = items.find(i => i && i.key === lang && i.value);
+        const en = items.find(i => i && i.key === 'en' && i.value);
+        const fb = items.find(i => i && i.value);
+        return String((pref || en || fb || {}).value || '').trim();
+      };
+      
+      const firstName = getVal(userinfo.firstName);
+      const lastName = getVal(userinfo.lastName);
+      const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
+      
+      return fullName || profile.fullName || profile.name || profile.username || this.currentAdminId;
     },
     statusOptions() {
       return [
@@ -361,7 +381,10 @@ export default {
       return new Promise(resolve => setTimeout(resolve, ms));
     },
     buildCaseFromApi(c) {
-      const adminId = c.assigned_admin_id ? (c.assigned_admin_id.name || c.assigned_admin_id.username || c.assigned_admin_id) : null;
+      let adminId = c.assigned_admin_id ? (c.assigned_admin_id.name || c.assigned_admin_id.username || c.assigned_admin_id) : null;
+      if (adminId && typeof adminId === 'string' && adminId === this.currentAdminId && this.currentAdminName) {
+        adminId = this.currentAdminName;
+      }
       const activityLog = [
         { time: c.submitted_at, message: this.$t('emergencyReportManagement.details.logSubmitted') || 'ผู้ใช้ส่งรายงานแจ้งเหตุ' }
       ];
@@ -510,7 +533,7 @@ export default {
         if (updatedReport) {
           const optimisticCase = this.buildCaseFromApi(updatedReport);
           optimisticCase.status = 'IN_PROGRESS';
-          optimisticCase.assigned_admin_id = this.currentAdminId;
+          optimisticCase.assigned_admin_id = this.currentAdminName || this.currentAdminId;
           this.upsertCase(optimisticCase);
           if (this.selectedCase && this.selectedCase.id === caseId) {
             this.selectCase(optimisticCase);
