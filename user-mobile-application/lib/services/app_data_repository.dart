@@ -112,18 +112,18 @@ class AppDataRepository {
   Future<bool> _refreshEmergencyReports({String? userId}) async {
     try {
       final reports = await _api.fetchEmergencyReports(userId: userId);
-      final activeReport = reports.cast<Map<String, dynamic>?>().firstWhere(
-        (r) {
-          if (r == null) return false;
-          final status = (r['status'] as String? ?? '').toUpperCase();
-          return status != 'RESOLVED' && status != 'CLOSED';
-        },
-        orElse: () => null,
-      );
+      if (reports.isEmpty) {
+        activeEmergencyReportNotifier.value = null;
+        activeEmergencyIdNotifier.value = null;
+        return true;
+      }
 
-      if (activeReport != null) {
-        activeEmergencyReportNotifier.value = activeReport;
-        activeEmergencyIdNotifier.value = activeReport['_id'] as String?;
+      final latestReport = reports.first;
+      final status = (latestReport['status'] as String? ?? '').toUpperCase();
+
+      if (status != 'RESOLVED' && status != 'CLOSED') {
+        activeEmergencyReportNotifier.value = latestReport;
+        activeEmergencyIdNotifier.value = latestReport['_id'] as String?;
       } else {
         activeEmergencyReportNotifier.value = null;
         activeEmergencyIdNotifier.value = null;

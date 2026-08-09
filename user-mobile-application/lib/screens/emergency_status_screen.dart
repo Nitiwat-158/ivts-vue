@@ -31,7 +31,14 @@ class _EmergencyStatusScreenState extends State<EmergencyStatusScreen> {
     setState(() => _isLoading = true);
     try {
       final report = await MobileApiService().fetchEmergencyReportById(widget.emergencyId);
-      if (mounted) setState(() => _report = report);
+      if (mounted) {
+        setState(() => _report = report);
+        final status = (report['status'] as String? ?? '').toUpperCase();
+        if (status == 'RESOLVED' || status == 'CLOSED') {
+          AppDataRepository.instance.activeEmergencyIdNotifier.value = null;
+          AppDataRepository.instance.activeEmergencyReportNotifier.value = null;
+        }
+      }
     } catch (e) {
       debugPrint('Error fetching report: $e');
     } finally {

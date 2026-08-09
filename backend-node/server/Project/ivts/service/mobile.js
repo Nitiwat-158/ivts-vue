@@ -503,8 +503,10 @@ exports.createRequest = async function createRequest(payload) {
 // ─── Emergency reports ─────────────────────────────────────────────────────────
 
 function buildEmergencyTimeline(report) {
-  const isAcknowledged = ['IN_PROGRESS', 'RESOLVED', 'CLOSED', 'OVERDUE'].includes(report.status);
-  const isContacting = ['IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(report.status);
+  const status = (report.status || '').toUpperCase();
+  const isAcknowledged = ['IN_PROGRESS', 'ACKNOWLEDGED', 'RESOLVED', 'CLOSED', 'OVERDUE'].includes(status);
+  const isContacting = ['IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(status);
+  const isResolved = ['RESOLVED', 'CLOSED'].includes(status);
 
   return [
     {
@@ -524,6 +526,12 @@ function buildEmergencyTimeline(report) {
       label: 'กำลังติดต่อกลับ',
       timestamp: '',
       completed: isContacting
+    },
+    {
+      step: 'resolved',
+      label: 'เคสได้รับการแก้ไขแล้ว',
+      timestamp: '',
+      completed: isResolved
     }
   ];
 }
@@ -571,7 +579,7 @@ exports.listEmergencyReports = async function listEmergencyReports(query) {
   }
 
   const limit = Math.min(Math.max(toNumber(query.limit, DEFAULT_LIMIT), 1), MAX_LIMIT);
-  const reports = await EmergencyReport.find(filter).sort({ incident_time: -1 }).limit(limit).lean();
+  const reports = await EmergencyReport.find(filter).sort({ submitted_at: -1, incident_time: -1 }).limit(limit).lean();
   return reports.map((r) => Object.assign({}, r, { timeline: buildEmergencyTimeline(r) }));
 };
 
