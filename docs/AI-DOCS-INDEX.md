@@ -85,6 +85,7 @@ Do not add these unless the project has a real need and source evidence:
 | `tasks/2026-08-08-vehicle-approval-mongo-update.md` | completed | Active tasklist for fixing vehicle request approval MongoDB sync (`vehicles` & `owner_vehicles`). |
 | `tasks/2026-08-08-mobile-emergency-request-history.md` | completed | Active tasklist for User Mobile emergency request history integration. |
 | `tasks/2026-08-08-dashboard-alert-safe-render.md` | completed | Active tasklist for Dashboard emergency alert safe text rendering (prevent raw JSON object display). |
+| `tasks/2026-08-09-emergency-report-accept-permission.md` | done | Active tasklist for Emergency Report Management Accept permission alignment and frontend feedback. |
 | `tasks/2026-06-18-<topic>.md` | active as needed | One focused tasklist per work item. |
 
 
@@ -126,6 +127,7 @@ Do not add these unless the project has a real need and source evidence:
 | `changes/2026-08-08-vehicle-approval-mongo-update.md` | completed | T1-T20 change record for fixing vehicle request approval MongoDB sync (`vehicles` & `owner_vehicles`). |
 | `changes/2026-08-08-mobile-emergency-request-history.md` | completed | T1-T20 change record for User Mobile emergency request history integration. |
 | `changes/2026-08-08-dashboard-alert-safe-render.md` | completed | T1-T20 change record for Dashboard emergency alert safe text rendering. |
+| `changes/2026-08-09-emergency-report-accept-permission.md` | done | T1-T20 change record for Emergency Report Management Accept permission and feedback fix. |
 | `changes/2026-06-18-<topic>.md` | active as needed | T1-T20 handoff for each completed or handed-off work item. |
 
 

@@ -94,6 +94,8 @@ Protected routes require authentication plus permission checks. UI visibility mu
 
 Frontend permission bootstrap must reuse an in-flight `fetchMyPermissions` request for concurrent callers so route guards wait for the same permission matrix instead of issuing duplicate requests or evaluating access before permissions finish loading.
 
+Emergency report management actions must use the explicit report-management permission path and surface authorization failures to the user instead of failing silently.
+
 ### FR-IVTS-005 Settings And Operations
 
 Settings, runtime access, database backup, email notification, workflow, audit, and deployment behavior must be verified from current settings routes/views and deployment files before release.

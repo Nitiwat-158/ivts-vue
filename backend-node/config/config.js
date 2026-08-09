@@ -68,6 +68,7 @@ function buildDefaultPermissionPaths(rootPath) {
         '/ivts/registry',
         '/ivts/review',
         '/ivts/reports',
+        '/ivts/emergency-reports',
         '/operations/business',
         '/management/category',
         '/config/message-authen',

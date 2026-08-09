@@ -51,6 +51,43 @@ function deny(response, statusCode, payload) {
     }, payload || {}));
 }
 
+function summarizePermissionData(permissionData) {
+    var matrix = permissionData && permissionData.matrix ? permissionData.matrix : {};
+    var effective = permissionData && Array.isArray(permissionData.effectivePermissions) ? permissionData.effectivePermissions : [];
+    return {
+        assignmentCount: Array.isArray(permissionData && permissionData.assignments) ? permissionData.assignments.length : 0,
+        permissionCount: Array.isArray(permissionData && permissionData.permissions) ? permissionData.permissions.length : 0,
+        matrixPaths: Object.keys(matrix),
+        effectivePermissions: effective.map(function (item) {
+            return item && item.path ? item.path : null;
+        }).filter(Boolean)
+    };
+}
+
+function logDeniedPermission(request, statusCode, requiredAction, candidates, evaluation, extra) {
+    var accountId = request && request.body && request.body.accounts ? String(request.body.accounts) : null;
+    var authAccountId = request && request.authAccount && request.authAccount._id ? String(request.authAccount._id) : null;
+    var permissionData = evaluation && evaluation.permissionData ? evaluation.permissionData : null;
+    var payload = {
+        statusCode: statusCode,
+        accountId: accountId,
+        authAccountId: authAccountId,
+        method: request && request.method ? request.method : null,
+        path: request && request.originalUrl ? request.originalUrl : null,
+        requiredAction: requiredAction,
+        requiredPaths: candidates,
+        source: evaluation && evaluation.source ? evaluation.source : 'unknown',
+        matchedPath: evaluation && evaluation.matchedPath ? evaluation.matchedPath : '',
+        permissionSummary: summarizePermissionData(permissionData)
+    };
+    if (extra && typeof extra === 'object') {
+        payload.reason = extra.reason || null;
+        payload.message = extra.message || null;
+    }
+    // eslint-disable-next-line no-console
+    console.warn('Permission denied:', payload);
+}
+
 exports.requirePermission = function (paths, action, options) {
     var requiredAction = action || 'view';
     var candidates = buildCandidates(paths);
@@ -60,7 +97,12 @@ exports.requirePermission = function (paths, action, options) {
         try {
             var accountId = request && request.body ? request.body.accounts : null;
             if (!accountId) {
+                logDeniedPermission(request, 401, requiredAction, candidates, null, {
+                    reason: 'missing_account_context',
+                    message: 'Missing account context'
+                });
                 return deny(response, 401, {
+                    message: 'Missing account context',
                     data: {
                         reason: 'missing_account_context'
                     }
@@ -81,7 +123,12 @@ exports.requirePermission = function (paths, action, options) {
             var allowed = !!(evaluation && evaluation.allowed);
 
             if (!allowed) {
+                logDeniedPermission(request, 403, requiredAction, candidates, evaluation, {
+                    reason: 'permission_denied',
+                    message: resolverOptions.denyMessage || 'Forbidden'
+                });
                 return deny(response, 403, {
+                    message: resolverOptions.denyMessage || 'Forbidden',
                     data: {
                         requiredAction: requiredAction,
                         requiredPaths: candidates,

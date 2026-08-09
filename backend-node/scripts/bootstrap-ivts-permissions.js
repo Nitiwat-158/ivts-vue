@@ -25,6 +25,7 @@ const DEFAULT_MENU_PATHS = (
   '/ivts/registry',
   '/ivts/review',
   '/ivts/reports',
+  '/ivts/emergency-reports',
   '/operations/business',
   '/management/category',
   '/config/message-authen',

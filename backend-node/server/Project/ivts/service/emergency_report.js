@@ -4,6 +4,19 @@ const EmergencyReport = require('../models/emergency_report.model');
 const Vehicle = require('../models/vehicle.model');
 const User = require('../models/user.model');
 
+async function loadLeanReportById(reportId) {
+  const query = EmergencyReport.findById(reportId);
+  if (query && typeof query.lean === 'function') {
+    return query.lean();
+  }
+  return query;
+}
+
+function logStatusUpdate(stage, details) {
+  // eslint-disable-next-line no-console
+  console.info('EmergencyReportService.updateStatus', Object.assign({ stage: stage }, details || {}));
+}
+
 exports.getAll = async function(req, res) {
   try {
     const filters = {};
@@ -78,31 +91,111 @@ exports.getAll = async function(req, res) {
 
 exports.updateStatus = async function(req, res) {
   try {
-    const reportId = req.params.id;
-    const { status, adminId } = req.body;
+    const reportId = String(req.params.id || '').trim();
+    const payload = req.body || {};
+    const status = typeof payload.status === 'string' ? payload.status.trim() : '';
+    const adminId = typeof payload.adminId === 'string' ? payload.adminId.trim() : '';
 
-    const report = await EmergencyReport.findById(reportId);
+    if (!reportId) {
+      return res.status(400).json({ message: 'Emergency report id is required' });
+    }
+
+    if (!status && !adminId) {
+      return res.status(400).json({ message: 'status or adminId is required' });
+    }
+
+    const report = await loadLeanReportById(reportId);
     if (!report) {
       return res.status(404).json({ message: 'Emergency report not found' });
     }
 
-    if (status) report.status = status;
-    if (adminId) report.assigned_admin_id = adminId;
+    logStatusUpdate('before-update', {
+      reportId: reportId,
+      currentStatus: report.status || null,
+      currentAssignedAdminId: report.assigned_admin_id || null,
+      nextStatus: status || null,
+      nextAssignedAdminId: adminId || null
+    });
 
-    await report.save();
+    if (adminId && report.assigned_admin_id && String(report.assigned_admin_id) !== adminId) {
+      logStatusUpdate('conflict', {
+        reportId: reportId,
+        currentAssignedAdminId: report.assigned_admin_id,
+        attemptedAssignedAdminId: adminId
+      });
+      return res.status(409).json({
+        message: 'Emergency report is already assigned to another admin',
+        data: {
+          reason: 'report_already_assigned',
+          currentAssignedAdminId: report.assigned_admin_id
+        }
+      });
+    }
+
+    const update = { $set: {} };
+    if (status) {
+      update.$set.status = status;
+    }
+    if (adminId) {
+      update.$set.assigned_admin_id = adminId;
+    }
+
+    const updateFilter = { _id: reportId };
+    if (adminId) {
+      updateFilter.$or = [
+        { assigned_admin_id: null },
+        { assigned_admin_id: '' },
+        { assigned_admin_id: adminId }
+      ];
+    }
+
+    const updatedReport = await EmergencyReport.findOneAndUpdate(updateFilter, update, {
+      new: true,
+      runValidators: true,
+      context: 'query'
+    });
+
+    if (!updatedReport) {
+      const currentReport = await loadLeanReportById(reportId);
+      if (!currentReport) {
+        return res.status(404).json({ message: 'Emergency report not found' });
+      }
+      logStatusUpdate('conflict-after-update', {
+        reportId: reportId,
+        databaseStatus: currentReport.status || null,
+        databaseAssignedAdminId: currentReport.assigned_admin_id || null,
+        attemptedStatus: status || null,
+        attemptedAssignedAdminId: adminId || null
+      });
+      return res.status(409).json({
+        message: 'Emergency report was changed by another request',
+        data: {
+          reason: 'report_update_conflict',
+          status: currentReport.status || null,
+          assigned_admin_id: currentReport.assigned_admin_id || null
+        }
+      });
+    }
+
+    const persistedReport = await loadLeanReportById(reportId);
+    logStatusUpdate('after-update', {
+      reportId: reportId,
+      savedStatus: persistedReport && persistedReport.status ? persistedReport.status : null,
+      savedAssignedAdminId: persistedReport && persistedReport.assigned_admin_id ? persistedReport.assigned_admin_id : null
+    });
 
     let enrichedVehicle = null;
     let enrichedAdmin = null;
 
-    if (report.vehicle_id) {
+    if (persistedReport && persistedReport.vehicle_id) {
       // vehicle_id stores vehicle_code string (e.g. "CR0001"), not ObjectId
-      enrichedVehicle = await Vehicle.findOne({ vehicle_code: report.vehicle_id }).lean();
+      enrichedVehicle = await Vehicle.findOne({ vehicle_code: persistedReport.vehicle_id }).lean();
     }
-    if (report.assigned_admin_id) {
-      enrichedAdmin = await User.findOne({ user_id: report.assigned_admin_id }, 'username name email user_id').lean();
+    if (persistedReport && persistedReport.assigned_admin_id) {
+      enrichedAdmin = await User.findOne({ user_id: persistedReport.assigned_admin_id }, 'username name email user_id').lean();
     }
 
-    const reportObj = report.toObject();
+    const reportObj = Object.assign({}, persistedReport);
     reportObj.vehicle_id = enrichedVehicle || null;
     reportObj.assigned_admin_id = enrichedAdmin || null;
 

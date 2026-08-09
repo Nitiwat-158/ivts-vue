@@ -6,7 +6,7 @@
 | Project | IVTS |
 | Module / Feature | system progress and readiness |
 | Requirement | Track actual project system progress from source and verification evidence |
-| Active Change Record | `docs/changes/2026-08-08-mobile-emergency-request-history.md` |
+| Active Change Record | `docs/changes/2026-08-09-emergency-report-accept-permission.md` |
 | Overall Status | in_progress |
 | Overall Progress | 60% |
 | Progress Type | Evidence-backed readiness score, not final product completion |
@@ -77,6 +77,7 @@ Adjust weights per project, but keep them evidence-backed.
 | ivts-VA-001 | Fix Vehicle Request Approval MongoDB Sync | Backend | AI | none | done | 100 | Refactored vehicle approval sync in `vehicle_request.js` & ran data repair script | `vehicle_request.js`, `owner_vehicle.js`, `fix-approved-requests-vehicles.js` | 2/2 unit tests PASS; live MongoDB repair PASS | none | — | Repaired MongoDB collections & fixed sync logic |
 | ivts-MERH-001 | User Mobile Emergency Request History Integration | Mobile/Backend | AI | none | done | 100 | Saved user ID on emergency report, merged in listRequestHistory & updated Flutter app | `emergency_report.model.js`, `service/mobile.js`, `emergency_request_screen.dart`, `locale_provider.dart` | node --check PASS; flutter analyze 0 errors | none | — | Included emergency requests in Request History |
 | ivts-DASH-001 | Dashboard alert safe text rendering (avoid raw JSON in alert line) | Frontend | AI | none | done | 100 | Added reusable type guards + location/description helpers in Dashboard alert mapper to support string/object payloads | `frontend-vue/src/views/Dashboard.vue` | `npm --prefix frontend-vue run lint -- src/views/Dashboard.vue` PASS; manual cases documented for `vehicle_id` string/object | none | — | Human-readable dashboard alerts |
+| ivts-ERM-001 | Emergency report accept permission and feedback fix | Backend/Frontend | AI | none | done | 100 | Route permission aligned to report management scope, backend denial logging added, and frontend now shows loading/error feedback | `backend-node/server/Project/ivts/ivts.routes.js`, `backend-node/server/Project/security/service/authorization.js`, `frontend-vue/src/projects/views/operations/EmergencyReportManagement.vue` | workspace error check PASS | none | — | Accept flow with visible failure feedback |
 
 
 
