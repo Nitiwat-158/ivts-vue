@@ -86,14 +86,19 @@
               <div v-if="selectedVehicle" class="ai-track-detail mt-4">
                 <CCard class="mb-3">
                   <CCardBody>
-                    <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
                       <div>
                         <h3>{{ $t('aiTrack.detailTitle') }}</h3>
                         <p class="text-muted mb-0">{{ $t('aiTrack.detailSubtitle') }}</p>
                       </div>
-                      <CButton size="sm" color="primary" @click="fetchTimeline(selectedVehicle)" :disabled="loadingTimeline">
-                        {{ $t('aiTrack.refreshTimeline') }}
-                      </CButton>
+                      <div class="d-flex flex-wrap gap-2">
+                        <CButton size="sm" color="secondary" variant="outline" @click="fetchTimeline(selectedVehicle)" :disabled="loadingTimeline">
+                          {{ $t('aiTrack.refreshTimeline') }}
+                        </CButton>
+                        <CButton size="sm" color="success" @click="openRegisterModal" :disabled="!selectedVehicle || !selectedVehicle.global_id || registerSubmitting">
+                          {{ $t('aiTrack.registerOwnership') }}
+                        </CButton>
+                      </div>
                     </div>
 
                     <div class="mb-3">
@@ -129,6 +134,38 @@
                   </CCardBody>
                 </CCard>
               </div>
+              <CModal :show="registerModalVisible" @update:show="registerModalVisible = $event" size="lg" centered>
+                <CModalHeader closeButton>
+                  <h5 class="mb-0">{{ $t('aiTrack.registerOwnership') }}</h5>
+                </CModalHeader>
+                <CModalBody>
+                  <form @submit.prevent="confirmRegister">
+                    <div class="form-group">
+                      <label>{{ $t('aiTrack.registerGlobalId') }}</label>
+                      <input type="text" class="form-control" :value="selectedVehicle?.global_id" disabled />
+                    </div>
+                    <div class="form-group">
+                      <label>{{ $t('aiTrack.registerVehicleId') }}</label>
+                      <input type="text" class="form-control" v-model="registerVehicleId" placeholder="e.g. TEST-VEH-123" />
+                    </div>
+                    <div class="form-group">
+                      <label>{{ $t('aiTrack.registerNickname') }}</label>
+                      <input type="text" class="form-control" v-model="registerNickname" placeholder="Optional nickname" />
+                    </div>
+                    <div v-if="registerMessage" class="alert alert-info mt-3">
+                      {{ registerMessage }}
+                    </div>
+                  </form>
+                </CModalBody>
+                <CModalFooter>
+                  <CButton color="secondary" variant="outline" @click="closeRegisterModal" :disabled="registerSubmitting">
+                    {{ $t('common.close') }}
+                  </CButton>
+                  <CButton color="primary" @click="confirmRegister" :disabled="registerSubmitting">
+                    {{ $t('aiTrack.confirmRegister') }}
+                  </CButton>
+                </CModalFooter>
+              </CModal>
 
               <div v-if="fullRouteVehicles.length > 0" class="ai-track-full-route mt-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -175,7 +212,12 @@ export default {
       timeline: [],
       routePolyline: [],
       fullRouteVehicles: [],
-      errorMessage: ''
+      errorMessage: '',
+      registerModalVisible: false,
+      registerVehicleId: '',
+      registerNickname: '',
+      registerSubmitting: false,
+      registerMessage: '',
     }
   },
   computed: {
@@ -278,6 +320,50 @@ export default {
       if (!vehicle || this.selectedVehicle?.global_id === vehicle.global_id) return
       this.selectedVehicle = vehicle
       this.fetchTimeline(vehicle)
+    },
+    openRegisterModal() {
+      this.registerVehicleId = '';
+      this.registerNickname = '';
+      this.registerMessage = '';
+      this.registerModalVisible = true;
+    },
+    async confirmRegister() {
+      if (!this.selectedVehicle || !this.selectedVehicle.global_id) return;
+      const profile = this.$store && this.$store.getters ? this.$store.getters['auth/profile'] : null;
+      const userId = profile && (profile._id || profile.id) ? String(profile._id || profile.id) : '';
+      if (!userId) {
+        this.registerMessage = this.$t('aiTrack.registerNoUser');
+        return;
+      }
+      if (!this.registerVehicleId || !this.registerVehicleId.trim()) {
+        this.registerMessage = this.$t('aiTrack.registerNoVehicleId');
+        return;
+      }
+
+      this.registerSubmitting = true;
+      this.registerMessage = '';
+
+      try {
+        await api.aiTrack('register', {
+          user_id: userId,
+          vehicle_id: this.registerVehicleId.trim(),
+          global_id: this.selectedVehicle.global_id,
+          nickname: this.registerNickname.trim() || null,
+        });
+        this.registerMessage = this.$t('aiTrack.registerSuccess');
+        this.registerModalVisible = false;
+      } catch (err) {
+        console.error('AI Track registration failed', err);
+        this.registerMessage = (err && err.response && err.response.data && err.response.data.error)
+          ? err.response.data.error
+          : err && err.message ? err.message : this.$t('aiTrack.registerError');
+      } finally {
+        this.registerSubmitting = false;
+      }
+    },
+    closeRegisterModal() {
+      this.registerModalVisible = false;
+      this.registerMessage = '';
     },
     formatTimestamp(value) {
       if (!value) return '-'

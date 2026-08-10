@@ -101,6 +101,7 @@ reid:
   match_threshold: 0.35
   match_window_minutes: 30
   vector_dim: 512
+  user_match_threshold: 0.35
 detection:
   model_path: E:\pj_plot\mfu_vehicle_tracking\weights\best_9000.onnx
   tracker: bytetrack.yaml

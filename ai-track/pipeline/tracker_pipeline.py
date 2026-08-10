@@ -33,8 +33,11 @@ correct way to run ByteTrack across multiple independent camera feeds.
 """
 from __future__ import annotations
 
+import json
+import os
 import threading
 import time
+import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
@@ -52,6 +55,26 @@ from pipeline.camera_stream import RTSPStreamThread
 from pipeline.mask_utils import apply_mask
 
 DB_WORKER_THREADS = 4
+
+
+def notify_node_tracking_history(user_payload: dict):
+    """HTTP bridge: Python tells Node to persist a tracking_history event."""
+    node_url = os.getenv('IVTS_NODE_TRACKING_HISTORY_URL', 'http://localhost:8203/api/v1/mobile/ai-track/ownership/history')
+    if not node_url:
+        return
+
+    data = json.dumps(user_payload).encode('utf-8')
+    req = urllib.request.Request(
+        node_url,
+        data=data,
+        headers={'Content-Type': 'application/json'},
+        method='POST',
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=3) as resp:
+            resp.read()
+    except Exception as exc:
+        print(f"⚠️ [Ownership Bridge] failed to push tracking history to Node: {exc}")
 
 
 def save_detection(
@@ -128,7 +151,29 @@ def save_detection(
                     detected_lng=detected_lng,
                     box_area=box_area,
                 )
+
+            # Independent user-ownership side-channel: compare this new live
+            # vector to the Registered Vehicles reference-vector table. This is
+            # not replacing the global_id ReID matcher; it runs in parallel.
+            user_match = db.find_registered_vehicle_match(
+                cur,
+                vector=vector,
+                threshold=config.reid.user_match_threshold,
+            )
             conn.commit()
+
+        if user_match:
+            payload = {
+                'user_id': user_match['user_id'],
+                'vehicle_id': user_match.get('vehicle_id'),
+                'global_id': match.global_id,
+                'camera_id': camera_id,
+                'lat': detected_lat,
+                'lng': detected_lng,
+                'timestamp': timestamp.isoformat(),
+                'log_id': log_id,
+            }
+            notify_node_tracking_history(payload)
 
         cooldown_key = f"{camera_id}_{track_id}"
         with global_id_lock:
