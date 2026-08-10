@@ -82,7 +82,7 @@ Mobile Application User Request History ("ประวัติการแจ�
 
 Mobile Application Active Emergency Banner (`HomeScreen`) displays a dynamic red action banner formatted by request type (`theft`, `accident`, `breakdown`, `other`) when an active emergency report (`NEW`, `IN_PROGRESS`, `ACKNOWLEDGED`, `PENDING`) exists for the user (e.g. `มีคำร้องฉุกเฉิน (อุบัติเหตุ) กำลังดำเนินการ — แตะเพื่อดู`). When the case status is `RESOLVED` or `CLOSED` (or marked resolved by user), the banner automatically disappears.
 
-Mobile Application Emergency Resolution (`EmergencyStatusScreen`, `PATCH /api/v1/mobile/emergency-reports/:id`) updates the emergency report document status to `RESOLVED` directly in MongoDB (`emergency_reports` collection), updating audit timestamp and refreshing mobile app state.
+Mobile Application Emergency Resolution (`EmergencyStatusScreen`, `PATCH /api/v1/mobile/emergency-reports/:id`) updates the emergency report document status to `RESOLVED` directly in MongoDB (`emergency_reports` collection), updating audit timestamp and refreshing mobile app state. The emergency status timeline displays 4 steps (`submitted`, `acknowledged`, `contacting`, `resolved`) with all steps marked completed when status reaches `RESOLVED` or `CLOSED`.
 
 ### FR-IVTS-002 Account Directory And Lifecycle
 
