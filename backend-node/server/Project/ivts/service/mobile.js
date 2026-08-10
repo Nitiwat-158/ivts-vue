@@ -143,6 +143,8 @@ function mapVehicle(v) {
   return {
     id: String(v._id),
     plateNumber: v.plate_number || '',
+    province: v.province_license || '',
+    provinceLicense: v.province_license || '',
     vehicleCode: v.vehicle_code || String(v._id),
     type: vehicleTypeLabel(v.type),
     brand: v.brand || '',
@@ -312,10 +314,18 @@ exports.listRequestHistory = async function listRequestHistory(query) {
 
   const requestItems = requests.map((r) => {
     const rawDate = r.created_at || new Date();
+    const vInfo = r.vehicle_info || {};
+    const oInfo = r.owner_info || {};
     return {
       title: r.request_type === 'renew' ? 'Renewal' : 'Vehicle registration',
-      vehicleCode: (r.vehicle_info && r.vehicle_info.license_plate) || '',
+      vehicleCode: vInfo.license_plate || '',
       vehicleId: r._id,
+      province: vInfo.province_license || '',
+      provinceLicense: vInfo.province_license || '',
+      brand: vInfo.brand || '',
+      model: vInfo.model || '',
+      color: vInfo.color || '',
+      ownerName: [oInfo.name, oInfo.surname].filter(Boolean).join(' ') || '',
       date: formatDateBE(rawDate) || '',
       dateGroup: dateGroupLabel(rawDate) || '',
       _timestamp: new Date(rawDate).getTime()
@@ -451,7 +461,7 @@ exports.createRequest = async function createRequest(payload) {
     user_type: normalizedUserType,
     vehicle_info: {
       license_plate: cleanText(vehicleInfo.license_plate),
-      province_license: cleanText(vehicleInfo.province_license),
+      province_license: cleanText(vehicleInfo.province_license || vehicleInfo.province),
       brand: cleanText(vehicleInfo.brand),
       model: cleanText(vehicleInfo.model),
       color: cleanText(vehicleInfo.color),
@@ -754,5 +764,51 @@ exports.listNotifications = async function listNotifications(query) {
   }));
 
   return [...emergencyNotifications, ...renewalNotifications];
+};
+
+exports.getRequestById = async function getRequestById(id) {
+  const cleanId = cleanText(id);
+  if (!cleanId) {
+    const error = new Error('request id is required');
+    error.status = 400;
+    throw error;
+  }
+  const req = await Request.findById(cleanId).lean();
+  if (!req) {
+    const error = new Error('Request not found');
+    error.status = 404;
+    throw error;
+  }
+  const vInfo = req.vehicle_info || {};
+  const oInfo = req.owner_info || {};
+  const rawDate = req.created_at || new Date();
+
+  return {
+    id: req._id,
+    userId: req.user_id || req.users_id,
+    requestType: req.request_type,
+    requestStatus: req.request_status,
+    userType: req.user_type,
+    vehicleInfo: {
+      licensePlate: vInfo.license_plate || '',
+      provinceLicense: vInfo.province_license || '',
+      province: vInfo.province_license || '',
+      brand: vInfo.brand || '',
+      model: vInfo.model || '',
+      color: vInfo.color || '',
+      type: vInfo.type || 'car',
+      priorityOrder: vInfo.priority_order || 'first_car'
+    },
+    ownerInfo: {
+      name: oInfo.name || '',
+      surname: oInfo.surname || '',
+      citizenId: oInfo.citizen_id || '',
+      isOwnerMatchUser: Boolean(oInfo.is_owner_match_user)
+    },
+    uploadedDocuments: req.uploaded_documents || {},
+    validity: req.validity || {},
+    date: formatDateBE(rawDate) || '',
+    createdAt: req.created_at
+  };
 };
 

@@ -6,9 +6,9 @@
 | Project | IVTS |
 | Module / Feature | system progress and readiness |
 | Requirement | Track actual project system progress from source and verification evidence |
-| Active Change Record | `docs/changes/2026-08-09-emergency-report-accept-permission.md` |
-| Overall Status | in_progress |
-| Overall Progress | 60% |
+| Active Change Record | `docs/changes/2026-08-10-mobile-request-province-api.md` |
+| Overall Status | done |
+| Overall Progress | 100% |
 | Progress Type | Evidence-backed readiness score, not final product completion |
 
 ## T1. Source Evidence

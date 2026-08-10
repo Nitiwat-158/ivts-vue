@@ -8,6 +8,7 @@ class Vehicle {
   final String brand;
   final String model;
   final String color;
+  final String? province;
   final String ownerName;
   final String issueDate;
   final String expiryDate;
@@ -25,6 +26,7 @@ class Vehicle {
     required this.brand,
     required this.model,
     required this.color,
+    this.province,
     required this.ownerName,
     required this.issueDate,
     required this.expiryDate,

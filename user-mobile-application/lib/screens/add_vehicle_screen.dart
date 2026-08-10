@@ -99,7 +99,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
       final v = widget.vehicle!;
       _selectedType = v.type.toLowerCase() == 'motorcycle' ? 'motorcycle' : 'car';
       _licensePlateController.text = v.plateNumber;
-      _provinceController.text = '-';
+      _provinceController.text = (v.province != null && v.province!.isNotEmpty && v.province != '-') ? v.province! : '-';
       _brandController.text = v.brand;
       _modelController.text = v.model;
       _colorController.text = v.color;
@@ -112,6 +112,51 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
         _surnameController.text = '';
       }
       _citizenIdController.text = '-';
+
+      if (widget.isReadOnly && v.id.isNotEmpty && (v.id.startsWith('REQ') || v.id.contains('req'))) {
+        _loadRequestDetails(v.id);
+      }
+    }
+  }
+
+  Future<void> _loadRequestDetails(String requestId) async {
+    try {
+      final data = await _api.fetchRequestById(requestId);
+      if (!mounted) return;
+      final vehicleInfo = data['vehicleInfo'] as Map<String, dynamic>? ?? {};
+      final ownerInfo = data['ownerInfo'] as Map<String, dynamic>? ?? {};
+      setState(() {
+        final prv = vehicleInfo['province'] as String? ?? vehicleInfo['provinceLicense'] as String? ?? '';
+        if (prv.isNotEmpty) _provinceController.text = prv;
+
+        final lic = vehicleInfo['licensePlate'] as String? ?? '';
+        if (lic.isNotEmpty) _licensePlateController.text = lic;
+
+        final brd = vehicleInfo['brand'] as String? ?? '';
+        if (brd.isNotEmpty) _brandController.text = brd;
+
+        final mdl = vehicleInfo['model'] as String? ?? '';
+        if (mdl.isNotEmpty) _modelController.text = mdl;
+
+        final clr = vehicleInfo['color'] as String? ?? '';
+        if (clr.isNotEmpty) _colorController.text = clr;
+
+        final typ = vehicleInfo['type'] as String? ?? '';
+        if (typ.isNotEmpty) {
+          _selectedType = typ.toLowerCase() == 'motorcycle' ? 'motorcycle' : 'car';
+        }
+
+        final nm = ownerInfo['name'] as String? ?? '';
+        if (nm.isNotEmpty) _nameController.text = nm;
+
+        final snm = ownerInfo['surname'] as String? ?? '';
+        if (snm.isNotEmpty) _surnameController.text = snm;
+
+        final cid = ownerInfo['citizenId'] as String? ?? '';
+        if (cid.isNotEmpty) _citizenIdController.text = cid;
+      });
+    } catch (e) {
+      debugPrint('Error loading request detail for $requestId: $e');
     }
   }
 

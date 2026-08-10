@@ -160,20 +160,21 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen> {
                                 break;
                               }
                             }
-                            matchingVehicle ??= Vehicle(
+                            matchingVehicle = Vehicle(
                               id: request.vehicleId,
                               plateNumber: request.vehicleCode,
                               vehicleCode: request.vehicleId,
-                              type: 'Car',
-                              brand: '-',
-                              model: '-',
-                              color: '-',
-                              ownerName: '-',
+                              type: matchingVehicle?.type ?? 'Car',
+                              brand: matchingVehicle?.brand ?? '-',
+                              model: matchingVehicle?.model ?? '-',
+                              color: matchingVehicle?.color ?? '-',
+                              province: request.province ?? matchingVehicle?.province ?? '-',
+                              ownerName: matchingVehicle?.ownerName ?? '-',
                               issueDate: request.date,
-                              expiryDate: '-',
-                              daysUntilExpiry: 0,
-                              status: VehicleStatus.active,
-                              lastLocation: '-',
+                              expiryDate: matchingVehicle?.expiryDate ?? '-',
+                              daysUntilExpiry: matchingVehicle?.daysUntilExpiry ?? 0,
+                              status: matchingVehicle?.status ?? VehicleStatus.active,
+                              lastLocation: matchingVehicle?.lastLocation ?? '-',
                               lastUpdatedTime: request.date,
                             );
 

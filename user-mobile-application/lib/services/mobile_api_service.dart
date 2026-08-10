@@ -32,6 +32,22 @@ class MobileApiService {
     return json.map(_requestHistoryFromJson).toList();
   }
 
+  Future<Map<String, dynamic>> fetchRequestById(String requestId) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}/requests/$requestId');
+    final response = await _client.get(uri).timeout(ApiConfig.requestTimeout);
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('GET $uri failed with status ${response.statusCode}');
+    }
+
+    final decoded = jsonDecode(response.body);
+    if (decoded is! Map<String, dynamic> || decoded['data'] is! Map<String, dynamic>) {
+      throw const FormatException('Unexpected request detail API response shape');
+    }
+
+    return decoded['data'] as Map<String, dynamic>;
+  }
+
   Future<Map<String, dynamic>> createRequest(Map<String, dynamic> payload) async {
     final uri = Uri.parse('${ApiConfig.baseUrl}/requests');
     final response = await _client
@@ -217,6 +233,7 @@ class MobileApiService {
       brand: json['brand'] as String? ?? '',
       model: json['model'] as String? ?? '',
       color: json['color'] as String? ?? '',
+      province: json['province'] as String? ?? json['provinceLicense'] as String? ?? json['province_license'] as String?,
       ownerName: json['ownerName'] as String? ?? '',
       issueDate: json['issueDate'] as String? ?? '',
       expiryDate: json['expiryDate'] as String? ?? '',
@@ -267,6 +284,7 @@ class MobileApiService {
       title: json['title'] as String? ?? '',
       vehicleCode: json['vehicleCode'] as String? ?? '',
       vehicleId: json['vehicleId'] as String? ?? '',
+      province: json['province'] as String? ?? json['provinceLicense'] as String? ?? json['province_license'] as String?,
       date: json['date'] as String? ?? '',
       dateGroup: json['dateGroup'] as String? ?? '',
     );

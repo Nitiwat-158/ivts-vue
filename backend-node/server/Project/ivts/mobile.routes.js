@@ -124,6 +124,18 @@ router.post('/requests', async function (request, response) {
 });
 
 /**
+ * GET /api/v1/mobile/requests/:id
+ * Fetch detailed vehicle request by ID.
+ */
+router.get('/requests/:id', async function (request, response) {
+  try {
+    return ok(response, await mobileService.getRequestById(request.params.id));
+  } catch (error) {
+    return fail(response, error);
+  }
+});
+
+/**
  * GET /api/v1/mobile/emergency-reports?vehicle_id=
  */
 router.get('/emergency-reports', async function (request, response) {
