@@ -36,6 +36,7 @@ class RequestHistoryItem {
   final String title;
   final String vehicleCode;
   final String vehicleId;
+  final String? province;
   final String date;
   final String dateGroup;
 
@@ -43,6 +44,7 @@ class RequestHistoryItem {
     required this.title,
     required this.vehicleCode,
     required this.vehicleId,
+    this.province,
     required this.date,
     required this.dateGroup,
   });

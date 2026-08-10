@@ -151,6 +151,7 @@ class VehicleDetailsScreen extends StatelessWidget {
                     return;
                   }
                   final data = await api.fetchAiTrackVehicleTimeline(globalId);
+                  if (!context.mounted) return;
                   scaffold.hideCurrentSnackBar();
                   showDialog(
                     context: context,

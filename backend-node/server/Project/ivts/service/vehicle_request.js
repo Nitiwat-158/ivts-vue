@@ -262,19 +262,59 @@ exports.review = async function review(id, body, request) {
 };
 
 /**
- * Generate a sequential vehicle_code in "CR0001" format.
+ * Generate a sequential vehicle_code in "CR0001" format, avoiding collisions.
  */
 async function _generateVehicleCode() {
-  const count = await Vehicle.countDocuments({});
-  return 'CR' + String(count + 1).padStart(4, '0');
+  const vehicles = await Vehicle.find(
+    { $or: [{ _id: /^CR\d+/i }, { vehicle_code: /^CR\d+/i }] },
+    { _id: 1, vehicle_code: 1 }
+  ).lean();
+
+  let maxNum = 0;
+  for (const v of vehicles) {
+    const idNum = parseInt(String(v._id || '').replace(/^CR/i, ''), 10);
+    const codeNum = parseInt(String(v.vehicle_code || '').replace(/^CR/i, ''), 10);
+    if (!isNaN(idNum) && idNum > maxNum) maxNum = idNum;
+    if (!isNaN(codeNum) && codeNum > maxNum) maxNum = codeNum;
+  }
+
+  let nextNum = maxNum + 1;
+  while (true) {
+    const candidate = 'CR' + String(nextNum).padStart(4, '0');
+    const exists = await Vehicle.findOne({
+      $or: [{ _id: candidate }, { vehicle_code: candidate }]
+    }).lean();
+    if (!exists) {
+      return candidate;
+    }
+    nextNum++;
+  }
 }
 
 /**
- * Generate a sequential owner_vehicle ID in "OV0001" format.
+ * Generate a sequential owner_vehicle ID in "OV0001" format, avoiding collisions.
  */
 async function _generateOwnerVehicleId() {
-  const count = await OwnerVehicle.countDocuments({});
-  return 'OV' + String(count + 1).padStart(4, '0');
+  const ovs = await OwnerVehicle.find(
+    { _id: /^OV\d+/i },
+    { _id: 1 }
+  ).lean();
+
+  let maxNum = 0;
+  for (const ov of ovs) {
+    const idNum = parseInt(String(ov._id || '').replace(/^OV/i, ''), 10);
+    if (!isNaN(idNum) && idNum > maxNum) maxNum = idNum;
+  }
+
+  let nextNum = maxNum + 1;
+  while (true) {
+    const candidate = 'OV' + String(nextNum).padStart(4, '0');
+    const exists = await OwnerVehicle.findById(candidate);
+    if (!exists) {
+      return candidate;
+    }
+    nextNum++;
+  }
 }
 
 /**
@@ -294,9 +334,9 @@ async function _syncOwnerVehicleOnApproval(requestDoc, vehicleCode, plateSrc, no
   const userId = String(requestDoc.user_id);
   const existingOwnerVeh = await OwnerVehicle.findOne({
     $or: [
-      { vehicle_code: vehicleCode },
-      { vehicle_id: vehicleCode },
-      { plate_number: plateSrc, user_id: userId }
+      { plate_number: plateSrc, user_id: userId },
+      { plate_number: plateSrc },
+      { vehicle_code: vehicleCode, user_id: userId }
     ]
   });
 
@@ -315,31 +355,35 @@ async function _syncOwnerVehicleOnApproval(requestDoc, vehicleCode, plateSrc, no
         updated_at: now
       }
     }, { runValidators: false });
-    console.log('[vehicle_request] OwnerVehicle updated: ' + existingOwnerVeh._id);
+    console.log('[vehicle_request] OwnerVehicle updated: ' + existingOwnerVeh._id + ' for vehicle: ' + vehicleCode + ' plate: ' + plateSrc);
   } else {
-    const ovId = await _generateOwnerVehicleId();
-    const newOwnerVeh = {
-      _id: ovId,
-      vehicle_code: vehicleCode,
-      vehicle_id: vehicleCode,
-      plate_number: plateSrc,
-      relationship: 'owner',
-      is_primary: true,
-      status: 'active',
-      user_id: userId,
-      document_status: 'Approved',
-      account_status: 'Active',
-      created_at: now,
-      updated_at: now
-    };
-    try {
-      await OwnerVehicle.create(newOwnerVeh);
-      console.log('[vehicle_request] OwnerVehicle created: ' + ovId + ' for vehicle: ' + vehicleCode);
-    } catch (err) {
-      if (err.code === 11000) {
-        console.warn('[vehicle_request] Duplicate OwnerVehicle ID, skipping');
-      } else {
-        throw err;
+    let ovCreated = false;
+    while (!ovCreated) {
+      const ovId = await _generateOwnerVehicleId();
+      const newOwnerVeh = {
+        _id: ovId,
+        vehicle_code: vehicleCode,
+        vehicle_id: vehicleCode,
+        plate_number: plateSrc,
+        relationship: 'owner',
+        is_primary: true,
+        status: 'active',
+        user_id: userId,
+        document_status: 'Approved',
+        account_status: 'Active',
+        created_at: now,
+        updated_at: now
+      };
+      try {
+        await OwnerVehicle.create(newOwnerVeh);
+        ovCreated = true;
+        console.log('[vehicle_request] OwnerVehicle created: ' + ovId + ' for vehicle: ' + vehicleCode + ' plate: ' + plateSrc);
+      } catch (err) {
+        if (err.code === 11000) {
+          console.warn('[vehicle_request] Duplicate OwnerVehicle ID collision (' + ovId + '), retrying');
+        } else {
+          throw err;
+        }
       }
     }
   }
@@ -381,10 +425,12 @@ async function _syncVehicleOnApproval(requestDoc, now) {
   // Resolve vehicle type: accept 'type' (new) or 'vehicle_type' (legacy)
   const vehicleType = vi.type || vi.vehicle_type || null;
 
-  // Check if a vehicle with this plate_number already exists for this user
+  // Check if a vehicle with this plate_number already exists
   const existing = await Vehicle.findOne({
-    plate_number: plateSrc,
-    user_id: String(requestDoc.user_id)
+    $or: [
+      { plate_number: plateSrc },
+      { license_plate: plateSrc }
+    ]
   }).lean();
 
   let resolvedVehicleCode = null;
@@ -402,38 +448,43 @@ async function _syncVehicleOnApproval(requestDoc, now) {
         owner_name: ownerName || existing.owner_name || null,
         validity_start: now,
         validity_expiry: expiryDate,
+        user_id: String(requestDoc.user_id),
         updated_at: now
       }
     }, { runValidators: false });
     console.log('[vehicle_request] Vehicle updated: ' + existing._id + ' plate: ' + plateSrc);
   } else {
-    const vehicleCode = await _generateVehicleCode();
-    resolvedVehicleCode = vehicleCode;
-    const newVehicle = {
-      _id: vehicleCode,
-      plate_number: plateSrc,
-      vehicle_code: vehicleCode,
-      type: vehicleType,
-      brand: vi.brand || null,
-      model: vi.model || null,
-      color: vi.color || null,
-      province_license: vi.province_license || null,
-      owner_name: ownerName,
-      validity_start: now,
-      validity_expiry: expiryDate,
-      last_location: null,
-      updated_at: now,
-      created_at: now,
-      user_id: String(requestDoc.user_id)
-    };
-    try {
-      await Vehicle.create(newVehicle);
-      console.log('[vehicle_request] Vehicle created: ' + vehicleCode + ' plate: ' + plateSrc);
-    } catch (createErr) {
-      if (createErr.code === 11000) {
-        console.warn('[vehicle_request] Duplicate vehicle_code, skipping');
-      } else {
-        throw createErr;
+    let vehicleCreated = false;
+    while (!vehicleCreated) {
+      const vehicleCode = await _generateVehicleCode();
+      const newVehicle = {
+        _id: vehicleCode,
+        plate_number: plateSrc,
+        vehicle_code: vehicleCode,
+        type: vehicleType,
+        brand: vi.brand || null,
+        model: vi.model || null,
+        color: vi.color || null,
+        province_license: vi.province_license || null,
+        owner_name: ownerName,
+        validity_start: now,
+        validity_expiry: expiryDate,
+        last_location: null,
+        updated_at: now,
+        created_at: now,
+        user_id: String(requestDoc.user_id)
+      };
+      try {
+        await Vehicle.create(newVehicle);
+        resolvedVehicleCode = vehicleCode;
+        vehicleCreated = true;
+        console.log('[vehicle_request] Vehicle created: ' + vehicleCode + ' plate: ' + plateSrc);
+      } catch (createErr) {
+        if (createErr.code === 11000) {
+          console.warn('[vehicle_request] Duplicate vehicle_code collision (' + vehicleCode + '), retrying with next ID');
+        } else {
+          throw createErr;
+        }
       }
     }
   }

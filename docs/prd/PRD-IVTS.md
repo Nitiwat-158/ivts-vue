@@ -78,6 +78,12 @@ Frontend session bootstrap must skip silent `/auth/me` when no local token and n
 
 Mobile Application authentication supports both MFU IAM proxy login and local user registration (`POST /api/v1/mobile/auth/register`). User passwords are password hashed using Node.js `crypto.scryptSync` with random salt and stored in MongoDB `users` collection. Registered credentials are authenticated locally (`POST /api/v1/mobile/auth/signin`), and user session `userId` is used to filter vehicle, trip history, request, and notification data per user.
 
+Mobile Application User Request History ("ประวัติการแจ้งเรื่อง", `GET /api/v1/mobile/requests?users_id=...`) includes both vehicle registration/renewal requests (`Request` collection) and emergency reports (`EmergencyReport` collection) submitted by the logged-in user or matching user's registered vehicles. Emergency items are titled "คำร้องฉุกเฉิน" (TH) / "Emergency request" (EN) and sorted by submission timestamp alongside registration requests.
+
+Mobile Application Active Emergency Banner (`HomeScreen`) displays a dynamic red action banner formatted by request type (`theft`, `accident`, `breakdown`, `other`) when an active emergency report (`NEW`, `IN_PROGRESS`, `ACKNOWLEDGED`, `PENDING`) exists for the user (e.g. `มีคำร้องฉุกเฉิน (อุบัติเหตุ) กำลังดำเนินการ — แตะเพื่อดู`). When the case status is `RESOLVED` or `CLOSED` (or marked resolved by user), the banner automatically disappears.
+
+Mobile Application Emergency Resolution (`EmergencyStatusScreen`, `PATCH /api/v1/mobile/emergency-reports/:id`) updates the emergency report document status to `RESOLVED` directly in MongoDB (`emergency_reports` collection), updating audit timestamp and refreshing mobile app state. The emergency status timeline displays 4 steps (`submitted`, `acknowledged`, `contacting`, `resolved`) with all steps marked completed when status reaches `RESOLVED` or `CLOSED`.
+
 ### FR-IVTS-002 Account Directory And Lifecycle
 
 Account directory, invite/update/status/lifecycle behavior must use the project IAM scope rules and must not mutate shared IAM account state without an explicit source-backed decision.
@@ -91,6 +97,8 @@ Project-specific workflows must be defined from mounted backend routes, frontend
 Protected routes require authentication plus permission checks. UI visibility must use the Security store/canAccess pattern and backend denial remains authoritative.
 
 Frontend permission bootstrap must reuse an in-flight `fetchMyPermissions` request for concurrent callers so route guards wait for the same permission matrix instead of issuing duplicate requests or evaluating access before permissions finish loading.
+
+Emergency report management actions must use the explicit report-management permission path and surface authorization failures to the user instead of failing silently.
 
 ### FR-IVTS-005 Settings And Operations
 

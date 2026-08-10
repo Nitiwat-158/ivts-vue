@@ -24,7 +24,9 @@ const canViewRegistry = authorization.requirePermission('/ivts/registry', 'view'
 const canEditRegistry = authorization.requirePermission('/ivts/registry', 'edit');
 const canDeleteRegistry = authorization.requirePermission('/ivts/registry', 'delete');
 const canViewReports = authorization.requirePermission(['/ivts/registry', '/ivts/reports'], 'view');
-const canManageReports = authorization.requirePermission(['/ivts/registry', '/ivts/reports'], 'edit');
+const canManageReports = authorization.requirePermission(['/ivts/reports', '/ivts/emergency-reports'], 'edit', {
+  denyMessage: 'Insufficient permission to manage this report'
+});
 
 // Vehicle request guards
 const canViewRequests = authorization.requirePermission('/ivts/requests', 'view');

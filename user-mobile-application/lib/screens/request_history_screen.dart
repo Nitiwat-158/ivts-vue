@@ -2,7 +2,11 @@ import '../providers/locale_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
+import '../models/vehicle.dart';
+import '../services/app_data_repository.dart';
 import '../theme/app_theme.dart';
+import 'add_vehicle_screen.dart';
+import 'emergency_status_screen.dart';
 
 class RequestHistoryScreen extends StatefulWidget {
   const RequestHistoryScreen({super.key});
@@ -14,6 +18,12 @@ class RequestHistoryScreen extends StatefulWidget {
 class _RequestHistoryScreenState extends State<RequestHistoryScreen> {
   String _selectedDate = 'all_time';
   String _selectedVehicle = 'all_vehicles';
+
+  @override
+  void initState() {
+    super.initState();
+    AppDataRepository.instance.refresh();
+  }
 
   List<String> get _dateOptions {
     final dates = MockData.requestHistory.map((e) => e.dateGroup).toSet().toList();
@@ -72,96 +82,146 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final loc = context.watch<LocaleProvider>();
-    final filtered = MockData.requestHistory.where((req) {
-      final matchDate = _selectedDate == 'all_time' || req.dateGroup == _selectedDate;
-      final matchVehicle = _selectedVehicle == 'all_vehicles' || req.vehicleCode == _selectedVehicle;
-      return matchDate && matchVehicle;
-    }).toList();
+    return ValueListenableBuilder<int>(
+      valueListenable: AppDataRepository.instance.refreshTick,
+      builder: (context, _, __) {
+        final loc = context.watch<LocaleProvider>();
+        final filtered = MockData.requestHistory.where((req) {
+          final matchDate = _selectedDate == 'all_time' || req.dateGroup == _selectedDate;
+          final matchVehicle = _selectedVehicle == 'all_vehicles' || req.vehicleCode == _selectedVehicle;
+          return matchDate && matchVehicle;
+        }).toList();
 
-    final grouped = <String, List<dynamic>>{};
-    for (final request in filtered) {
-      grouped.putIfAbsent(request.dateGroup, () => []).add(request);
-    }
+        final grouped = <String, List<dynamic>>{};
+        for (final request in filtered) {
+          grouped.putIfAbsent(request.dateGroup, () => []).add(request);
+        }
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => Navigator.of(context).maybePop(),
-        ),
-        title: Text(context.watch<LocaleProvider>().t('request_history')),
-      ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: _Chip(
-                    label: _selectedDate == 'all_time' ? loc.t('date') : loc.translateDateGroup(_selectedDate),
-                    onTap: () => _showFilterSheet(loc.t('select_date'), _dateOptions, _selectedDate, (val) => setState(() => _selectedDate = val)),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _Chip(
-                    label: _selectedVehicle == 'all_vehicles' ? loc.t('vehicle') : _selectedVehicle,
-                    onTap: () => _showFilterSheet(loc.t('select_vehicle'), _vehicleOptions, _selectedVehicle, (val) => setState(() => _selectedVehicle = val)),
-                  ),
-                ),
-              ],
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              onPressed: () => Navigator.of(context).maybePop(),
             ),
-            const SizedBox(height: 16),
-            if (grouped.isEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 40),
-                child: Center(
-                  child: Text(
-                    loc.t('no_requests_found'),
-                    style: const TextStyle(color: AppColors.textSecondary),
-                  ),
-                ),
-              ),
-            for (final group in grouped.entries) ...[
-              Text(
-                loc.translateDateGroup(group.key),
-                style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              ...group.value.map((request) => Container(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.divider),
+            title: Text(loc.t('request_history')),
+          ),
+          body: SafeArea(
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: _Chip(
+                        label: _selectedDate == 'all_time' ? loc.t('date') : loc.translateDateGroup(_selectedDate),
+                        onTap: () => _showFilterSheet(loc.t('select_date'), _dateOptions, _selectedDate, (val) => setState(() => _selectedDate = val)),
+                      ),
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _Chip(
+                        label: _selectedVehicle == 'all_vehicles' ? loc.t('vehicle') : _selectedVehicle,
+                        onTap: () => _showFilterSheet(loc.t('select_vehicle'), _vehicleOptions, _selectedVehicle, (val) => setState(() => _selectedVehicle = val)),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                if (grouped.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 40),
+                    child: Center(
+                      child: Text(
+                        loc.t('no_requests_found'),
+                        style: const TextStyle(color: AppColors.textSecondary),
+                      ),
+                    ),
+                  ),
+                for (final group in grouped.entries) ...[
+                  Text(
+                    loc.translateDateGroup(group.key),
+                    style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  ...group.value.map((request) => GestureDetector(
+                        onTap: () {
+                          if (request.title.toLowerCase().contains('emergency') || request.title == 'Emergency request') {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => EmergencyStatusScreen(emergencyId: request.vehicleId),
+                              ),
+                            );
+                          } else {
+                            Vehicle? matchingVehicle;
+                            for (final v in MockData.vehicles) {
+                              if (v.plateNumber == request.vehicleCode || v.vehicleCode == request.vehicleCode || v.id == request.vehicleId) {
+                                matchingVehicle = v;
+                                break;
+                              }
+                            }
+                            matchingVehicle = Vehicle(
+                              id: request.vehicleId,
+                              plateNumber: request.vehicleCode,
+                              vehicleCode: request.vehicleId,
+                              type: matchingVehicle?.type ?? 'Car',
+                              brand: matchingVehicle?.brand ?? '-',
+                              model: matchingVehicle?.model ?? '-',
+                              color: matchingVehicle?.color ?? '-',
+                              province: request.province ?? matchingVehicle?.province ?? '-',
+                              ownerName: matchingVehicle?.ownerName ?? '-',
+                              issueDate: request.date,
+                              expiryDate: matchingVehicle?.expiryDate ?? '-',
+                              daysUntilExpiry: matchingVehicle?.daysUntilExpiry ?? 0,
+                              status: matchingVehicle?.status ?? VehicleStatus.active,
+                              lastLocation: matchingVehicle?.lastLocation ?? '-',
+                              lastUpdatedTime: request.date,
+                            );
+
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => AddVehicleScreen(
+                                  vehicle: matchingVehicle,
+                                  isReadOnly: true,
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.divider),
+                          ),
+                          child: Row(
                             children: [
-                              Text(loc.translateRequestTitle(request.title), style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
-                              const SizedBox(height: 4),
-                              Text('${request.vehicleCode}   ID: ${request.vehicleId}', style: const TextStyle(color: AppColors.textSecondary)),
-                              const SizedBox(height: 4),
-                              Text(request.date, style: const TextStyle(color: AppColors.textSecondary)),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(loc.translateRequestTitle(request.title), style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+                                    const SizedBox(height: 4),
+                                    Text('${request.vehicleCode}   ID: ${request.vehicleId}', style: const TextStyle(color: AppColors.textSecondary)),
+                                    const SizedBox(height: 4),
+                                    Text(request.date, style: const TextStyle(color: AppColors.textSecondary)),
+                                  ],
+                                ),
+                              ),
+                              const Icon(Icons.chevron_right, color: AppColors.primary),
                             ],
                           ),
                         ),
-                        const Icon(Icons.chevron_right, color: AppColors.primary),
-                      ],
-                    ),
-                  )),
-              const SizedBox(height: 12),
-            ],
-          ],
-        ),
-      ),
+                      )),
+                  const SizedBox(height: 12),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

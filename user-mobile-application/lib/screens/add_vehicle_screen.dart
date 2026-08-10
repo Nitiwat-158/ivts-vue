@@ -3,13 +3,21 @@ import 'package:provider/provider.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../models/vehicle.dart';
 import '../services/auth_service.dart';
 import '../services/app_data_repository.dart';
 import '../services/mobile_api_service.dart';
 import '../theme/app_theme.dart';
 
 class AddVehicleScreen extends StatefulWidget {
-  const AddVehicleScreen({super.key});
+  final Vehicle? vehicle;
+  final bool isReadOnly;
+
+  const AddVehicleScreen({
+    super.key,
+    this.vehicle,
+    this.isReadOnly = false,
+  });
 
   @override
   State<AddVehicleScreen> createState() => _AddVehicleScreenState();
@@ -83,6 +91,74 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
   final _nameController = TextEditingController();
   final _surnameController = TextEditingController();
   final _citizenIdController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.vehicle != null) {
+      final v = widget.vehicle!;
+      _selectedType = v.type.toLowerCase() == 'motorcycle' ? 'motorcycle' : 'car';
+      _licensePlateController.text = v.plateNumber;
+      _provinceController.text = (v.province != null && v.province!.isNotEmpty && v.province != '-') ? v.province! : '-';
+      _brandController.text = v.brand;
+      _modelController.text = v.model;
+      _colorController.text = v.color;
+      if (v.ownerName.contains(' ')) {
+        final parts = v.ownerName.split(' ');
+        _nameController.text = parts.first;
+        _surnameController.text = parts.sublist(1).join(' ');
+      } else {
+        _nameController.text = v.ownerName;
+        _surnameController.text = '';
+      }
+      _citizenIdController.text = '-';
+
+      if (widget.isReadOnly && v.id.isNotEmpty && (v.id.startsWith('REQ') || v.id.contains('req'))) {
+        _loadRequestDetails(v.id);
+      }
+    }
+  }
+
+  Future<void> _loadRequestDetails(String requestId) async {
+    try {
+      final data = await _api.fetchRequestById(requestId);
+      if (!mounted) return;
+      final vehicleInfo = data['vehicleInfo'] as Map<String, dynamic>? ?? {};
+      final ownerInfo = data['ownerInfo'] as Map<String, dynamic>? ?? {};
+      setState(() {
+        final prv = vehicleInfo['province'] as String? ?? vehicleInfo['provinceLicense'] as String? ?? '';
+        if (prv.isNotEmpty) _provinceController.text = prv;
+
+        final lic = vehicleInfo['licensePlate'] as String? ?? '';
+        if (lic.isNotEmpty) _licensePlateController.text = lic;
+
+        final brd = vehicleInfo['brand'] as String? ?? '';
+        if (brd.isNotEmpty) _brandController.text = brd;
+
+        final mdl = vehicleInfo['model'] as String? ?? '';
+        if (mdl.isNotEmpty) _modelController.text = mdl;
+
+        final clr = vehicleInfo['color'] as String? ?? '';
+        if (clr.isNotEmpty) _colorController.text = clr;
+
+        final typ = vehicleInfo['type'] as String? ?? '';
+        if (typ.isNotEmpty) {
+          _selectedType = typ.toLowerCase() == 'motorcycle' ? 'motorcycle' : 'car';
+        }
+
+        final nm = ownerInfo['name'] as String? ?? '';
+        if (nm.isNotEmpty) _nameController.text = nm;
+
+        final snm = ownerInfo['surname'] as String? ?? '';
+        if (snm.isNotEmpty) _surnameController.text = snm;
+
+        final cid = ownerInfo['citizenId'] as String? ?? '';
+        if (cid.isNotEmpty) _citizenIdController.text = cid;
+      });
+    } catch (e) {
+      debugPrint('Error loading request detail for $requestId: $e');
+    }
+  }
 
   @override
   void dispose() {
@@ -280,7 +356,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: Text(loc.t('add_vehicle')),
+        title: Text(widget.isReadOnly ? loc.t('details') : loc.t('add_vehicle')),
       ),
       body: SafeArea(
         child: ListView(
@@ -311,7 +387,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                           child: Text(vehicleTypeLabels[i], style: const TextStyle(color: AppColors.textPrimary)),
                         );
                       }),
-                      onChanged: (value) => setState(() => _selectedType = value),
+                      onChanged: widget.isReadOnly ? null : (value) => setState(() => _selectedType = value),
                     ),
                   ),
                 ),
@@ -319,27 +395,27 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
 
                 _FieldLabel(label: loc.t('license_plate')),
                 const SizedBox(height: 6),
-                _InputField(controller: _licensePlateController),
+                _InputField(controller: _licensePlateController, enabled: !widget.isReadOnly),
                 const SizedBox(height: 14),
 
                 _FieldLabel(label: loc.t('province')),
                 const SizedBox(height: 6),
-                _InputField(controller: _provinceController),
+                _InputField(controller: _provinceController, enabled: !widget.isReadOnly),
                 const SizedBox(height: 14),
 
                 _FieldLabel(label: loc.t('brand')),
                 const SizedBox(height: 6),
-                _InputField(controller: _brandController),
+                _InputField(controller: _brandController, enabled: !widget.isReadOnly),
                 const SizedBox(height: 14),
 
                 _FieldLabel(label: loc.t('model')),
                 const SizedBox(height: 6),
-                _InputField(controller: _modelController),
+                _InputField(controller: _modelController, enabled: !widget.isReadOnly),
                 const SizedBox(height: 14),
 
                 _FieldLabel(label: loc.t('color')),
                 const SizedBox(height: 6),
-                _InputField(controller: _colorController),
+                _InputField(controller: _colorController, enabled: !widget.isReadOnly),
               ],
             ),
             const SizedBox(height: 16),
@@ -350,12 +426,12 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
               children: [
                 _FieldLabel(label: loc.t('name')),
                 const SizedBox(height: 6),
-                _InputField(controller: _nameController),
+                _InputField(controller: _nameController, enabled: !widget.isReadOnly),
                 const SizedBox(height: 14),
 
                 _FieldLabel(label: loc.t('surname')),
                 const SizedBox(height: 6),
-                _InputField(controller: _surnameController),
+                _InputField(controller: _surnameController, enabled: !widget.isReadOnly),
                 const SizedBox(height: 14),
 
                 _FieldLabel(label: loc.t('citizen_id')),
@@ -363,40 +439,43 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                 _InputField(
                   controller: _citizenIdController,
                   keyboardType: TextInputType.number,
+                  enabled: !widget.isReadOnly,
                 ),
                 const SizedBox(height: 16),
 
                 // Vehicle Registration Certificate
                 _UploadRow(
                   label: loc.t('vehicle_registration_certificate'),
-                  isAdded: _registrationFile != null,
-                  onAddTap: () => _showAttachOptions(true),
+                  isAdded: _registrationFile != null || widget.isReadOnly,
+                  onAddTap: widget.isReadOnly ? () {} : () => _showAttachOptions(true),
                 ),
                 const SizedBox(height: 10),
 
                 // Photo of License Plate
                 _UploadRow(
                   label: loc.t('photo_license_plate'),
-                  isAdded: _licensePlateFile != null,
-                  onAddTap: () => _showAttachOptions(false),
+                  isAdded: _licensePlateFile != null || widget.isReadOnly,
+                  onAddTap: widget.isReadOnly ? () {} : () => _showAttachOptions(false),
                 ),
               ],
             ),
             const SizedBox(height: 24),
 
             // ── Submit Button ──────────────────────────────────────────
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(52),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1),
+            if (!widget.isReadOnly) ...[
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size.fromHeight(52),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1),
+                ),
+                onPressed: _submitting ? null : _onSubmit,
+                child: Text(_submitting ? loc.t('submitting') : loc.t('submit')),
               ),
-              onPressed: _submitting ? null : _onSubmit,
-              child: Text(_submitting ? loc.t('submitting') : loc.t('submit')),
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
+            ],
           ],
         ),
       ),
@@ -456,21 +535,27 @@ class _FieldLabel extends StatelessWidget {
 class _InputField extends StatelessWidget {
   final TextEditingController controller;
   final TextInputType keyboardType;
+  final bool enabled;
 
   const _InputField({
     required this.controller,
     this.keyboardType = TextInputType.text,
+    this.enabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      enabled: enabled,
       keyboardType: keyboardType,
-      style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+      style: TextStyle(
+        color: enabled ? AppColors.textPrimary : AppColors.textPrimary.withValues(alpha: 0.8),
+        fontSize: 14,
+      ),
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.white,
+        fillColor: enabled ? Colors.white : const Color(0xFFF2F2F2),
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         border: OutlineInputBorder(

@@ -143,6 +143,8 @@ function mapVehicle(v) {
   return {
     id: String(v._id),
     plateNumber: v.plate_number || '',
+    province: v.province_license || '',
+    provinceLicense: v.province_license || '',
     vehicleCode: v.vehicle_code || String(v._id),
     type: vehicleTypeLabel(v.type),
     brand: v.brand || '',
@@ -298,8 +300,8 @@ exports.listTripHistory = async function listTripHistory(query) {
 // legitimately returns [] until registration/renewal requests are submitted.
 
 exports.listRequestHistory = async function listRequestHistory(query) {
+  const userId = cleanText(query.users_id || query.user_id);
   const filter = {};
-  const userId = cleanText(query.users_id);
   if (userId) {
     filter.$or = [
       { users_id: userIdFilterValue(userId) },
@@ -310,13 +312,79 @@ exports.listRequestHistory = async function listRequestHistory(query) {
   const limit = Math.min(Math.max(toNumber(query.limit, DEFAULT_LIMIT), 1), MAX_LIMIT);
   const requests = await Request.find(filter).sort({ created_at: -1 }).limit(limit).lean();
 
-  return requests.map((r) => ({
-    title: r.request_type === 'renew' ? 'Renewal' : 'Vehicle registration',
-    vehicleCode: (r.vehicle_info && r.vehicle_info.license_plate) || '',
-    vehicleId: r._id,
-    date: formatDateBE(r.created_at) || '',
-    dateGroup: dateGroupLabel(r.created_at) || ''
-  }));
+  const requestItems = requests.map((r) => {
+    const rawDate = r.created_at || new Date();
+    const vInfo = r.vehicle_info || {};
+    const oInfo = r.owner_info || {};
+    return {
+      title: r.request_type === 'renew' ? 'Renewal' : 'Vehicle registration',
+      vehicleCode: vInfo.license_plate || '',
+      vehicleId: r._id,
+      province: vInfo.province_license || '',
+      provinceLicense: vInfo.province_license || '',
+      brand: vInfo.brand || '',
+      model: vInfo.model || '',
+      color: vInfo.color || '',
+      ownerName: [oInfo.name, oInfo.surname].filter(Boolean).join(' ') || '',
+      date: formatDateBE(rawDate) || '',
+      dateGroup: dateGroupLabel(rawDate) || '',
+      _timestamp: new Date(rawDate).getTime()
+    };
+  });
+
+  // Query user emergency reports matching users_id, user_id, or user's vehicles
+  let emergencyFilter = {};
+  if (userId) {
+    const userVehicles = await Vehicle.find(filter).lean();
+    const userVehicleIds = userVehicles.map((v) => String(v._id));
+    const userVehicleCodes = userVehicles.map((v) => String(v.vehicle_code)).filter(Boolean);
+
+    emergencyFilter = {
+      $or: [
+        { users_id: userIdFilterValue(userId) },
+        { user_id: userIdFilterValue(userId) },
+        { vehicle_id: { $in: [...userVehicleIds, ...userVehicleCodes] } }
+      ]
+    };
+  }
+
+  const emergencyReports = await EmergencyReport.find(emergencyFilter).sort({ submitted_at: -1 }).limit(limit).lean();
+
+  // Look up vehicle license plate / code info for emergency reports
+  const emgVehicleIds = [...new Set(emergencyReports.map((e) => e.vehicle_id).filter(Boolean))];
+  let emgVehicles = [];
+  if (emgVehicleIds.length) {
+    emgVehicles = await Vehicle.find({
+      $or: [
+        { _id: { $in: emgVehicleIds } },
+        { vehicle_code: { $in: emgVehicleIds } }
+      ]
+    }).lean();
+  }
+  const vehicleMap = new Map();
+  emgVehicles.forEach((v) => {
+    if (v._id) vehicleMap.set(String(v._id), v);
+    if (v.vehicle_code) vehicleMap.set(String(v.vehicle_code), v);
+  });
+
+  const emergencyItems = emergencyReports.map((r) => {
+    const v = vehicleMap.get(String(r.vehicle_id)) || null;
+    const plateOrCode = v ? (v.plate_number || v.vehicle_code || String(v._id)) : (r.vehicle_id || '');
+    const rawDate = r.submitted_at || r.incident_time || new Date();
+    return {
+      title: 'Emergency request',
+      vehicleCode: plateOrCode,
+      vehicleId: r._id,
+      date: formatDateBE(rawDate) || '',
+      dateGroup: dateGroupLabel(rawDate) || '',
+      _timestamp: new Date(rawDate).getTime()
+    };
+  });
+
+  // Merge and sort by timestamp descending
+  const combined = [...requestItems, ...emergencyItems].sort((a, b) => b._timestamp - a._timestamp);
+
+  return combined.slice(0, limit).map(({ _timestamp, ...item }) => item);
 };
 
 function createRequestId() {
@@ -393,7 +461,7 @@ exports.createRequest = async function createRequest(payload) {
     user_type: normalizedUserType,
     vehicle_info: {
       license_plate: cleanText(vehicleInfo.license_plate),
-      province_license: cleanText(vehicleInfo.province_license),
+      province_license: cleanText(vehicleInfo.province_license || vehicleInfo.province),
       brand: cleanText(vehicleInfo.brand),
       model: cleanText(vehicleInfo.model),
       color: cleanText(vehicleInfo.color),
@@ -445,8 +513,10 @@ exports.createRequest = async function createRequest(payload) {
 // ─── Emergency reports ─────────────────────────────────────────────────────────
 
 function buildEmergencyTimeline(report) {
-  const isAcknowledged = ['IN_PROGRESS', 'RESOLVED', 'CLOSED', 'OVERDUE'].includes(report.status);
-  const isContacting = ['IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(report.status);
+  const status = (report.status || '').toUpperCase();
+  const isAcknowledged = ['IN_PROGRESS', 'ACKNOWLEDGED', 'RESOLVED', 'CLOSED', 'OVERDUE'].includes(status);
+  const isContacting = ['IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(status);
+  const isResolved = ['RESOLVED', 'CLOSED'].includes(status);
 
   return [
     {
@@ -466,6 +536,12 @@ function buildEmergencyTimeline(report) {
       label: 'กำลังติดต่อกลับ',
       timestamp: '',
       completed: isContacting
+    },
+    {
+      step: 'resolved',
+      label: 'เคสได้รับการแก้ไขแล้ว',
+      timestamp: '',
+      completed: isResolved
     }
   ];
 }
@@ -479,10 +555,41 @@ function createEmergencyId() {
 exports.listEmergencyReports = async function listEmergencyReports(query) {
   const filter = {};
   const vehicleId = cleanText(query.vehicle_id);
+  const userId = cleanText(query.users_id || query.user_id);
+
   if (vehicleId) filter.vehicle_id = vehicleId;
+  if (userId) {
+    const vehicleFilter = {
+      $or: [
+        { users_id: userIdFilterValue(userId) },
+        { user_id: userIdFilterValue(userId) }
+      ]
+    };
+    const userVehicles = await Vehicle.find(vehicleFilter).lean();
+    const userVehicleIds = userVehicles.map((v) => String(v._id));
+    const userVehicleCodes = userVehicles.map((v) => String(v.vehicle_code)).filter(Boolean);
+
+    const userOr = [
+      { users_id: userIdFilterValue(userId) },
+      { user_id: userIdFilterValue(userId) }
+    ];
+    if (userVehicleIds.length || userVehicleCodes.length) {
+      userOr.push({ vehicle_id: { $in: [...userVehicleIds, ...userVehicleCodes] } });
+    }
+
+    if (filter.vehicle_id) {
+      filter.$and = [
+        { vehicle_id: filter.vehicle_id },
+        { $or: userOr }
+      ];
+      delete filter.vehicle_id;
+    } else {
+      filter.$or = userOr;
+    }
+  }
 
   const limit = Math.min(Math.max(toNumber(query.limit, DEFAULT_LIMIT), 1), MAX_LIMIT);
-  const reports = await EmergencyReport.find(filter).sort({ incident_time: -1 }).limit(limit).lean();
+  const reports = await EmergencyReport.find(filter).sort({ submitted_at: -1, incident_time: -1 }).limit(limit).lean();
   return reports.map((r) => Object.assign({}, r, { timeline: buildEmergencyTimeline(r) }));
 };
 
@@ -513,6 +620,21 @@ exports.createEmergencyReport = async function createEmergencyReport(payload) {
   const body = payload || {};
   const requestType = cleanText(body.request_type);
   const incidentTime = toDate(body.incident_time);
+  let userId = cleanText(body.users_id || body.user_id);
+  const vehicleId = cleanText(body.vehicle_id);
+
+  if (!userId && vehicleId) {
+    try {
+      const vehicle = await Vehicle.collection.findOne({
+        $or: [{ _id: vehicleId }, { vehicle_code: vehicleId }]
+      });
+      if (vehicle) {
+        userId = cleanText(vehicle.users_id || vehicle.user_id);
+      }
+    } catch (err) {
+      console.warn('vehicle lookup for emergency user_id failed:', err && err.message ? err.message : err);
+    }
+  }
 
   if (!requestType) {
     const error = new Error('request_type is required');
@@ -528,7 +650,9 @@ exports.createEmergencyReport = async function createEmergencyReport(payload) {
 
   const document = {
     _id: cleanText(body._id) || createEmergencyId(),
-    vehicle_id: cleanText(body.vehicle_id),
+    vehicle_id: vehicleId,
+    user_id: userId,
+    users_id: userId,
     request_type: requestType,
     severity: cleanText(body.severity) || 'medium',
     incident_time: incidentTime,
@@ -563,6 +687,31 @@ exports.createEmergencyReport = async function createEmergencyReport(payload) {
 
   const plain = created.toObject();
   return Object.assign({}, plain, { timeline: buildEmergencyTimeline(plain) });
+};
+
+exports.updateEmergencyReportStatus = async function updateEmergencyReportStatus(id, payload) {
+  const reportId = cleanText(id);
+  const status = cleanText(payload && payload.status) || 'RESOLVED';
+
+  if (!reportId) {
+    const error = new Error('Emergency report id is required');
+    error.status = 400;
+    throw error;
+  }
+
+  const updatedReport = await EmergencyReport.findOneAndUpdate(
+    { _id: reportId },
+    { $set: { status: status, updated_at: new Date() } },
+    { new: true }
+  ).lean();
+
+  if (!updatedReport) {
+    const error = new Error('Emergency report not found');
+    error.status = 404;
+    throw error;
+  }
+
+  return Object.assign({}, updatedReport, { timeline: buildEmergencyTimeline(updatedReport) });
 };
 
 // ─── Notifications (derived, no dedicated collection) ─────────────────────────
@@ -615,5 +764,51 @@ exports.listNotifications = async function listNotifications(query) {
   }));
 
   return [...emergencyNotifications, ...renewalNotifications];
+};
+
+exports.getRequestById = async function getRequestById(id) {
+  const cleanId = cleanText(id);
+  if (!cleanId) {
+    const error = new Error('request id is required');
+    error.status = 400;
+    throw error;
+  }
+  const req = await Request.findById(cleanId).lean();
+  if (!req) {
+    const error = new Error('Request not found');
+    error.status = 404;
+    throw error;
+  }
+  const vInfo = req.vehicle_info || {};
+  const oInfo = req.owner_info || {};
+  const rawDate = req.created_at || new Date();
+
+  return {
+    id: req._id,
+    userId: req.user_id || req.users_id,
+    requestType: req.request_type,
+    requestStatus: req.request_status,
+    userType: req.user_type,
+    vehicleInfo: {
+      licensePlate: vInfo.license_plate || '',
+      provinceLicense: vInfo.province_license || '',
+      province: vInfo.province_license || '',
+      brand: vInfo.brand || '',
+      model: vInfo.model || '',
+      color: vInfo.color || '',
+      type: vInfo.type || 'car',
+      priorityOrder: vInfo.priority_order || 'first_car'
+    },
+    ownerInfo: {
+      name: oInfo.name || '',
+      surname: oInfo.surname || '',
+      citizenId: oInfo.citizen_id || '',
+      isOwnerMatchUser: Boolean(oInfo.is_owner_match_user)
+    },
+    uploadedDocuments: req.uploaded_documents || {},
+    validity: req.validity || {},
+    date: formatDateBE(rawDate) || '',
+    createdAt: req.created_at
+  };
 };
 

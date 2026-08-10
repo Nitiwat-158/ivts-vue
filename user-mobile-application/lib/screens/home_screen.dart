@@ -143,16 +143,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTap: () {},
               ),
             if (!_hasNoVehicles)
-              ValueListenableBuilder<String?>(
-                valueListenable: AppDataRepository.instance.activeEmergencyIdNotifier,
-                builder: (context, emergencyId, child) {
-                  if (emergencyId == null) return const SizedBox.shrink();
+              ValueListenableBuilder<Map<String, dynamic>?>(
+                valueListenable: AppDataRepository.instance.activeEmergencyReportNotifier,
+                builder: (context, activeReport, child) {
+                  if (activeReport == null) return const SizedBox.shrink();
+                  final emergencyId = activeReport['_id'] as String? ?? '';
+                  final requestType = activeReport['request_type'] as String?;
+                  final loc = context.watch<LocaleProvider>();
+                  final bannerText = loc.getEmergencyBannerText(requestType);
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: _ActionBanner(
                       color: AppColors.accentRed,
                       icon: Icons.fmd_bad_rounded,
-                      text: context.watch<LocaleProvider>().t('emergency_banner'),
+                      text: bannerText,
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(

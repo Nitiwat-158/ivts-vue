@@ -171,7 +171,8 @@
                 <strong>{{ $t('emergencyReportManagement.details.sharedQueueTitle') }}</strong><br/>
                 {{ $t('emergencyReportManagement.details.sharedQueueDesc') }}
               </div>
-              <CButton color="success" @click="acceptCase(selectedCase.id)">
+              <CButton color="success" :disabled="isAcceptingCase || !currentAdminId" @click="acceptCase(selectedCase.id)">
+                <CSpinner v-if="isAcceptingCase" size="sm" class="mr-2" />
                 {{ $t('emergencyReportManagement.actions.accept') }}
               </CButton>
             </CAlert>
@@ -294,11 +295,37 @@ export default {
       filterType: '',
       selectedCase: null,
       editStatus: '',
-      currentAdminName: 'Admin_Mock',
-      currentAdminId: 'usr_mfu_001'
+      isAcceptingCase: false
     };
   },
   computed: {
+    currentAdminId() {
+      const profile = this.$store && this.$store.getters ? this.$store.getters['auth/profile'] : null;
+      if (!profile || typeof profile !== 'object') return '';
+      const rawId = profile.user_id || profile._id || profile.id || '';
+      return String(rawId || '').trim();
+    },
+    currentAdminName() {
+      const profile = this.$store && this.$store.getters ? this.$store.getters['auth/profile'] : null;
+      if (!profile || typeof profile !== 'object') return '';
+      
+      const userinfo = profile.userinfo || {};
+      const lang = (this.$store && this.$store.getters ? this.$store.getters['setting/lang'] : 'en') || 'en';
+      
+      const getVal = (items) => {
+        if (!Array.isArray(items)) return '';
+        const pref = items.find(i => i && i.key === lang && i.value);
+        const en = items.find(i => i && i.key === 'en' && i.value);
+        const fb = items.find(i => i && i.value);
+        return String((pref || en || fb || {}).value || '').trim();
+      };
+      
+      const firstName = getVal(userinfo.firstName);
+      const lastName = getVal(userinfo.lastName);
+      const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
+      
+      return fullName || profile.fullName || profile.name || profile.username || this.currentAdminId;
+    },
     statusOptions() {
       return [
         { value: '', label: this.$t('emergencyReportManagement.filters.allStatuses') },
@@ -350,6 +377,67 @@ export default {
     this.fetchData();
   },
   methods: {
+    sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    },
+    buildCaseFromApi(c) {
+      let adminId = c.assigned_admin_id ? (c.assigned_admin_id.name || c.assigned_admin_id.username || c.assigned_admin_id) : null;
+      if (adminId && typeof adminId === 'string' && adminId === this.currentAdminId && this.currentAdminName) {
+        adminId = this.currentAdminName;
+      }
+      const activityLog = [
+        { time: c.submitted_at, message: this.$t('emergencyReportManagement.details.logSubmitted') || 'ผู้ใช้ส่งรายงานแจ้งเหตุ' }
+      ];
+
+      if (adminId) {
+        activityLog.push({
+          time: c.submitted_at,
+          message: (this.$t('emergencyReportManagement.details.logAccepted') || 'แอดมิน {admin} รับเรื่องแล้ว').replace('{admin}', adminId)
+        });
+      }
+
+      if (c.status === 'RESOLVED') {
+        activityLog.push({
+          time: c.submitted_at,
+          message: this.$t('emergencyReportManagement.details.logResolved') || 'ดำเนินการแก้ไขสถานะเป็น RESOLVED'
+        });
+      } else if (c.status === 'CLOSED') {
+        activityLog.push({
+          time: c.submitted_at,
+          message: this.$t('emergencyReportManagement.details.logClosed') || 'เคสถูกปิดแล้ว'
+        });
+      }
+
+      return {
+        id: c._id,
+        vehicle: {
+          license_plate: c.vehicle_id ? (c.vehicle_id.plateNumber || c.vehicle_id.license_plate || 'Unknown') : 'Unknown',
+          vehicle_ref_id: c.vehicle_id ? (c.vehicle_id.vehicleCode || c.vehicle_id.vehicle_ref_id || 'Unknown') : 'Unknown'
+        },
+        owner: {
+          name: c.vehicle_id ? (c.vehicle_id.ownerName || c.vehicle_id.owner_name || 'Unknown') : 'Unknown',
+          phone: 'Unknown'
+        },
+        request_type: c.request_type,
+        severity: c.severity,
+        incident_time: c.incident_time,
+        submitted_at: c.submitted_at,
+        description: c.description,
+        last_known_location: c.location,
+        status: c.status,
+        assigned_admin_id: adminId,
+        related_case_ids: [],
+        activity_log: activityLog
+      };
+    },
+    upsertCase(updatedCase) {
+      const index = this.cases.findIndex(item => item.id === updatedCase.id);
+      if (index === -1) {
+        this.cases = [updatedCase].concat(this.cases);
+        return;
+      }
+      this.$set(this.cases, index, updatedCase);
+    },
     async fetchData() {
       try {
         const response = await api.ivtsEmergencyReports('get');
@@ -357,51 +445,7 @@ export default {
           ? response.data.data
           : (response && response.data ? response.data : []);
 
-        this.cases = reports.map(c => {
-          const adminId = c.assigned_admin_id ? (c.assigned_admin_id.name || c.assigned_admin_id.username || c.assigned_admin_id) : null;
-          let activity_log = [
-            { time: c.submitted_at, message: this.$t('emergencyReportManagement.details.logSubmitted') || "ผู้ใช้ส่งรายงานแจ้งเหตุ" }
-          ];
-          if (adminId) {
-            activity_log.push({
-              time: c.submitted_at,
-              message: (this.$t('emergencyReportManagement.details.logAccepted') || "แอดมิน {admin} รับเรื่องแล้ว").replace('{admin}', adminId)
-            });
-          }
-          if (c.status === 'RESOLVED') {
-            activity_log.push({
-              time: c.submitted_at,
-              message: this.$t('emergencyReportManagement.details.logResolved') || "ดำเนินการแก้ไขสถานะเป็น RESOLVED"
-            });
-          } else if (c.status === 'CLOSED') {
-            activity_log.push({
-              time: c.submitted_at,
-              message: this.$t('emergencyReportManagement.details.logClosed') || "เคสถูกปิดแล้ว"
-            });
-          }
-
-          return {
-            id: c._id,
-            vehicle: {
-              license_plate: c.vehicle_id ? (c.vehicle_id.plateNumber || c.vehicle_id.license_plate || 'Unknown') : 'Unknown',
-              vehicle_ref_id: c.vehicle_id ? (c.vehicle_id.vehicleCode || c.vehicle_id.vehicle_ref_id || 'Unknown') : 'Unknown'
-            },
-            owner: {
-              name: c.vehicle_id ? (c.vehicle_id.ownerName || c.vehicle_id.owner_name || 'Unknown') : 'Unknown',
-              phone: 'Unknown'
-            },
-            request_type: c.request_type,
-            severity: c.severity,
-            incident_time: c.incident_time,
-            submitted_at: c.submitted_at,
-            description: c.description,
-            last_known_location: c.location,
-            status: c.status,
-            assigned_admin_id: adminId,
-            related_case_ids: [],
-            activity_log: activity_log
-          };
-        });
+        this.cases = reports.map(c => this.buildCaseFromApi(c));
 
         if (this.$route && this.$route.query && this.$route.query.id) {
           const targetCase = this.cases.find(c => c.id === this.$route.query.id);
@@ -434,25 +478,94 @@ export default {
       this.selectedCase = item;
       this.editStatus = item.status;
     },
+    showAcceptError(error) {
+      const status = error && error.response ? error.response.status : null;
+      let message = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+      if (status === 401) {
+        message = 'กรุณาเข้าสู่ระบบใหม่';
+      } else if (status === 403) {
+        message = 'คุณไม่มีสิทธิ์รับเคสนี้ กรุณาติดต่อผู้ดูแลระบบ';
+      } else if (status === 409) {
+        message = 'เคสนี้ถูกรับไปแล้ว กรุณารีเฟรชข้อมูลล่าสุด';
+      }
+      this.$store.dispatch('dialog/showToast', { message, color: 'danger' });
+    },
+    async refreshCasesWithVerification(caseId, expectedStatus) {
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        if (attempt > 0) {
+          await this.sleep(250 * attempt);
+        }
+
+        const response = await api.ivtsEmergencyReports('get');
+        const reports = response && response.data && Array.isArray(response.data.data)
+          ? response.data.data
+          : (response && response.data ? response.data : []);
+        const mappedCases = reports.map(c => this.buildCaseFromApi(c));
+        const latestCase = mappedCases.find(item => item.id === caseId);
+
+        if (latestCase && latestCase.status === expectedStatus) {
+          this.cases = mappedCases;
+          if (this.selectedCase && this.selectedCase.id === caseId) {
+            this.selectCase(latestCase);
+          }
+          this.lastUpdated = new Date().toLocaleTimeString();
+          return true;
+        }
+      }
+
+      return false;
+    },
     async acceptCase(caseId) {
+      if (this.isAcceptingCase) return;
+      if (!this.currentAdminId) {
+        this.$store.dispatch('dialog/showToast', {
+          message: 'ไม่พบข้อมูลผู้ใช้งานปัจจุบัน กรุณาเข้าสู่ระบบใหม่',
+          color: 'danger'
+        });
+        return;
+      }
+
+      this.isAcceptingCase = true;
       try {
-        await api.ivtsEmergencyReports('update-status', { id: caseId, payload: { status: 'IN_PROGRESS', adminId: this.currentAdminId } });
-        await this.fetchData();
-        if (this.selectedCase && this.selectedCase.id === caseId) {
-          const updatedCase = this.cases.find(c => c.id === caseId);
-          if (updatedCase) this.selectCase(updatedCase);
+        const response = await api.ivtsEmergencyReports('update-status', { id: caseId, payload: { status: 'IN_PROGRESS', adminId: this.currentAdminId } });
+        const updatedReport = response && response.data && response.data.data ? response.data.data : (response && response.data ? response.data : null);
+
+        if (updatedReport) {
+          const optimisticCase = this.buildCaseFromApi(updatedReport);
+          optimisticCase.status = 'IN_PROGRESS';
+          optimisticCase.assigned_admin_id = this.currentAdminName || this.currentAdminId;
+          this.upsertCase(optimisticCase);
+          if (this.selectedCase && this.selectedCase.id === caseId) {
+            this.selectCase(optimisticCase);
+            this.editStatus = 'IN_PROGRESS';
+          }
+        }
+
+        const confirmed = await this.refreshCasesWithVerification(caseId, 'IN_PROGRESS');
+        if (!confirmed) {
+          this.$store.dispatch('dialog/showToast', {
+            message: 'บันทึกแล้ว แต่ข้อมูลล่าสุดยังไม่ตรงกัน กรุณารีเฟรชอีกครั้ง',
+            color: 'warning'
+          });
         }
       } catch (error) {
         console.error('Failed to accept case', error);
+        this.showAcceptError(error);
+      } finally {
+        this.isAcceptingCase = false;
       }
     },
     async saveStatus() {
       if (this.selectedCase && this.editStatus) {
         try {
-          await api.ivtsEmergencyReports('update-status', { id: this.selectedCase.id, payload: { status: this.editStatus } });
-          await this.fetchData();
-          const updatedCase = this.cases.find(c => c.id === this.selectedCase.id);
-          if (updatedCase) this.selectCase(updatedCase);
+          const response = await api.ivtsEmergencyReports('update-status', { id: this.selectedCase.id, payload: { status: this.editStatus } });
+          const updatedReport = response && response.data && response.data.data ? response.data.data : (response && response.data ? response.data : null);
+          if (updatedReport) {
+            const normalizedCase = this.buildCaseFromApi(updatedReport);
+            this.upsertCase(normalizedCase);
+            this.selectCase(normalizedCase);
+          }
+          await this.refreshCasesWithVerification(this.selectedCase.id, this.editStatus);
         } catch (error) {
           console.error('Failed to save status', error);
         }
