@@ -2,8 +2,11 @@ import '../providers/locale_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
+import '../models/vehicle.dart';
 import '../services/app_data_repository.dart';
 import '../theme/app_theme.dart';
+import 'add_vehicle_screen.dart';
+import 'emergency_status_screen.dart';
 
 class RequestHistoryScreen extends StatefulWidget {
   const RequestHistoryScreen({super.key});
@@ -141,30 +144,74 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen> {
                     style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  ...group.value.map((request) => Container(
-                        margin: const EdgeInsets.only(bottom: 10),
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.divider),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(loc.translateRequestTitle(request.title), style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
-                                  const SizedBox(height: 4),
-                                  Text('${request.vehicleCode}   ID: ${request.vehicleId}', style: const TextStyle(color: AppColors.textSecondary)),
-                                  const SizedBox(height: 4),
-                                  Text(request.date, style: const TextStyle(color: AppColors.textSecondary)),
-                                ],
+                  ...group.value.map((request) => GestureDetector(
+                        onTap: () {
+                          if (request.title.toLowerCase().contains('emergency') || request.title == 'Emergency request') {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => EmergencyStatusScreen(emergencyId: request.vehicleId),
                               ),
-                            ),
-                            const Icon(Icons.chevron_right, color: AppColors.primary),
-                          ],
+                            );
+                          } else {
+                            Vehicle? matchingVehicle;
+                            for (final v in MockData.vehicles) {
+                              if (v.plateNumber == request.vehicleCode || v.vehicleCode == request.vehicleCode || v.id == request.vehicleId) {
+                                matchingVehicle = v;
+                                break;
+                              }
+                            }
+                            matchingVehicle ??= Vehicle(
+                              id: request.vehicleId,
+                              plateNumber: request.vehicleCode,
+                              vehicleCode: request.vehicleId,
+                              type: 'Car',
+                              brand: '-',
+                              model: '-',
+                              color: '-',
+                              ownerName: '-',
+                              issueDate: request.date,
+                              expiryDate: '-',
+                              daysUntilExpiry: 0,
+                              status: VehicleStatus.active,
+                              lastLocation: '-',
+                              lastUpdatedTime: request.date,
+                            );
+
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => AddVehicleScreen(
+                                  vehicle: matchingVehicle,
+                                  isReadOnly: true,
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.divider),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(loc.translateRequestTitle(request.title), style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+                                    const SizedBox(height: 4),
+                                    Text('${request.vehicleCode}   ID: ${request.vehicleId}', style: const TextStyle(color: AppColors.textSecondary)),
+                                    const SizedBox(height: 4),
+                                    Text(request.date, style: const TextStyle(color: AppColors.textSecondary)),
+                                  ],
+                                ),
+                              ),
+                              const Icon(Icons.chevron_right, color: AppColors.primary),
+                            ],
+                          ),
                         ),
                       )),
                   const SizedBox(height: 12),
