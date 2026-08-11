@@ -92,6 +92,8 @@ Account directory, invite/update/status/lifecycle behavior must use the project 
 
 Project-specific workflows must be defined from mounted backend routes, frontend routes, service modules, and current permission paths. Add new paths to environment/bootstrap permission configuration before exposing UI actions.
 
+*Note: The AI Track (`nav.aiTrack`) user interface and corresponding frontend route have been deprecated and removed.*
+
 ### FR-IVTS-004 Security And Permission Management
 
 Protected routes require authentication plus permission checks. UI visibility must use the Security store/canAccess pattern and backend denial remains authoritative.

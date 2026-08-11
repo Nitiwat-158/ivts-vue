@@ -6,6 +6,7 @@
 | Project | IVTS |
 | Module / Feature | system progress and readiness |
 | Requirement | Track actual project system progress from source and verification evidence |
+| Active Change Record | `docs/changes/2026-08-11-remove-ai-track.md` |
 | Active Change Record | `docs/changes/2026-08-11-remove-dashboard-widgets.md` |
 | Overall Status | done |
 | Overall Progress | 100% |
@@ -85,6 +86,11 @@ Adjust weights per project, but keep them evidence-backed.
 | ivts-TASK-054 | Mobile dynamic emergency request pop-up / banner by request type | Backend/Frontend | AI | none | done | 100 | Filtered listEmergencyReports by user_id, activeEmergencyReportNotifier state, dynamic localized banner & auto-dismiss on resolve | `mobile.js`, `home_screen.dart`, `emergency_request_screen.dart`, `app_data_repository.dart`, `locale_provider.dart` | node --check PASS; flutter analyze PASS (0 issues) | none | — | Dynamic localized emergency request banner & auto-dismiss on resolve |
 | ivts-TASK-055 | Update Emergency Report Status in MongoDB on Mobile Resolve | Backend/Frontend | AI | none | done | 100 | PATCH /api/v1/mobile/emergency-reports/:id endpoint updates MongoDB status to RESOLVED & refreshes mobile repository | `mobile.routes.js`, `mobile.js`, `mobile_api_service.dart`, `emergency_status_screen.dart` | node --check PASS; flutter analyze PASS (0 issues) | none | — | MongoDB status updated on resolve |
 | ivts-TASK-056 | Mobile Emergency Banner Auto-Dismiss on RESOLVED Status | Backend/Frontend | AI | none | done | 100 | Added 4th timeline step in mobile.js, updated AppDataRepository & EmergencyStatusScreen to auto-dismiss banner on RESOLVED/CLOSED | `mobile.js`, `app_data_repository.dart`, `emergency_status_screen.dart` | node --check PASS; flutter analyze PASS (0 issues) | none | — | Auto-dismiss emergency banner on RESOLVED status |
+| ivts-AIT-001 | Remove AI Track UI | Frontend | AI | none | done | 100 | Removed from sidebar and router | `_nav.js`, `router/index.js`, `AITrack.vue` | visual check | none | — | AI Track page removed |
+
+
+
+
 | ivts-DASH-003 | Remove Vehicles Today & Hourly Traffic Cards | Frontend | AI | none | done | 100 | Removed 2 stat cards from Dashboard.vue and updated remaining 2 cards to lg="6" | `frontend-vue/src/views/Dashboard.vue` | `vue-cli-service lint` PASS | none | — | Updated Dashboard stat section |
 
 
@@ -125,5 +131,6 @@ Mobile API (`docs/tasks/2026-07-24-mobile-mongodb-api.md`): backend `/api/v1/mob
 Auth separation (2026-07-31): `iam-admin-client.js → forwardScopedSignin` reverted to original commit `9a255686` — strictly Web Admin only; no mobile logic, no DEBUG logs. New `iam-mobile-client.js` handles all mobile user authentication: MFU IAM proxy, JIT user provisioning in MongoDB `users` collection, Google ID Token fallback (dev-only), and hijack detection. `mobile.routes.js` updated to call `iamMobileClient.forwardMobileSignin`. All 15 admin regression tests + 9 new mobile unit tests PASS. Progress updated from 45% → 52%.
 Dashboard alert rendering fix (2026-08-08): `frontend-vue/src/views/Dashboard.vue` now guards enriched object fields and maps emergency alert location/description to safe concise strings. This prevents raw object JSON from being rendered in Alerts when `vehicle_id` arrives as an enriched object.
 Mobile API (`docs/tasks/2026-07-24-mobile-mongodb-api.md`): backend `/api/v1/mobile` read-only API implemented against real MongoDB collections (live schema verified via mongosh) and smoke-tested via curl (7/7 endpoints pass). Flutter app's `mock_data.dart` fully emptied per explicit user instruction — MongoDB is now the sole data source, no mock fallback. Windows desktop build (`flutter create --platforms=windows .` + `flutter run -d windows`) verified end-to-end: real data loaded (`6 vehicles`, `4 notifications`, `0 trip history`/`0 requests` matching real empty collections). Android emulator verification remains blocked by Windows Firewall scoping (B-002); this does not block the completed feature since Windows-target verification succeeded.
-
 Auth separation (2026-07-31): `iam-admin-client.js → forwardScopedSignin` reverted to original commit `9a255686` — strictly Web Admin only; no mobile logic, no DEBUG logs. New `iam-mobile-client.js` handles all mobile user authentication: MFU IAM proxy, JIT user provisioning in MongoDB `users` collection, Google ID Token fallback (dev-only), and hijack detection. `mobile.routes.js` updated to call `iamMobileClient.forwardMobileSignin`. All 15 admin regression tests + 9 new mobile unit tests PASS. Progress updated from 45% → 52%.
+
+AI Track UI Removal (2026-08-11): The frontend AI Track route, component, and sidebar navigation item have been fully removed per user request.
