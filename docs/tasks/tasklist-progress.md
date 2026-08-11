@@ -6,7 +6,7 @@
 | Project | IVTS |
 | Module / Feature | system progress and readiness |
 | Requirement | Track actual project system progress from source and verification evidence |
-| Active Change Record | `docs/changes/2026-08-10-mobile-request-province-api.md` |
+| Active Change Record | `docs/changes/2026-08-11-remove-dashboard-widgets.md` |
 | Overall Status | done |
 | Overall Progress | 100% |
 | Progress Type | Evidence-backed readiness score, not final product completion |
@@ -85,10 +85,7 @@ Adjust weights per project, but keep them evidence-backed.
 | ivts-TASK-054 | Mobile dynamic emergency request pop-up / banner by request type | Backend/Frontend | AI | none | done | 100 | Filtered listEmergencyReports by user_id, activeEmergencyReportNotifier state, dynamic localized banner & auto-dismiss on resolve | `mobile.js`, `home_screen.dart`, `emergency_request_screen.dart`, `app_data_repository.dart`, `locale_provider.dart` | node --check PASS; flutter analyze PASS (0 issues) | none | — | Dynamic localized emergency request banner & auto-dismiss on resolve |
 | ivts-TASK-055 | Update Emergency Report Status in MongoDB on Mobile Resolve | Backend/Frontend | AI | none | done | 100 | PATCH /api/v1/mobile/emergency-reports/:id endpoint updates MongoDB status to RESOLVED & refreshes mobile repository | `mobile.routes.js`, `mobile.js`, `mobile_api_service.dart`, `emergency_status_screen.dart` | node --check PASS; flutter analyze PASS (0 issues) | none | — | MongoDB status updated on resolve |
 | ivts-TASK-056 | Mobile Emergency Banner Auto-Dismiss on RESOLVED Status | Backend/Frontend | AI | none | done | 100 | Added 4th timeline step in mobile.js, updated AppDataRepository & EmergencyStatusScreen to auto-dismiss banner on RESOLVED/CLOSED | `mobile.js`, `app_data_repository.dart`, `emergency_status_screen.dart` | node --check PASS; flutter analyze PASS (0 issues) | none | — | Auto-dismiss emergency banner on RESOLVED status |
-
-
-
-
+| ivts-DASH-003 | Remove Vehicles Today & Hourly Traffic Cards | Frontend | AI | none | done | 100 | Removed 2 stat cards from Dashboard.vue and updated remaining 2 cards to lg="6" | `frontend-vue/src/views/Dashboard.vue` | `vue-cli-service lint` PASS | none | — | Updated Dashboard stat section |
 
 
 ## T4. Verification Log
@@ -100,7 +97,7 @@ Adjust weights per project, but keep them evidence-backed.
 | `node --check` iam-admin-client.js + iam-mobile-client.js + mobile.routes.js | PASS | Exit code 0 — 2026-07-31 |
 | `--test iam-admin-client.test.js` (15 tests) | PASS 15/15 | node:test runner — 2026-07-31 |
 | `--test iam-mobile-client.test.js` (9 tests) | PASS 9/9 | node:test runner — 2026-07-31 |
-| `npm --prefix frontend-vue run lint -- src/views/Dashboard.vue` | PASS | No lint errors — 2026-08-08 |
+| `npm --prefix frontend-vue run lint -- src/views/Dashboard.vue` | PASS | No lint errors — 2026-08-11 |
 | backend npm test | not run | requires running server + DB |
 | frontend lint/test/build | not run | |
 | live smoke/e2e | not run | |

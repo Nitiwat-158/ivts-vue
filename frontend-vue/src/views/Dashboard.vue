@@ -119,7 +119,7 @@
     <!-- 3) Stats Section -->
     <CRow class="mb-4">
       <!-- Small Cards -->
-      <CCol sm="6" lg="3" class="mb-3 mb-lg-0">
+      <CCol sm="6" lg="6" class="mb-3 mb-sm-0">
         <CCard class="h-100 mb-0 stat-card">
           <CCardBody class="text-center d-flex flex-column justify-content-center">
             <div class="text-muted font-weight-bold small mb-2">{{ $t('ivts.totalCameras') }}</div>
@@ -127,7 +127,7 @@
           </CCardBody>
         </CCard>
       </CCol>
-      <CCol sm="6" lg="3" class="mb-3 mb-lg-0">
+      <CCol sm="6" lg="6" class="mb-3 mb-sm-0">
         <CCard class="h-100 mb-0 stat-card">
           <CCardBody class="text-center d-flex flex-column justify-content-center">
             <div class="text-muted font-weight-bold small mb-2">Active / Inactive</div>
@@ -136,40 +136,6 @@
               <span class="text-muted mx-1">/</span> 
               <span class="text-danger">{{ cameraStats.inactive }}</span>
             </h2>
-          </CCardBody>
-        </CCard>
-      </CCol>
-      <CCol sm="6" lg="3" class="mb-3 mb-lg-0">
-        <CCard class="h-100 mb-0 stat-card">
-          <CCardBody class="text-center d-flex flex-column justify-content-center">
-            <div class="text-muted font-weight-bold small mb-2">{{ $t('ivts.vehiclesToday') }}</div>
-            <h2 class="mb-1 font-weight-bold text-dark">1,284</h2>
-            <div class="small font-weight-bold text-success">▲ 12% {{ $t('ivts.comparedToYesterday') }}</div>
-          </CCardBody>
-        </CCard>
-      </CCol>
-      <CCol sm="6" lg="3" class="mb-3 mb-lg-0">
-        <CCard class="h-100 mb-0 stat-card">
-          <CCardBody class="d-flex flex-column justify-content-center">
-            <div class="text-muted font-weight-bold small mb-2 text-center">{{ $t('ivts.hourlyTraffic') }}</div>
-            <div class="mock-chart-container mt-2">
-              <svg viewBox="0 0 100 35" class="w-100" style="height: 40px; overflow: visible;">
-                <polyline 
-                  fill="none" 
-                  stroke="#321fdb" 
-                  stroke-width="2" 
-                  points="0,30 15,15 30,20 45,5 60,10 75,0 90,15 100,5" 
-                />
-                <circle cx="0" cy="30" r="2.5" fill="#321fdb"/>
-                <circle cx="15" cy="15" r="2.5" fill="#321fdb"/>
-                <circle cx="30" cy="20" r="2.5" fill="#321fdb"/>
-                <circle cx="45" cy="5" r="2.5" fill="#321fdb"/>
-                <circle cx="60" cy="10" r="2.5" fill="#321fdb"/>
-                <circle cx="75" cy="0" r="2.5" fill="#321fdb"/>
-                <circle cx="90" cy="15" r="2.5" fill="#321fdb"/>
-                <circle cx="100" cy="5" r="2.5" fill="#321fdb"/>
-              </svg>
-            </div>
           </CCardBody>
         </CCard>
       </CCol>
