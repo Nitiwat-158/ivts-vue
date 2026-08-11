@@ -7,7 +7,7 @@
 | Module / Feature | system progress and readiness |
 | Requirement | Track actual project system progress from source and verification evidence |
 | Active Change Record | `docs/changes/2026-08-11-remove-ai-track.md` |
-| Active Change Record | `docs/changes/2026-08-11-remove-dashboard-widgets.md` |
+| Active Change Record | `docs/changes/2026-08-11-remove-erm-update-notes.md` |
 | Overall Status | done |
 | Overall Progress | 100% |
 | Progress Type | Evidence-backed readiness score, not final product completion |
@@ -92,6 +92,7 @@ Adjust weights per project, but keep them evidence-backed.
 
 
 | ivts-DASH-003 | Remove Vehicles Today & Hourly Traffic Cards | Frontend | AI | none | done | 100 | Removed 2 stat cards from Dashboard.vue and updated remaining 2 cards to lg="6" | `frontend-vue/src/views/Dashboard.vue` | `vue-cli-service lint` PASS | none | — | Updated Dashboard stat section |
+| ivts-ERM-002 | Remove Send Update & Internal Notes UI | Frontend | AI | none | done | 100 | Removed Send Update and Internal Notes sections from EmergencyReportManagement.vue | `frontend-vue/src/projects/views/operations/EmergencyReportManagement.vue` | `vue-cli-service lint` PASS | none | — | Updated ERM detail pane |
 
 
 ## T4. Verification Log
@@ -104,6 +105,7 @@ Adjust weights per project, but keep them evidence-backed.
 | `--test iam-admin-client.test.js` (15 tests) | PASS 15/15 | node:test runner — 2026-07-31 |
 | `--test iam-mobile-client.test.js` (9 tests) | PASS 9/9 | node:test runner — 2026-07-31 |
 | `npm --prefix frontend-vue run lint -- src/views/Dashboard.vue` | PASS | No lint errors — 2026-08-11 |
+| `npm --prefix frontend-vue run lint -- src/projects/views/operations/EmergencyReportManagement.vue` | PASS | No lint errors — 2026-08-11 |
 | backend npm test | not run | requires running server + DB |
 | frontend lint/test/build | not run | |
 | live smoke/e2e | not run | |

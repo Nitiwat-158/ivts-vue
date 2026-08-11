@@ -230,21 +230,6 @@
               </div>
             </div>
 
-            <!-- Send Update -->
-            <div class="mb-3">
-              <h6 class="text-muted mb-1">{{ $t('emergencyReportManagement.details.sendUpdate') }} ({{ selectedCase.owner.phone }})</h6>
-              <div class="d-flex">
-                <CInput class="flex-grow-1 mb-0 mr-2" :placeholder="$t('emergencyReportManagement.actions.typeMessage')"/>
-                <CButton color="primary">{{ $t('emergencyReportManagement.actions.send') }}</CButton>
-              </div>
-            </div>
-
-            <!-- Internal Notes -->
-            <div class="mb-3">
-              <h6 class="text-muted mb-1">{{ $t('emergencyReportManagement.details.internalNotes') }}</h6>
-              <CTextarea rows="3" :placeholder="$t('emergencyReportManagement.actions.typeNotes')"></CTextarea>
-            </div>
-
           </CCardBody>
           <CCardFooter class="d-flex justify-content-between align-items-center">
             <CButton color="secondary" variant="outline">

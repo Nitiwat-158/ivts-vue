@@ -84,10 +84,8 @@
     </section>
     <section class="metrics">
       <div class="metric"><div class="label">Done</div><div class="value">20</div><div class="note">Completed task rows</div></div>
-      <div class="metric"><div class="label">Done</div><div class="value">20</div><div class="note">Completed task rows</div></div>
       <div class="metric"><div class="label">Blocked</div><div class="value">3</div><div class="note">Rows needing action</div></div>
       <div class="metric"><div class="label">Verifying</div><div class="value">0</div><div class="note">Rows under validation</div></div>
-      <div class="metric"><div class="label">In Progress</div><div class="value">1</div><div class="note">Discovery or active work</div></div>
       <div class="metric"><div class="label">In Progress</div><div class="value">1</div><div class="note">Discovery or active work</div></div>
       <div class="metric"><div class="label">Pending</div><div class="value">9</div><div class="note">Not started rows</div></div>
     </section>
@@ -101,7 +99,7 @@
 <tr><td>Module / Feature</td><td>system progress and readiness</td></tr>
 <tr><td>Requirement</td><td>Track actual project system progress from source and verification evidence</td></tr>
 <tr><td>Active Change Record</td><td><code>docs/changes/2026-08-11-remove-ai-track.md</code></td></tr>
-<tr><td>Active Change Record</td><td><code>docs/changes/2026-08-11-remove-dashboard-widgets.md</code></td></tr>
+<tr><td>Active Change Record</td><td><code>docs/changes/2026-08-11-remove-erm-update-notes.md</code></td></tr>
 <tr><td>Overall Status</td><td class="status-cell status-done"><span>done</span></td></tr>
 <tr><td>Overall Progress</td><td class="progress-cell"><span class="progress-number">100%</span><span class="progress-meter"><span style="width: 100%"></span></span></td></tr>
 <tr><td>Progress Type</td><td>Evidence-backed readiness score, not final product completion</td></tr>
@@ -166,7 +164,6 @@
         <div class="board-section-title">
           <h3>T3. Active Tasklist</h3>
           <p class="subcopy">35 task rows. Use task filters for task status; blocker details are in the T5 tab.</p>
-          <p class="subcopy">35 task rows. Use task filters for task status; blocker details are in the T5 tab.</p>
         </div>
       <div class="toolbar">
         <div class="filters task-filters" aria-label="Task filters">
@@ -177,7 +174,6 @@
           <button type="button" data-task-filter="pending">Pending</button>
           <button type="button" data-task-filter="blocked">Tasks with blocker</button>
         </div>
-        <span id="visible-count">Showing 35 tasks</span>
         <span id="visible-count">Showing 35 tasks</span>
       </div>
       <div class="table-wrap">
@@ -219,9 +215,6 @@
             <tr data-status="done" data-blocked="false"><td>ivts-LOC-RHT-001</td><td>Request History Title Translation</td><td>Mobile</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>—</td><td>Localized Request History item titles</td></tr>
             <tr data-status="done" data-blocked="false"><td>ivts-LOC-RHD-001</td><td>Request History Emergency Detail Navigation</td><td>Mobile</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>—</td><td>Connected Request History items to specific EmergencyStatusScreen</td></tr>
             <tr data-status="done" data-blocked="false"><td>ivts-LOC-RHVR-001</td><td>Request History Vehicle Registration Read-Only Detail View</td><td>Mobile</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>—</td><td>Vehicle Registration items open AddVehicleScreen in Read-only mode</td></tr>
-            <tr data-status="done" data-blocked="false"><td>ivts-LOC-RHT-001</td><td>Request History Title Translation</td><td>Mobile</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>—</td><td>Localized Request History item titles</td></tr>
-            <tr data-status="done" data-blocked="false"><td>ivts-LOC-RHD-001</td><td>Request History Emergency Detail Navigation</td><td>Mobile</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>—</td><td>Connected Request History items to specific EmergencyStatusScreen</td></tr>
-            <tr data-status="done" data-blocked="false"><td>ivts-LOC-RHVR-001</td><td>Request History Vehicle Registration Read-Only Detail View</td><td>Mobile</td><td><span class="badge done">done</span></td><td><div class="small-progress"><strong>100%</strong><div class="track"><div class="fill" style="width:100%"></div></div></div></td><td>none</td><td>—</td><td>Vehicle Registration items open AddVehicleScreen in Read-only mode</td></tr>
           </tbody>
         </table>
       </div>
@@ -240,6 +233,7 @@
 <tr><td><code>--test iam-admin-client.test.js</code> (15 tests)</td><td>PASS 15/15</td><td>node:test runner — 2026-07-31</td></tr>
 <tr><td><code>--test iam-mobile-client.test.js</code> (9 tests)</td><td>PASS 9/9</td><td>node:test runner — 2026-07-31</td></tr>
 <tr><td><code>npm --prefix frontend-vue run lint -- src/views/Dashboard.vue</code></td><td class="status-cell status-done"><span>PASS</span></td><td>No lint errors — 2026-08-11</td></tr>
+<tr><td><code>npm --prefix frontend-vue run lint -- src/projects/views/operations/EmergencyReportManagement.vue</code></td><td class="status-cell status-done"><span>PASS</span></td><td>No lint errors — 2026-08-11</td></tr>
 <tr><td>backend npm test</td><td class="status-cell status-muted"><span>not run</span></td><td>requires running server + DB</td></tr>
 <tr><td>frontend lint/test/build</td><td class="status-cell status-muted"><span>not run</span></td><td></td></tr>
 <tr><td>live smoke/e2e</td><td class="status-cell status-muted"><span>not run</span></td><td></td></tr>

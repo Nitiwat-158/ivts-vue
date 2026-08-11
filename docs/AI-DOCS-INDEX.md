@@ -88,6 +88,7 @@ Do not add these unless the project has a real need and source evidence:
 | `tasks/2026-08-09-emergency-report-accept-permission.md` | done | Active tasklist for Emergency Report Management Accept permission alignment and frontend feedback. |
 | `tasks/2026-08-10-mobile-request-province-api.md` | in_progress | Active tasklist for Mobile Registration Request Province API & Detail Integration. |
 | `tasks/2026-08-11-remove-dashboard-widgets.md` | completed | Active tasklist for removing Vehicles Today and Hourly Traffic cards from Dashboard. |
+| `tasks/2026-08-11-remove-erm-update-notes.md` | completed | Active tasklist for removing Send Update and Internal Notes from Emergency Report Management. |
 | `tasks/2026-06-18-<topic>.md` | active as needed | One focused tasklist per work item. |
 
 
@@ -132,6 +133,7 @@ Do not add these unless the project has a real need and source evidence:
 | `changes/2026-08-09-emergency-report-accept-permission.md` | done | T1-T20 change record for Emergency Report Management Accept permission and feedback fix. |
 | `changes/2026-08-10-mobile-request-province-api.md` | in_progress | T1-T20 change record for Mobile Registration Request Province API & Detail Integration. |
 | `changes/2026-08-11-remove-dashboard-widgets.md` | completed | T1-T20 change record for removing Vehicles Today and Hourly Traffic cards from Dashboard. |
+| `changes/2026-08-11-remove-erm-update-notes.md` | completed | T1-T20 change record for removing Send Update and Internal Notes from Emergency Report Management. |
 | `changes/2026-06-18-<topic>.md` | active as needed | T1-T20 handoff for each completed or handed-off work item. |
 
 
