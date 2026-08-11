@@ -15,9 +15,15 @@ async function main() {
 
   try {
     await client.connect();
-    const schemaPath = path.resolve(__dirname, '../../ai-track/sql/schema.sql');
-    const sql = fs.readFileSync(schemaPath, 'utf8');
-    await client.query(sql);
+    const schemaFiles = [
+      path.resolve(__dirname, '../../ai-track/sql/schema.sql'),
+      path.resolve(__dirname, '../../ai-track/sql/registered_vehicles.sql'),
+    ];
+    for (const schemaPath of schemaFiles) {
+      const sql = fs.readFileSync(schemaPath, 'utf8');
+      await client.query(sql);
+      console.log(`Applied AI-track schema file: ${schemaPath}`);
+    }
     console.log('AI-track schema initialized successfully.');
   } catch (err) {
     console.error('Failed to initialize AI-track schema:', err && err.message ? err.message : err);

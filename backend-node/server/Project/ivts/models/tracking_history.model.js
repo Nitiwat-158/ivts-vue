@@ -9,8 +9,11 @@ const Schema = mongoose.Schema;
  */
 const trackingHistorySchema = new Schema({
   user_id: { type: String, ref: 'User', required: true, index: true },
-  vehicle_id: { type: Number, ref: 'Vehicle', required: true, index: true },
-  log_id: { type: Number, ref: 'TrackingLog', required: true },
+  vehicle_id: { type: String, ref: 'Vehicle', required: true, index: true },
+  tracking_logs_id: { type: Number, ref: 'TrackingLog', required: true },
+  camera_id: { type: String, default: null, index: true },
+  lat: { type: Number, default: null },
+  lng: { type: Number, default: null },
   timestamp: { type: Date, default: Date.now, index: true }
 }, {
   collection: 'tracking_histories'

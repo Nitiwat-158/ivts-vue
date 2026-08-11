@@ -23,6 +23,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from common.config import load_config
 from common.db import Database, get_dict_cursor
+from api.registrations import router as registration_router
 
 config = load_config()
 db = Database(config)
@@ -41,6 +42,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(registration_router)
 
 @app.get("/")
 def read_root():

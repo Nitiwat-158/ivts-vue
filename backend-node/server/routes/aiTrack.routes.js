@@ -5,6 +5,7 @@
 // from your main server to wire the routes.
 
 const pathLib = require('path');
+const axios = require('axios');
 const adapter = require('../services/aiTrackAdapter');
 
 function makeRouteHandlers({ pool, cameraYamlPath, requireAuth }) {
@@ -41,6 +42,31 @@ function makeRouteHandlers({ pool, cameraYamlPath, requireAuth }) {
     }
   }
 
+  async function postRegisterHandler(req, res) {
+    try {
+      const payload = req.body || {};
+      const userId = payload.user_id || payload.userId;
+      const vehicleId = payload.vehicle_id || payload.vehicleId;
+      const globalId = payload.global_id || payload.globalId;
+      if (!userId || !vehicleId || !globalId) {
+        return res.status(400).json({ error: 'user_id, vehicle_id, and global_id are required' });
+      }
+
+      const pythonBaseUrl = process.env.AI_TRACK_PYTHON_BASE_URL || 'http://127.0.0.1:8000';
+      const pythonUrl = process.env.AI_TRACK_PYTHON_REGISTER_URL || `${pythonBaseUrl}/api/vehicles/register`;
+      const matchResp = await axios.post(pythonUrl, {
+        user_id: String(userId),
+        vehicle_id: String(vehicleId),
+        global_id: Number(globalId),
+        nickname: payload.nickname || null,
+      });
+      res.json(matchResp.data);
+    } catch (err) {
+      const status = err.response && err.response.status ? err.response.status : 500;
+      return res.status(status).json({ error: err.response && err.response.data ? err.response.data : String(err) });
+    }
+  }
+
   async function getTimelineHandler(req, res) {
     try {
       const globalId = parseInt(req.params.global_id, 10);
@@ -65,7 +91,7 @@ function makeRouteHandlers({ pool, cameraYamlPath, requireAuth }) {
     }
   }
 
-  return { getCamerasHandler, getRecentHandler, getFullRouteHandler, getTimelineHandler };
+  return { getCamerasHandler, getRecentHandler, getFullRouteHandler, postRegisterHandler, getTimelineHandler };
 }
 
 function registerAiTrackRoutes(app, opts) {
@@ -87,6 +113,7 @@ function registerAiTrackRoutes(app, opts) {
     router.get('/cameras', handlers.getCamerasHandler);
     router.get('/vehicles/recent', handlers.getRecentHandler);
     router.get('/vehicles/full-route', handlers.getFullRouteHandler);
+    router.post('/register', handlers.postRegisterHandler);
     router.get('/vehicle/:global_id/timeline', handlers.getTimelineHandler);
     app.use(base, router);
   } else {
@@ -100,6 +127,7 @@ function registerAiTrackRoutes(app, opts) {
     app.get(base + '/cameras', handlers.getCamerasHandler);
     app.get(base + '/vehicles/recent', handlers.getRecentHandler);
     app.get(base + '/vehicles/full-route', handlers.getFullRouteHandler);
+    app.post(base + '/register', handlers.postRegisterHandler);
     app.get(base + '/vehicle/:global_id/timeline', handlers.getTimelineHandler);
   }
 }

@@ -54,6 +54,7 @@ class ReidConfig:
     match_window_minutes: int
     vector_dim: int
     fusion_window_seconds: float = 2.0  # optional in cameras.yaml - see common/fusion.py docstring
+    user_match_threshold: float = 0.35  # threshold for nearest registered reference-vector lookup
 
 
 @dataclass

@@ -16,6 +16,7 @@
 
 const express = require('express');
 const router = express.Router();
+const axios = require('axios');
 
 const mobileService = require('./service/mobile');
 const iamMobileClient = require('../security/service/iam-mobile-client');
@@ -190,6 +191,90 @@ router.patch('/emergency-reports/:id', async function (request, response) {
 router.get('/notifications', async function (request, response) {
   try {
     return ok(response, await mobileService.listNotifications(request.query || {}));
+  } catch (error) {
+    return fail(response, error);
+  }
+});
+
+/**
+ * POST /api/v1/mobile/ai-track/ownership/history
+ * AI-track user ownership bridge: Python can POST a matched user_id + camera
+ * + coordinate + timestamp to be mirrored into the Mongo tracking_histories
+ * collection with the existing schema.
+ */
+router.post('/ai-track/ownership/history', async function (request, response) {
+  try {
+    const body = request.body || {};
+    const { user_id, vehicle_id, camera_id, lat, lng, timestamp, global_id, log_id } = body;
+    if (!user_id) {
+      const error = new Error('user_id is required');
+      error.status = 400;
+      throw error;
+    }
+
+    const bridge = require('./service/tracking_history_bridge');
+    const created = await bridge.writeUserTrackingHistory({
+      userId: user_id,
+      cameraId: camera_id,
+      lat,
+      lng,
+      timestamp,
+      globalId: global_id,
+      vehicleId: vehicle_id,
+      logId: log_id,
+    });
+
+    return ok(response, { created: true, doc: created.toObject ? created.toObject() : created });
+  } catch (error) {
+    return fail(response, error);
+  }
+});
+
+/**
+ * POST /api/v1/mobile/ai-track/ownership/match
+ * Node-to-Python bridge endpoint: match a global_id to user ownership and
+ * persist the matched history record.
+ */
+router.post('/ai-track/ownership/match', async function (request, response) {
+  try {
+    const body = request.body || {};
+    const { global_id, camera_id, lat, lng, timestamp, log_id } = body;
+    if (!global_id) {
+      const error = new Error('global_id is required');
+      error.status = 400;
+      throw error;
+    }
+
+    const pythonBaseUrl = process.env.AI_TRACK_PYTHON_BASE_URL || 'http://127.0.0.1:8000';
+    const pythonUrl = process.env.AI_TRACK_PYTHON_URL || `${pythonBaseUrl}/api/vehicles/match`;
+    const matchResp = await axios.post(pythonUrl, {
+      global_id,
+      threshold: 0.15,
+    });
+
+    const match = matchResp.data && matchResp.data.match ? matchResp.data.match : null;
+    if (!match) {
+      const error = new Error('no match returned from Python AI-track service');
+      error.status = 404;
+      throw error;
+    }
+
+    const bridge = require('./service/tracking_history_bridge');
+    const created = await bridge.writeUserTrackingHistory({
+      userId: match.user_id,
+      cameraId: camera_id,
+      lat,
+      lng,
+      timestamp,
+      globalId: match.global_id,
+      vehicleId: match.vehicle_id,
+      logId: log_id,
+    });
+
+    return ok(response, {
+      matched: match,
+      history: created.toObject ? created.toObject() : created,
+    });
   } catch (error) {
     return fail(response, error);
   }

@@ -363,6 +363,8 @@ export default {
         return instance.get('/api/v1/ai-track/vehicles/full-route', { params: data || {} });
       case 'timeline':
         return instance.get(`/api/v1/ai-track/vehicle/${data && (data.global_id || data.id || data)}/timeline`, { params: data && data.params ? data.params : {} });
+      case 'register':
+        return instance.post('/api/v1/ai-track/register', data || {});
       default:
         break;
     }

@@ -44,6 +44,113 @@ class Database:
         )
         return cur.fetchone()[0]
 
+    def upsert_registered_vehicle_reference(
+        self,
+        cur,
+        user_id: str,
+        vehicle_id: str,
+        global_id: int,
+        vector: List[float],
+        nickname: Optional[str] = None,
+    ) -> dict:
+        """Upsert one user-owned reference vector keyed by (user_id, vehicle_id)."""
+        vector_str = vector_to_pgvector_literal(vector)
+        nickname_value = nickname or None
+        cur.execute(
+            """
+            INSERT INTO registered_vehicles (user_id, vehicle_id, global_id, reference_vector, nickname, created_at, updated_at)
+            VALUES (%s, %s, %s, %s, %s, NOW(), NOW())
+            ON CONFLICT (user_id, vehicle_id) DO UPDATE
+                SET global_id = EXCLUDED.global_id,
+                    reference_vector = EXCLUDED.reference_vector,
+                    nickname = EXCLUDED.nickname,
+                    updated_at = NOW()
+            RETURNING id, user_id, vehicle_id, global_id;
+            """,
+            (user_id, vehicle_id, global_id, vector_str, nickname_value),
+        )
+        return cur.fetchone()
+
+    def average_live_vectors_for_global_id(self, cur, global_id: int) -> List[float]:
+        """Aggregate all live_vector samples for one global_id into one reference vector."""
+        cur.execute(
+            """
+            SELECT live_vector
+            FROM vehicle_logs
+            WHERE global_id = %s AND live_vector IS NOT NULL
+            ORDER BY timestamp ASC;
+            """,
+            (global_id,),
+        )
+        rows = cur.fetchall()
+        if not rows:
+            raise ValueError(f"no vehicle_logs rows found for global_id={global_id}")
+
+        vector_rows = []
+        for (raw_vector,) in rows:
+            parsed = self._parse_vector(raw_vector)
+            vector_rows.append(parsed)
+
+        if not vector_rows:
+            raise ValueError(f"no vector payloads found for global_id={global_id}")
+
+        dim = len(vector_rows[0])
+        avg = [0.0] * dim
+        for vector in vector_rows:
+            if len(vector) != dim:
+                raise ValueError(f"registered vector dimension mismatch for global_id={global_id}")
+            for i in range(dim):
+                avg[i] += float(vector[i])
+        return [v / len(vector_rows) for v in avg]
+
+    def find_registered_vehicle_match(self, cur, vector: List[float], threshold: float) -> Optional[dict]:
+        """Find the nearest registered reference vector using cosine distance and optional threshold."""
+        vector_str = vector_to_pgvector_literal(vector)
+        cur.execute(
+            """
+            SELECT user_id, vehicle_id, global_id, id, (reference_vector <=> %s) AS distance
+            FROM registered_vehicles
+            ORDER BY reference_vector <=> %s
+            LIMIT 1;
+            """,
+            (vector_str, vector_str),
+        )
+        row = cur.fetchone()
+        if not row:
+            return None
+
+        user_id, vehicle_id, global_id, registered_id, distance = row
+        if distance is None or float(distance) > float(threshold):
+            return None
+
+        return {
+            "user_id": user_id,
+            "vehicle_id": vehicle_id,
+            "global_id": global_id,
+            "registered_id": registered_id,
+            "distance": float(distance),
+        }
+
+    @staticmethod
+    def _parse_vector(raw_vector) -> List[float]:
+        if isinstance(raw_vector, (list, tuple)):
+            return [float(x) for x in raw_vector]
+        if raw_vector is None:
+            raise ValueError('empty vector payload')
+        if isinstance(raw_vector, str):
+            text = raw_vector.strip()
+            if text.startswith('[') and text.endswith(']'):
+                inner = text[1:-1].strip()
+                if not inner:
+                    return []
+                return [float(piece.strip()) for piece in inner.split(',')]
+            if text.startswith('"') and text.endswith('"'):
+                text = text[1:-1]
+                if text.startswith('[') and text.endswith(']'):
+                    inner = text[1:-1].strip()
+                    return [float(piece.strip()) for piece in inner.split(',')]
+        raise ValueError(f'unrecognized vector payload: {raw_vector!r}')
+
     def touch_identity(self, cur, global_id: int, timestamp: datetime) -> None:
         cur.execute(
             "UPDATE vehicle_identities SET last_seen = %s WHERE global_id = %s;",
