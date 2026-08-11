@@ -47,13 +47,6 @@ export default function buildNav (t) {
         },
         {
           _name: 'CSidebarNavItem',
-          name: t('nav.aiTrack'),
-          to: '/operations/ai-track',
-          icon: 'cil-location-pin',
-          permission: { path: '/ivts/tracking', action: 'view' }
-        },
-        {
-          _name: 'CSidebarNavItem',
           name: t('nav.emergencyReportManagement'),
           to: '/operations/emergency-reports',
           icon: 'cil-warning',
